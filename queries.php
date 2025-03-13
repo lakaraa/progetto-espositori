@@ -29,7 +29,13 @@ function insertMessaggio($pdo, $nome, $telefono, $messaggio) {
 }
 
 function getContributi($pdo) {
-    $query = "SELECT * FROM contributi"; 
+    $query = "SELECT * FROM contributo";
+    $stmt = $pdo->prepare($query); 
+    
+    if (!$stmt) {
+        echo "Errore nella preparazione della query!";
+        return [];
+    }
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC); 
 }
