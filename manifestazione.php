@@ -2,7 +2,7 @@
 include 'config.php'; 
 include 'queries.php'; 
 
-$manifestazioni = getManifestazioniTop6($pdo); 
+$manifestazioni = getManifestazioni($pdo); 
 
 include 'template_header.php'; 
 ?>
@@ -22,14 +22,15 @@ include 'template_header.php';
 <section class="section section-lg bg-default text-center">
     <div class="container">
         <h2>Manifestazioni</h2>
-        <p>Scopri le varie manifestazioni che gestiamo. Clicca su una manifestazione per vedere la descrizione e i vari contribuenti.</p>
+        <p>Scopri tutte le manifestazioni che gestiamo. Clicca su una manifestazione per vedere maggiori dettagli e contribuenti.</p>
         <div class="row">
             <?php foreach ($manifestazioni as $row): ?>
                 <div class="col-md-4">
                     <img src="resources/images/events-01-553x316.jpg" alt="<?php echo htmlspecialchars($row['Nome']); ?>" class="manifestazione-img">
                     <a class="button button-primary button-lg" href="contributions.php?id=<?php echo $row['Id_Manifestazione']; ?>">
                         <?php echo htmlspecialchars($row['Nome']); ?>
-                    </a> <br> <br> <br>
+                    </a> 
+                    <br> <br> <br>
                 </div>
             <?php endforeach; ?>
         </div>
