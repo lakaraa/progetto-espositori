@@ -26,7 +26,7 @@ include 'template_header.php';
         <div class="row">
             <?php foreach ($manifestazioni as $row): ?>
                 <div class="col-md-4">
-                    <img src="images/events-01-553x316.jpg" alt="<?php echo htmlspecialchars($row['Nome']); ?>" class="manifestazione-img">
+                    <img src="resources/images/events-01-553x316.jpg" alt="<?php echo htmlspecialchars($row['Nome']); ?>" class="manifestazione-img">
                     <a class="button button-primary button-lg" href="contributions.php?id=<?php echo $row['Id_Manifestazione']; ?>">
                         <?php echo htmlspecialchars($row['Nome']); ?>
                     </a> <br> <br> <br>
