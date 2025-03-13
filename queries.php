@@ -27,3 +27,9 @@ function insertMessaggio($pdo, $nome, $telefono, $messaggio) {
         return false;
     }
 }
+
+function getContributi($pdo) {
+    $query = "SELECT * FROM contributi"; 
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC); 
+}
