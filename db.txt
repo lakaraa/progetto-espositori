@@ -1,0 +1,316 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1:3306
+-- Creato il: Mar 18, 2025 alle 11:09
+-- Versione del server: 8.2.0
+-- Versione PHP: 8.3.0
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `espositori`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `area`
+--
+
+CREATE TABLE `area` (
+  `Id_Area` int NOT NULL,
+  `Nome` varchar(100) NOT NULL,
+  `Descrizione` text,
+  `Capienza_Massima` int NOT NULL,
+  `Id_Manifestazione` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `categoria`
+--
+
+CREATE TABLE `categoria` (
+  `Id_Categoria` int NOT NULL,
+  `Nome` varchar(100) NOT NULL,
+  `Descrizione` text
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `contributo`
+--
+
+CREATE TABLE `contributo` (
+  `Id_Contributo` int NOT NULL,
+  `Id_Utente` int DEFAULT NULL,
+  `Immagine` blob NOT NULL,
+  `Titolo` varchar(255) NOT NULL,
+  `Sintesi` varchar(2000) NOT NULL,
+  `Accettazione` tinyint(1) DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `localizzazione`
+--
+
+CREATE TABLE `localizzazione` (
+  `Id_Manifestazione` int NOT NULL,
+  `Id_Contributo` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `manifestazione`
+--
+
+CREATE TABLE `manifestazione` (
+  `Id_Manifestazione` int NOT NULL,
+  `Nome` varchar(100) NOT NULL,
+  `Descrizione` text,
+  `Luogo` varchar(100) NOT NULL,
+  `Durata` int NOT NULL,
+  `Data` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `messaggio`
+--
+
+CREATE TABLE `messaggio` (
+  `Id_Messaggio` int NOT NULL,
+  `Nome` varchar(100) NOT NULL,
+  `Telefono` varchar(20) DEFAULT NULL,
+  `Messaggio` text NOT NULL,
+  `Data_Invio` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `prenotazione`
+--
+
+CREATE TABLE `prenotazione` (
+  `Id_Utente` int NOT NULL,
+  `Id_Turno` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `tipologia`
+--
+
+CREATE TABLE `tipologia` (
+  `Id_Contributo` int NOT NULL,
+  `Id_Categoria` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `turno`
+--
+
+CREATE TABLE `turno` (
+  `Id_Turno` int NOT NULL,
+  `Data` date NOT NULL,
+  `Ora` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `Numero_Persone` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Struttura della tabella `utente`
+--
+
+CREATE TABLE `utente` (
+  `Id_Utente` int NOT NULL,
+  `Username` varchar(50) NOT NULL,
+  `Password` varchar(255) NOT NULL,
+  `Nome` varchar(50) NOT NULL,
+  `Cognome` varchar(50) NOT NULL,
+  `Email` varchar(100) NOT NULL,
+  `Telefono` varchar(20) NOT NULL,
+  `Ruolo` enum('Personale','Espositore','Visitatore') NOT NULL,
+  `Qualifica` varchar(100) DEFAULT NULL,
+  `Curriculum` blob
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Indici per le tabelle scaricate
+--
+
+--
+-- Indici per le tabelle `area`
+--
+ALTER TABLE `area`
+  ADD PRIMARY KEY (`Id_Area`),
+  ADD KEY `area_ibfk_1` (`Id_Manifestazione`);
+
+--
+-- Indici per le tabelle `categoria`
+--
+ALTER TABLE `categoria`
+  ADD PRIMARY KEY (`Id_Categoria`);
+
+--
+-- Indici per le tabelle `contributo`
+--
+ALTER TABLE `contributo`
+  ADD PRIMARY KEY (`Id_Contributo`),
+  ADD KEY `Id_Utente` (`Id_Utente`);
+
+--
+-- Indici per le tabelle `localizzazione`
+--
+ALTER TABLE `localizzazione`
+  ADD PRIMARY KEY (`Id_Manifestazione`,`Id_Contributo`),
+  ADD KEY `Id_Contributo` (`Id_Contributo`);
+
+--
+-- Indici per le tabelle `manifestazione`
+--
+ALTER TABLE `manifestazione`
+  ADD PRIMARY KEY (`Id_Manifestazione`);
+
+--
+-- Indici per le tabelle `messaggio`
+--
+ALTER TABLE `messaggio`
+  ADD PRIMARY KEY (`Id_Messaggio`);
+
+--
+-- Indici per le tabelle `prenotazione`
+--
+ALTER TABLE `prenotazione`
+  ADD PRIMARY KEY (`Id_Utente`,`Id_Turno`),
+  ADD KEY `Id_Turno` (`Id_Turno`);
+
+--
+-- Indici per le tabelle `tipologia`
+--
+ALTER TABLE `tipologia`
+  ADD PRIMARY KEY (`Id_Contributo`,`Id_Categoria`),
+  ADD KEY `Id_Categoria` (`Id_Categoria`);
+
+--
+-- Indici per le tabelle `turno`
+--
+ALTER TABLE `turno`
+  ADD PRIMARY KEY (`Id_Turno`);
+
+--
+-- Indici per le tabelle `utente`
+--
+ALTER TABLE `utente`
+  ADD PRIMARY KEY (`Id_Utente`),
+  ADD UNIQUE KEY `Username` (`Username`),
+  ADD UNIQUE KEY `Email` (`Email`);
+
+--
+-- AUTO_INCREMENT per le tabelle scaricate
+--
+
+--
+-- AUTO_INCREMENT per la tabella `area`
+--
+ALTER TABLE `area`
+  MODIFY `Id_Area` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT per la tabella `categoria`
+--
+ALTER TABLE `categoria`
+  MODIFY `Id_Categoria` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT per la tabella `contributo`
+--
+ALTER TABLE `contributo`
+  MODIFY `Id_Contributo` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT per la tabella `manifestazione`
+--
+ALTER TABLE `manifestazione`
+  MODIFY `Id_Manifestazione` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT per la tabella `messaggio`
+--
+ALTER TABLE `messaggio`
+  MODIFY `Id_Messaggio` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT per la tabella `turno`
+--
+ALTER TABLE `turno`
+  MODIFY `Id_Turno` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT per la tabella `utente`
+--
+ALTER TABLE `utente`
+  MODIFY `Id_Utente` int NOT NULL AUTO_INCREMENT;
+
+--
+-- Limiti per le tabelle scaricate
+--
+
+--
+-- Limiti per la tabella `area`
+--
+ALTER TABLE `area`
+  ADD CONSTRAINT `area_ibfk_1` FOREIGN KEY (`Id_Manifestazione`) REFERENCES `manifestazione` (`Id_Manifestazione`) ON DELETE CASCADE;
+
+--
+-- Limiti per la tabella `contributo`
+--
+ALTER TABLE `contributo`
+  ADD CONSTRAINT `contributo_ibfk_1` FOREIGN KEY (`Id_Utente`) REFERENCES `utente` (`Id_Utente`) ON DELETE CASCADE;
+
+--
+-- Limiti per la tabella `localizzazione`
+--
+ALTER TABLE `localizzazione`
+  ADD CONSTRAINT `localizzazione_ibfk_1` FOREIGN KEY (`Id_Manifestazione`) REFERENCES `manifestazione` (`Id_Manifestazione`) ON DELETE CASCADE,
+  ADD CONSTRAINT `localizzazione_ibfk_2` FOREIGN KEY (`Id_Contributo`) REFERENCES `contributo` (`Id_Contributo`) ON DELETE CASCADE;
+
+--
+-- Limiti per la tabella `prenotazione`
+--
+ALTER TABLE `prenotazione`
+  ADD CONSTRAINT `prenotazione_ibfk_1` FOREIGN KEY (`Id_Utente`) REFERENCES `utente` (`Id_Utente`) ON DELETE CASCADE,
+  ADD CONSTRAINT `prenotazione_ibfk_2` FOREIGN KEY (`Id_Turno`) REFERENCES `turno` (`Id_Turno`) ON DELETE CASCADE;
+
+--
+-- Limiti per la tabella `tipologia`
+--
+ALTER TABLE `tipologia`
+  ADD CONSTRAINT `tipologia_ibfk_1` FOREIGN KEY (`Id_Contributo`) REFERENCES `contributo` (`Id_Contributo`) ON DELETE CASCADE,
+  ADD CONSTRAINT `tipologia_ibfk_2` FOREIGN KEY (`Id_Categoria`) REFERENCES `categoria` (`Id_Categoria`) ON DELETE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
