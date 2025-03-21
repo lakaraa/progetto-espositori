@@ -48,6 +48,7 @@ function getUserByEmail($pdo, $email)
     $stmt->execute();
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
+//Gestione Area
 function AddArea($pdo, $nome, $descrizione, $capienzaMassima, $idManifestazione) 
 {
     $sql = "INSERT INTO area (Nome, Descrizione, Capienza_Massima, Id_Manifestazione) 
@@ -66,7 +67,8 @@ function DeleteArea($pdo, $idArea)
     $stmt->bindParam(':idArea', $idArea, PDO::PARAM_INT);
     return $stmt->execute();
 }
-function UpdateArea($pdo, $idArea, $nome, $descrizione, $capienzaMassima, $idManifestazione) {
+function UpdateArea($pdo, $idArea, $nome, $descrizione, $capienzaMassima, $idManifestazione) 
+{
     $sql = "UPDATE area 
             SET Nome = :nome, Descrizione = :descrizione, Capienza_Massima = :capienzaMassima, Id_Manifestazione = :idManifestazione 
             WHERE Id_Area = :idArea";
@@ -76,5 +78,37 @@ function UpdateArea($pdo, $idArea, $nome, $descrizione, $capienzaMassima, $idMan
     $stmt->bindParam(':descrizione', $descrizione, PDO::PARAM_STR);
     $stmt->bindParam(':capienzaMassima', $capienzaMassima, PDO::PARAM_INT);
     $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
+    return $stmt->execute();
+}
+//Gestione Candidatura
+function AddCandidatura($pdo, $idUtente, $immagine, $titolo, $sintesi) 
+{
+    $sql = "INSERT INTO contributo (Id_Utente, Immagine, Titolo, Sintesi, Accettazione) 
+            VALUES (:idUtente, :immagine, :titolo, :sintesi, 0)";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    $stmt->bindParam(':immagine', $immagine, PDO::PARAM_LOB);
+    $stmt->bindParam(':titolo', $titolo, PDO::PARAM_STR);
+    $stmt->bindParam(':sintesi', $sintesi, PDO::PARAM_STR);
+    return $stmt->execute();
+}
+function UpdateCandidatura($pdo, $idContributo, $immagine, $titolo, $sintesi, $accettazione) 
+{
+    $sql = "UPDATE contributo 
+            SET Immagine = :immagine, Titolo = :titolo, Sintesi = :sintesi, Accettazione = :accettazione 
+            WHERE Id_Contributo = :idContributo";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idContributo', $idContributo, PDO::PARAM_INT);
+    $stmt->bindParam(':immagine', $immagine, PDO::PARAM_LOB);
+    $stmt->bindParam(':titolo', $titolo, PDO::PARAM_STR);
+    $stmt->bindParam(':sintesi', $sintesi, PDO::PARAM_STR);
+    $stmt->bindParam(':accettazione', $accettazione, PDO::PARAM_BOOL);
+    return $stmt->execute();
+}
+function DeleteCandidatura($pdo, $idContributo) 
+{
+    $sql = "DELETE FROM contributo WHERE Id_Contributo = :idContributo";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idContributo', $idContributo, PDO::PARAM_INT);
     return $stmt->execute();
 }
