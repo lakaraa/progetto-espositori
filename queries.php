@@ -112,3 +112,52 @@ function DeleteCandidatura($pdo, $idContributo)
     $stmt->bindParam(':idContributo', $idContributo, PDO::PARAM_INT);
     return $stmt->execute();
 }
+
+//Gestione Espositore
+function AddEspositore($pdo, $username, $password, $nome, $cognome, $email, $telefono, $qualifica, $curriculum) 
+{
+    $hashedPassword = password_hash($password, PASSWORD_BCRYPT); // Hash della password
+    $sql = "INSERT INTO utente (Username, Password, Nome, Cognome, Email, Telefono, Ruolo, Qualifica, Curriculum) 
+            VALUES (:username, :password, :nome, :cognome, :email, :telefono, 'Espositore', :qualifica, :curriculum)";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+    $stmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR);
+    $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
+    $stmt->bindParam(':cognome', $cognome, PDO::PARAM_STR);
+    $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+    $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
+    $stmt->bindParam(':qualifica', $qualifica, PDO::PARAM_STR);
+    $stmt->bindParam(':curriculum', $curriculum, PDO::PARAM_LOB);
+    return $stmt->execute();
+}
+function DeleteEspositore($pdo, $idUtente) 
+{
+    $sql = "DELETE FROM utente WHERE Id_Utente = :idUtente AND Ruolo = 'Espositore'";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    return $stmt->execute();
+}
+function UpdateEspositore($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono, $qualifica, $curriculum) 
+{
+    $sql = "UPDATE utente 
+            SET Username = :username, 
+                Password = :password, 
+                Nome = :nome, 
+                Cognome = :cognome, 
+                Email = :email, 
+                Telefono = :telefono, 
+                Qualifica = :qualifica, 
+                Curriculum = :curriculum 
+            WHERE Id_Utente = :idUtente AND Ruolo = 'Espositore'";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+    $stmt->bindParam(':password', $password ? password_hash($password, PASSWORD_BCRYPT) : null, PDO::PARAM_STR);
+    $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
+    $stmt->bindParam(':cognome', $cognome, PDO::PARAM_STR);
+    $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+    $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
+    $stmt->bindParam(':qualifica', $qualifica, PDO::PARAM_STR);
+    $stmt->bindParam(':curriculum', $curriculum, PDO::PARAM_LOB);
+    return $stmt->execute();
+}
