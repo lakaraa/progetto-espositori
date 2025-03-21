@@ -235,3 +235,33 @@ function UpdatePersonale($pdo, $idUtente, $username, $password, $nome, $cognome,
     $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
     return $stmt->execute();
 }
+//Gestione Prenoatazione
+function AddPrenotazione($pdo, $idUtente, $idTurno) 
+{
+    $sql = "INSERT INTO prenotazione (Id_Utente, Id_Turno) 
+            VALUES (:idUtente, :idTurno)";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
+    return $stmt->execute();
+}
+function DeletePrenotazione($pdo, $idUtente, $idTurno) 
+{
+    $sql = "DELETE FROM prenotazione 
+            WHERE Id_Utente = :idUtente AND Id_Turno = :idTurno";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
+    return $stmt->execute();
+}
+function UpdatePrenotazione($pdo, $idUtente, $idTurno, $newIdTurno) 
+{
+    $sql = "UPDATE prenotazione 
+            SET Id_Turno = :newIdTurno 
+            WHERE Id_Utente = :idUtente AND Id_Turno = :idTurno";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
+    $stmt->bindParam(':newIdTurno', $newIdTurno, PDO::PARAM_INT);
+    return $stmt->execute();
+}
