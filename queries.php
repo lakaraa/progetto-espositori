@@ -53,7 +53,7 @@ function getUserByEmail($pdo, $email)
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 //Gestione Area
-function AddArea($pdo, $nome, $descrizione, $capienzaMassima, $idManifestazione) 
+function addArea($pdo, $nome, $descrizione, $capienzaMassima, $idManifestazione) 
 {
     $sql = "INSERT INTO area (Nome, Descrizione, Capienza_Massima, Id_Manifestazione) 
             VALUES (:nome, :descrizione, :capienzaMassima, :idManifestazione)";
@@ -64,14 +64,14 @@ function AddArea($pdo, $nome, $descrizione, $capienzaMassima, $idManifestazione)
     $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
     return $stmt->execute();
 }
-function DeleteArea($pdo, $idArea) 
+function deleteArea($pdo, $idArea) 
 {
     $sql = "DELETE FROM area WHERE Id_Area = :idArea";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idArea', $idArea, PDO::PARAM_INT);
     return $stmt->execute();
 }
-function UpdateArea($pdo, $idArea, $nome, $descrizione, $capienzaMassima, $idManifestazione) 
+function updateArea($pdo, $idArea, $nome, $descrizione, $capienzaMassima, $idManifestazione) 
 {
     $sql = "UPDATE area 
             SET Nome = :nome, Descrizione = :descrizione, Capienza_Massima = :capienzaMassima, Id_Manifestazione = :idManifestazione 
@@ -84,8 +84,23 @@ function UpdateArea($pdo, $idArea, $nome, $descrizione, $capienzaMassima, $idMan
     $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
     return $stmt->execute();
 }
+function getAreaById($pdo, $idArea) 
+{
+    $sql = "SELECT * FROM area WHERE Id_Area = :idArea";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idArea', $idArea, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+function getAree($pdo) 
+{
+    $sql = "SELECT * FROM area";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 //Gestione Candidatura
-function AddCandidatura($pdo, $idUtente, $immagine, $titolo, $sintesi) 
+function addCandidatura($pdo, $idUtente, $immagine, $titolo, $sintesi) 
 {
     $sql = "INSERT INTO contributo (Id_Utente, Immagine, Titolo, Sintesi, Accettazione) 
             VALUES (:idUtente, :immagine, :titolo, :sintesi, 0)";
@@ -96,7 +111,7 @@ function AddCandidatura($pdo, $idUtente, $immagine, $titolo, $sintesi)
     $stmt->bindParam(':sintesi', $sintesi, PDO::PARAM_STR);
     return $stmt->execute();
 }
-function UpdateCandidatura($pdo, $idContributo, $immagine, $titolo, $sintesi, $accettazione) 
+function updateCandidatura($pdo, $idContributo, $immagine, $titolo, $sintesi, $accettazione) 
 {
     $sql = "UPDATE contributo 
             SET Immagine = :immagine, Titolo = :titolo, Sintesi = :sintesi, Accettazione = :accettazione 
@@ -109,7 +124,7 @@ function UpdateCandidatura($pdo, $idContributo, $immagine, $titolo, $sintesi, $a
     $stmt->bindParam(':accettazione', $accettazione, PDO::PARAM_BOOL);
     return $stmt->execute();
 }
-function DeleteCandidatura($pdo, $idContributo) 
+function deleteCandidatura($pdo, $idContributo) 
 {
     $sql = "DELETE FROM contributo WHERE Id_Contributo = :idContributo";
     $stmt = $pdo->prepare($sql);
@@ -117,7 +132,7 @@ function DeleteCandidatura($pdo, $idContributo)
     return $stmt->execute();
 }
 //Gestione Espositore
-function AddEspositore($pdo, $username, $password, $nome, $cognome, $email, $telefono, $qualifica, $curriculum) 
+function addEspositore($pdo, $username, $password, $nome, $cognome, $email, $telefono, $qualifica, $curriculum) 
 {
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT); // Hash della password
     $sql = "INSERT INTO utente (Username, Password, Nome, Cognome, Email, Telefono, Ruolo, Qualifica, Curriculum) 
@@ -133,14 +148,14 @@ function AddEspositore($pdo, $username, $password, $nome, $cognome, $email, $tel
     $stmt->bindParam(':curriculum', $curriculum, PDO::PARAM_LOB);
     return $stmt->execute();
 }
-function DeleteEspositore($pdo, $idUtente) 
+function deleteEspositore($pdo, $idUtente) 
 {
     $sql = "DELETE FROM utente WHERE Id_Utente = :idUtente AND Ruolo = 'Espositore'";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
     return $stmt->execute();
 }
-function UpdateEspositore($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono, $qualifica, $curriculum) 
+function updateEspositore($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono, $qualifica, $curriculum) 
 {
     $sql = "UPDATE utente 
             SET Username = :username, 
@@ -165,7 +180,7 @@ function UpdateEspositore($pdo, $idUtente, $username, $password, $nome, $cognome
     return $stmt->execute();
 }
 //Gestione Manifestazione
-function AddManifestazione($pdo, $nome, $descrizione, $luogo, $durata, $data) 
+function addManifestazione($pdo, $nome, $descrizione, $luogo, $durata, $data) 
 {
     $sql = "INSERT INTO manifestazione (Nome, Descrizione, Luogo, Durata, Data) 
             VALUES (:nome, :descrizione, :luogo, :durata, :data)";
@@ -177,14 +192,14 @@ function AddManifestazione($pdo, $nome, $descrizione, $luogo, $durata, $data)
     $stmt->bindParam(':data', $data, PDO::PARAM_STR);
     return $stmt->execute();
 }
-function DeleteManifestazione($pdo, $idManifestazione) 
+function deleteManifestazione($pdo, $idManifestazione) 
 {
     $sql = "DELETE FROM manifestazione WHERE Id_Manifestazione = :idManifestazione";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
     return $stmt->execute();
 }
-function UpdateManifestazione($pdo, $idManifestazione, $nome, $descrizione, $luogo, $durata, $data) 
+function updateManifestazione($pdo, $idManifestazione, $nome, $descrizione, $luogo, $durata, $data) 
 {
     $sql = "UPDATE manifestazione 
             SET Nome = :nome, Descrizione = :descrizione, Luogo = :luogo, Durata = :durata, Data = :data 
@@ -199,7 +214,7 @@ function UpdateManifestazione($pdo, $idManifestazione, $nome, $descrizione, $luo
     return $stmt->execute();
 }
 //Gestione Personale
-function AddPersonale($pdo, $username, $password, $nome, $cognome, $email, $telefono) 
+function addPersonale($pdo, $username, $password, $nome, $cognome, $email, $telefono) 
 {
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
     $sql = "INSERT INTO utente (Username, Password, Nome, Cognome, Email, Telefono, Ruolo) 
@@ -213,13 +228,13 @@ function AddPersonale($pdo, $username, $password, $nome, $cognome, $email, $tele
     $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
     return $stmt->execute();
 }
-function DeletePersonale($pdo, $idUtente) {
+function deletePersonale($pdo, $idUtente) {
     $sql = "DELETE FROM utente WHERE Id_Utente = :idUtente AND Ruolo = 'Personale'";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
     return $stmt->execute();
 }
-function UpdatePersonale($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono) 
+function updatePersonale($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono) 
 {
     $sql = "UPDATE utente 
             SET Username = :username, 
@@ -240,7 +255,7 @@ function UpdatePersonale($pdo, $idUtente, $username, $password, $nome, $cognome,
     return $stmt->execute();
 }
 //Gestione Prenoatazione
-function AddPrenotazione($pdo, $idUtente, $idTurno) 
+function addPrenotazione($pdo, $idUtente, $idTurno) 
 {
     $sql = "INSERT INTO prenotazione (Id_Utente, Id_Turno) 
             VALUES (:idUtente, :idTurno)";
@@ -249,7 +264,7 @@ function AddPrenotazione($pdo, $idUtente, $idTurno)
     $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
     return $stmt->execute();
 }
-function DeletePrenotazione($pdo, $idUtente, $idTurno) 
+function deletePrenotazione($pdo, $idUtente, $idTurno) 
 {
     $sql = "DELETE FROM prenotazione 
             WHERE Id_Utente = :idUtente AND Id_Turno = :idTurno";
@@ -258,7 +273,7 @@ function DeletePrenotazione($pdo, $idUtente, $idTurno)
     $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
     return $stmt->execute();
 }
-function UpdatePrenotazione($pdo, $idUtente, $idTurno, $newIdTurno) 
+function updatePrenotazione($pdo, $idUtente, $idTurno, $newIdTurno) 
 {
     $sql = "UPDATE prenotazione 
             SET Id_Turno = :newIdTurno 
@@ -270,7 +285,7 @@ function UpdatePrenotazione($pdo, $idUtente, $idTurno, $newIdTurno)
     return $stmt->execute();
 }
 //Gestione visitore
-function AddVisitatore($pdo, $username, $password, $nome, $cognome, $email, $telefono) 
+function addVisitatore($pdo, $username, $password, $nome, $cognome, $email, $telefono) 
 {
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT); 
     $sql = "INSERT INTO utente (Username, Password, Nome, Cognome, Email, Telefono, Ruolo) 
@@ -284,14 +299,14 @@ function AddVisitatore($pdo, $username, $password, $nome, $cognome, $email, $tel
     $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
     return $stmt->execute();
 }
-function DeleteVisitatore($pdo, $idUtente) 
+function deleteVisitatore($pdo, $idUtente) 
 {
     $sql = "DELETE FROM utente WHERE Id_Utente = :idUtente AND Ruolo = 'Visitatore'";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
     return $stmt->execute();
 }
-function UpdateVisitatore($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono) 
+function updateVisitatore($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono) 
 {
     $sql = "UPDATE utente 
             SET Username = :username, 
