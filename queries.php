@@ -1,5 +1,5 @@
 <?php
-
+//i primi 6 manifestazioni per la pagina home
 function getManifestazioniTop6($pdo) 
 {
     $sql = "SELECT * FROM manifestazione LIMIT 6";  
@@ -7,6 +7,7 @@ function getManifestazioniTop6($pdo)
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+//tutte le manifestazioni per la pagina manifestazioni
 function getManifestazioni($pdo) 
 {
     $sql = "SELECT * FROM manifestazione"; 
@@ -14,6 +15,7 @@ function getManifestazioni($pdo)
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+//mandare un messaggio
 function insertMessaggio($pdo, $nome, $telefono, $messaggio) 
 {
     $sql = "INSERT INTO messaggio (Nome, Telefono, Messaggio, Data_Invio) VALUES (:nome, :telefono, :messaggio, NOW())";
@@ -28,6 +30,7 @@ function insertMessaggio($pdo, $nome, $telefono, $messaggio)
         return false;
     }
 }
+//tutti i contributi per la pagina contributi
 function getContributi($pdo) 
 {
     $query = "SELECT * FROM contributo";
@@ -40,6 +43,7 @@ function getContributi($pdo)
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC); 
 }
+//login
 function getUserByEmail($pdo, $email) 
 {
     $sql = "SELECT * FROM utente WHERE Email = :email";
