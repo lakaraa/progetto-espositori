@@ -39,3 +39,11 @@ function getContributi($pdo) {
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC); 
 }
+
+function getUserByEmail($pdo, $email) {
+    $sql = "SELECT * FROM utente WHERE Email = :email";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
