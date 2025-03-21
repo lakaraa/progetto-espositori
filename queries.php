@@ -265,3 +265,45 @@ function UpdatePrenotazione($pdo, $idUtente, $idTurno, $newIdTurno)
     $stmt->bindParam(':newIdTurno', $newIdTurno, PDO::PARAM_INT);
     return $stmt->execute();
 }
+//Gestione visitore
+function AddVisitatore($pdo, $username, $password, $nome, $cognome, $email, $telefono) 
+{
+    $hashedPassword = password_hash($password, PASSWORD_BCRYPT); 
+    $sql = "INSERT INTO utente (Username, Password, Nome, Cognome, Email, Telefono, Ruolo) 
+            VALUES (:username, :password, :nome, :cognome, :email, :telefono, 'Visitatore')";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+    $stmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR);
+    $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
+    $stmt->bindParam(':cognome', $cognome, PDO::PARAM_STR);
+    $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+    $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
+    return $stmt->execute();
+}
+function DeleteVisitatore($pdo, $idUtente) 
+{
+    $sql = "DELETE FROM utente WHERE Id_Utente = :idUtente AND Ruolo = 'Visitatore'";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    return $stmt->execute();
+}
+function UpdateVisitatore($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono) 
+{
+    $sql = "UPDATE utente 
+            SET Username = :username, 
+                Password = :password, 
+                Nome = :nome, 
+                Cognome = :cognome, 
+                Email = :email, 
+                Telefono = :telefono 
+            WHERE Id_Utente = :idUtente AND Ruolo = 'Visitatore'";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+    $stmt->bindParam(':password', $password ? password_hash($password, PASSWORD_BCRYPT) : null, PDO::PARAM_STR);
+    $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
+    $stmt->bindParam(':cognome', $cognome, PDO::PARAM_STR);
+    $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+    $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
+    return $stmt->execute();
+}
