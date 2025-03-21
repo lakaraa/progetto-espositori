@@ -112,7 +112,6 @@ function DeleteCandidatura($pdo, $idContributo)
     $stmt->bindParam(':idContributo', $idContributo, PDO::PARAM_INT);
     return $stmt->execute();
 }
-
 //Gestione Espositore
 function AddEspositore($pdo, $username, $password, $nome, $cognome, $email, $telefono, $qualifica, $curriculum) 
 {
@@ -159,5 +158,39 @@ function UpdateEspositore($pdo, $idUtente, $username, $password, $nome, $cognome
     $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
     $stmt->bindParam(':qualifica', $qualifica, PDO::PARAM_STR);
     $stmt->bindParam(':curriculum', $curriculum, PDO::PARAM_LOB);
+    return $stmt->execute();
+}
+//Gestione Manifestazione
+function AddManifestazione($pdo, $nome, $descrizione, $luogo, $durata, $data) 
+{
+    $sql = "INSERT INTO manifestazione (Nome, Descrizione, Luogo, Durata, Data) 
+            VALUES (:nome, :descrizione, :luogo, :durata, :data)";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
+    $stmt->bindParam(':descrizione', $descrizione, PDO::PARAM_STR);
+    $stmt->bindParam(':luogo', $luogo, PDO::PARAM_STR);
+    $stmt->bindParam(':durata', $durata, PDO::PARAM_INT);
+    $stmt->bindParam(':data', $data, PDO::PARAM_STR);
+    return $stmt->execute();
+}
+function DeleteManifestazione($pdo, $idManifestazione) 
+{
+    $sql = "DELETE FROM manifestazione WHERE Id_Manifestazione = :idManifestazione";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
+    return $stmt->execute();
+}
+function UpdateManifestazione($pdo, $idManifestazione, $nome, $descrizione, $luogo, $durata, $data) 
+{
+    $sql = "UPDATE manifestazione 
+            SET Nome = :nome, Descrizione = :descrizione, Luogo = :luogo, Durata = :durata, Data = :data 
+            WHERE Id_Manifestazione = :idManifestazione";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
+    $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
+    $stmt->bindParam(':descrizione', $descrizione, PDO::PARAM_STR);
+    $stmt->bindParam(':luogo', $luogo, PDO::PARAM_STR);
+    $stmt->bindParam(':durata', $durata, PDO::PARAM_INT);
+    $stmt->bindParam(':data', $data, PDO::PARAM_STR);
     return $stmt->execute();
 }
