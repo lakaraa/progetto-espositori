@@ -194,3 +194,44 @@ function UpdateManifestazione($pdo, $idManifestazione, $nome, $descrizione, $luo
     $stmt->bindParam(':data', $data, PDO::PARAM_STR);
     return $stmt->execute();
 }
+//Gestione Personale
+function AddPersonale($pdo, $username, $password, $nome, $cognome, $email, $telefono) 
+{
+    $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+    $sql = "INSERT INTO utente (Username, Password, Nome, Cognome, Email, Telefono, Ruolo) 
+            VALUES (:username, :password, :nome, :cognome, :email, :telefono, 'Personale')";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+    $stmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR);
+    $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
+    $stmt->bindParam(':cognome', $cognome, PDO::PARAM_STR);
+    $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+    $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
+    return $stmt->execute();
+}
+function DeletePersonale($pdo, $idUtente) {
+    $sql = "DELETE FROM utente WHERE Id_Utente = :idUtente AND Ruolo = 'Personale'";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    return $stmt->execute();
+}
+function UpdatePersonale($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono) 
+{
+    $sql = "UPDATE utente 
+            SET Username = :username, 
+                Password = :password, 
+                Nome = :nome, 
+                Cognome = :cognome, 
+                Email = :email, 
+                Telefono = :telefono 
+            WHERE Id_Utente = :idUtente AND Ruolo = 'Personale'";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+    $stmt->bindParam(':password', $password ? password_hash($password, PASSWORD_BCRYPT) : null, PDO::PARAM_STR);
+    $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
+    $stmt->bindParam(':cognome', $cognome, PDO::PARAM_STR);
+    $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+    $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
+    return $stmt->execute();
+}
