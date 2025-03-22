@@ -43,6 +43,28 @@ function getContributi($pdo)
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC); 
 }
+// Recupera una manifestazione specifica in base al suo ID
+function getManifestazioneById($pdo, $idManifestazione) {
+    $sql = "SELECT * FROM manifestazione WHERE Id_Manifestazione = :idManifestazione";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+// Recupera tutti i contributi associati a una manifestazione specifica
+function getContributiByManifestazione($pdo, $idManifestazione) 
+{
+    $sql = "
+        SELECT c.*
+        FROM contributo c
+        INNER JOIN localizzazione l ON c.Id_Contributo = l.Id_Contributo
+        WHERE l.Id_Manifestazione = :idManifestazione
+    ";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 //login
 function getUserByEmail($pdo, $email) 
 {
