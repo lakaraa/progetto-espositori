@@ -91,24 +91,37 @@ function deleteArea($pdo, $idArea)
     $sql = "DELETE FROM area WHERE Id_Area = :idArea";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idArea', $idArea, PDO::PARAM_INT);
-    return $stmt->execute();
+    $result = $stmt->execute();
+
+    if ($result) 
+        // Reset the auto-increment value for the table
+        $pdo->exec("ALTER TABLE area AUTO_INCREMENT = 1");
+
+    return $result;
 }
-function updateArea($pdo, $idArea, $nome, $descrizione, $capienzaMassima, $idManifestazione) 
-{
+function updateArea($pdo, $idArea, $nome, $descrizione, $capienzaMassima, $idManifestazione) {
     $sql = "UPDATE area 
-            SET Nome = :nome, Descrizione = :descrizione, Capienza_Massima = :capienzaMassima, Id_Manifestazione = :idManifestazione 
+            SET Nome = :nome, 
+                Descrizione = :descrizione, 
+                Capienza_Massima = :capienzaMassima, 
+                Id_Manifestazione = :idManifestazione
             WHERE Id_Area = :idArea";
     $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':idArea', $idArea, PDO::PARAM_INT);
     $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
     $stmt->bindParam(':descrizione', $descrizione, PDO::PARAM_STR);
     $stmt->bindParam(':capienzaMassima', $capienzaMassima, PDO::PARAM_INT);
     $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
+    $stmt->bindParam(':idArea', $idArea, PDO::PARAM_INT);
     return $stmt->execute();
 }
-function getAreaById($pdo, $idArea) 
-{
-    $sql = "SELECT * FROM area WHERE Id_Area = :idArea";
+function getAreaById($pdo, $idArea) {
+    $sql = "SELECT a.Id_Area AS id, 
+                a.Nome AS nome, 
+                a.Descrizione AS descrizione, 
+                a.Capienza_Massima AS capienza_massima, 
+                a.Id_Manifestazione AS id_manifestazione
+            FROM area a
+            WHERE a.Id_Area = :idArea";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idArea', $idArea, PDO::PARAM_INT);
     $stmt->execute();
@@ -116,7 +129,15 @@ function getAreaById($pdo, $idArea)
 }
 function getAree($pdo) 
 {
-    $sql = "SELECT * FROM area";
+    $sql = "
+        SELECT a.Id_Area AS id, 
+            a.Nome AS nome, 
+            m.Nome AS manifestazione, 
+            a.Descrizione AS descrizione, 
+            a.Capienza_Massima AS capienza_massima
+        FROM area a
+        INNER JOIN manifestazione m ON a.Id_Manifestazione = m.Id_Manifestazione
+    ";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -151,7 +172,11 @@ function deleteCandidatura($pdo, $idContributo)
     $sql = "DELETE FROM contributo WHERE Id_Contributo = :idContributo";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idContributo', $idContributo, PDO::PARAM_INT);
-    return $stmt->execute();
+    $result = $stmt->execute();
+    if ($result) 
+        // Reset the auto-increment value for the table
+        $pdo->exec("ALTER TABLE contributo AUTO_INCREMENT = 1");
+    return $result;
 }
 //Gestione Espositore
 function addEspositore($pdo, $username, $password, $nome, $cognome, $email, $telefono, $qualifica, $curriculum) 
@@ -175,7 +200,11 @@ function deleteEspositore($pdo, $idUtente)
     $sql = "DELETE FROM utente WHERE Id_Utente = :idUtente AND Ruolo = 'Espositore'";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
-    return $stmt->execute();
+    $result = $stmt->execute();
+    if ($result) 
+        // Reset the auto-increment value for the table
+        $pdo->exec("ALTER TABLE utente AUTO_INCREMENT = 1");
+    return $result;
 }
 function updateEspositore($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono, $qualifica, $curriculum) 
 {
@@ -219,7 +248,11 @@ function deleteManifestazione($pdo, $idManifestazione)
     $sql = "DELETE FROM manifestazione WHERE Id_Manifestazione = :idManifestazione";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
-    return $stmt->execute();
+    $result = $stmt->execute();
+    if ($result) 
+        // Reset the auto-increment value for the table
+        $pdo->exec("ALTER TABLE manifestazione AUTO_INCREMENT = 1");
+    return $result;
 }
 function updateManifestazione($pdo, $idManifestazione, $nome, $descrizione, $luogo, $durata, $data) 
 {
@@ -254,7 +287,11 @@ function deletePersonale($pdo, $idUtente) {
     $sql = "DELETE FROM utente WHERE Id_Utente = :idUtente AND Ruolo = 'Personale'";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
-    return $stmt->execute();
+    $result = $stmt->execute();
+    if ($result) 
+        // Reset the auto-increment value for the table
+        $pdo->exec("ALTER TABLE utente AUTO_INCREMENT = 1");
+    return $result;
 }
 function updatePersonale($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono) 
 {
@@ -293,7 +330,11 @@ function deletePrenotazione($pdo, $idUtente, $idTurno)
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
     $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
-    return $stmt->execute();
+    $result = $stmt->execute();
+    if ($result) 
+        // Reset the auto-increment value for the table
+        $pdo->exec("ALTER TABLE prenotazione AUTO_INCREMENT = 1");
+    return $result;
 }
 function updatePrenotazione($pdo, $idUtente, $idTurno, $newIdTurno) 
 {
@@ -326,7 +367,11 @@ function deleteVisitatore($pdo, $idUtente)
     $sql = "DELETE FROM utente WHERE Id_Utente = :idUtente AND Ruolo = 'Visitatore'";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
-    return $stmt->execute();
+    $result = $stmt->execute();
+    if ($result) 
+        // Reset the auto-increment value for the table
+        $pdo->exec("ALTER TABLE utente AUTO_INCREMENT = 1");
+    return $result;
 }
 function updateVisitatore($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono) 
 {
