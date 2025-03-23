@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
     <ul class="breadcrumbs-custom-path">
         <li><a href="../dashboard_personale.php">Dashboard</a></li>
-        <li><a href="../Aree/gestisci_aree.php">Gestione Aree</a></li>
+        <li><a href="gestisci_aree.php">Gestione Aree</a></li>
         <li class="active">Crea Area</li>
     </ul>
 </section>
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="container">
         <h2>Crea Aree</h2>
         <p>Compila il modulo sottostante per creare le aree.</p>
-        <form class="rd-form rd-mailform" data-form-output="form-output-global" data-form-type="contact" method="post" action="../../resources/bat/rd-mailform.php">
+        <form class="rd-form rd-mailform" data-form-output="form-output-global" data-form-type="contact" method="post" action="">
             <div class="row row-50">
                 <div class="col-md-6">
                     <div class="form-wrap">
