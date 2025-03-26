@@ -1,4 +1,7 @@
-<?php include __DIR__ . '/template_header.php'; ?>
+<?php 
+include_once __DIR__ . '/session.php';
+include_once __DIR__ . '/template_header.php'; 
+?>
 
 <!-- Breadcrumbs-->
 <section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(resources/images/bg-breadcrumbs-04-1920x480.jpg);">
@@ -20,22 +23,22 @@
                 <?php if (!empty($_GET['error'])): ?>
                     <p style="color: red;"><?php echo htmlspecialchars($_GET['error']); ?></p>
                 <?php endif; ?>
-                <form class="rd-form rd-mailform" method="post" action="auth/login_handler.php">
+                <form action="/progetto-espositori/auth/login_handler.php" method="post">
                     <div class="row row-30">
                         <div class="col-md-12">
                             <div class="form-wrap">
-                                <label class="form-label" for="login-email">Email</label>
-                                <input class="form-input" id="login-email" type="email" name="email" required>
+                                <label class="form-label" for="email">Email</label>
+                                <input class="form-input" id="email" type="email" name="email" style="text-transform: none;" required>
                             </div>
                         </div>
                         <div class="col-md-12">
                             <div class="form-wrap">
-                                <label class="form-label" for="login-password">Password</label>
-                                <input class="form-input" id="login-password" type="password" name="password" required>
+                                <label class="form-label" for="password">Password</label>
+                                <input class="form-input" id="password" type="password" name="password" style="text-transform: none;" required>
                             </div>
                         </div>
                         <div class="col-md-12">
-                            <button class="button button-primary" type="submit">Login</button>
+                            <button type="submit" class="button button-primary">Login</button>
                         </div>
                     </div>
                 </form>
