@@ -1,7 +1,8 @@
 <?php
-include 'config.php'; 
-include 'queries.php'; 
-include 'template_header.php'; 
+include_once("../config.php");
+include_once("../queries.php");
+include_once("../session.php");
+include_once("../template_header.php"); 
 
 // Variabile per il messaggio di successo
 $successMessage = "";
@@ -137,5 +138,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </section>
 
 <?php
-include 'template_footer.php'; 
+include_once("../template_footer.php");
 ?>

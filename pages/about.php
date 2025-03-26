@@ -1,7 +1,8 @@
 <?php
-  include 'config.php'; 
-  include 'queries.php'; 
-  include 'template_header.php'; 
+  include_once("../config.php");
+  include_once("../queries.php");
+  include_once("../session.php");
+  include_once("../template_header.php");
   $currentYear = date("Y");
 ?>
 
@@ -20,7 +21,7 @@
         <div class="container">
           <div class="row row-50 flex-md-row-reverse">
             <div class="col-md-6 text-center">
-              <div class="box-image-1"><img src="resources/images/events-01-553x316.jpg" alt="About Us" width="468" height="276"/>
+              <div class="box-image-1"><img src="../resources/images/events-01-553x316.jpg" alt="About Us" width="468" height="276"/>
               </div>
             </div>
             <div class="col-md-6">
@@ -40,5 +41,5 @@
       </section>
 
 <?php
-include 'template_footer.php'; 
+include_once("../template_footer.php"); 
 ?>
