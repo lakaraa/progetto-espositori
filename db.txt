@@ -296,7 +296,7 @@ CREATE TABLE `utente` (
   `Email` varchar(100) NOT NULL,
   `Telefono` varchar(20) NOT NULL,
   `Ruolo` enum('Personale','Espositore','Visitatore') NOT NULL,
-  `Qualifica` varchar(100) DEFAULT NULL,
+  `Qualifica` enum('professionista del settore','amatore','esperto non professionista') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `Curriculum` blob
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -306,14 +306,14 @@ CREATE TABLE `utente` (
 
 INSERT INTO `utente` (`Id_Utente`, `Username`, `Password`, `Nome`, `Cognome`, `Email`, `Telefono`, `Ruolo`, `Qualifica`, `Curriculum`) VALUES
 (1, 'user1', 'password1', 'Mario', 'Rossi', 'mario.rossi@example.com', '1234567890', 'Visitatore', NULL, NULL),
-(2, 'user2', 'password2', 'Luigi', 'Bianchi', 'luigi.bianchi@example.com', '0987654321', 'Espositore', 'Artista', NULL),
-(3, 'user3', 'password3', 'Anna', 'Verdi', 'anna.verdi@example.com', '1122334455', 'Personale', 'Organizzatore', NULL),
+(2, 'user2', 'password2', 'Luigi', 'Bianchi', 'luigi.bianchi@example.com', '0987654321', 'Espositore', 'professionista del settore', NULL),
+(3, 'user3', 'password3', 'Anna', 'Verdi', 'anna.verdi@example.com', '1122334455', 'Personale', NULL, NULL),
 (4, 'user4', 'password4', 'Paolo', 'Neri', 'paolo.neri@example.com', '5566778899', 'Visitatore', NULL, NULL),
-(5, 'user5', 'password5', 'Sara', 'Blu', 'sara.blu@example.com', '6677889900', 'Espositore', 'Fotografo', NULL),
-(6, 'user6', 'password6', 'Giulia', 'Viola', 'giulia.viola@example.com', '7788990011', 'Personale', 'Tecnico', NULL),
+(5, 'user5', 'password5', 'Sara', 'Blu', 'sara.blu@example.com', '6677889900', 'Espositore', 'amatore', NULL),
+(6, 'user6', 'password6', 'Giulia', 'Viola', 'giulia.viola@example.com', '7788990011', 'Personale', NULL, NULL),
 (7, 'user7', 'password7', 'Marco', 'Giallo', 'marco.giallo@example.com', '8899001122', 'Visitatore', NULL, NULL),
-(8, 'user8', 'password8', 'Elena', 'Rosa', 'elena.rosa@example.com', '9900112233', 'Espositore', 'Designer', NULL),
-(9, 'user9', 'password9', 'Luca', 'Marrone', 'luca.marrone@example.com', '0011223344', 'Personale', 'Manager', NULL),
+(8, 'user8', 'password8', 'Elena', 'Rosa', 'elena.rosa@example.com', '9900112233', 'Espositore', 'esperto non professionista', NULL),
+(9, 'user9', 'password9', 'Luca', 'Marrone', 'luca.marrone@example.com', '0011223344', 'Personale', NULL, NULL),
 (10, 'user10', 'password10', 'Chiara', 'Nero', 'chiara.nero@example.com', '2233445566', 'Visitatore', NULL, NULL);
 
 --
