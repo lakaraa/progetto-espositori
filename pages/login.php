@@ -1,5 +1,5 @@
 <?php 
-include_once __DIR__ . '/session.php';
+include_once '../session.php';
 include_once '../template_header.php'; 
 ?>
 
@@ -38,7 +38,7 @@ include_once '../template_header.php';
                             </div>
                         </div>
                         <div class="col-md-12">
-                            <button type="submit" class="button button-primary" onclick="alert('Il bottone è stato schiacciato!');">Login</button>
+                            <button type="submit" class="button button-primary">Login</button>
                         </div>
                     </div>
                 </form>
