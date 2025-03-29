@@ -92,11 +92,6 @@ function deleteArea($pdo, $idArea)
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idArea', $idArea, PDO::PARAM_INT);
     $result = $stmt->execute();
-
-    if ($result) 
-        // Reset the auto-increment value for the table
-        $pdo->exec("ALTER TABLE area AUTO_INCREMENT = 1");
-
     return $result;
 }
 function updateArea($pdo, $idArea, $nome, $descrizione, $capienzaMassima, $idManifestazione) {
@@ -179,20 +174,18 @@ function deleteCandidatura($pdo, $idContributo)
     return $result;
 }
 //Gestione Espositore
-function addEspositore($pdo, $username, $password, $nome, $cognome, $email, $telefono, $qualifica, $curriculum) 
-{
-    $hashedPassword = password_hash($password, PASSWORD_BCRYPT); // Hash della password
+function addEspositore($pdo, $username, $hashed_password, $first_name, $last_name, $email, $phone, $qualification, $cv_content) {
     $sql = "INSERT INTO utente (Username, Password, Nome, Cognome, Email, Telefono, Ruolo, Qualifica, Curriculum) 
             VALUES (:username, :password, :nome, :cognome, :email, :telefono, 'Espositore', :qualifica, :curriculum)";
     $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-    $stmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR);
-    $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
-    $stmt->bindParam(':cognome', $cognome, PDO::PARAM_STR);
-    $stmt->bindParam(':email', $email, PDO::PARAM_STR);
-    $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
-    $stmt->bindParam(':qualifica', $qualifica, PDO::PARAM_STR);
-    $stmt->bindParam(':curriculum', $curriculum, PDO::PARAM_LOB);
+    $stmt->bindParam(':username', $username);
+    $stmt->bindParam(':password', $hashed_password);
+    $stmt->bindParam(':nome', $first_name);
+    $stmt->bindParam(':cognome', $last_name);
+    $stmt->bindParam(':email', $email);
+    $stmt->bindParam(':telefono', $phone);
+    $stmt->bindParam(':qualifica', $qualification);
+    $stmt->bindParam(':curriculum', $cv_content, PDO::PARAM_LOB);
     return $stmt->execute();
 }
 function deleteEspositore($pdo, $idUtente) 
@@ -201,9 +194,6 @@ function deleteEspositore($pdo, $idUtente)
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
     $result = $stmt->execute();
-    if ($result) 
-        // Reset the auto-increment value for the table
-        $pdo->exec("ALTER TABLE utente AUTO_INCREMENT = 1");
     return $result;
 }
 function updateEspositore($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono, $qualifica, $curriculum) 
@@ -249,9 +239,6 @@ function deleteManifestazione($pdo, $idManifestazione)
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
     $result = $stmt->execute();
-    if ($result) 
-        // Reset the auto-increment value for the table
-        $pdo->exec("ALTER TABLE manifestazione AUTO_INCREMENT = 1");
     return $result;
 }
 function updateManifestazione($pdo, $idManifestazione, $nome, $descrizione, $luogo, $durata, $data) 
@@ -288,9 +275,6 @@ function deletePersonale($pdo, $idUtente) {
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
     $result = $stmt->execute();
-    if ($result) 
-        // Reset the auto-increment value for the table
-        $pdo->exec("ALTER TABLE utente AUTO_INCREMENT = 1");
     return $result;
 }
 function updatePersonale($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono) 
@@ -331,9 +315,6 @@ function deletePrenotazione($pdo, $idUtente, $idTurno)
     $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
     $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
     $result = $stmt->execute();
-    if ($result) 
-        // Reset the auto-increment value for the table
-        $pdo->exec("ALTER TABLE prenotazione AUTO_INCREMENT = 1");
     return $result;
 }
 function updatePrenotazione($pdo, $idUtente, $idTurno, $newIdTurno) 
@@ -368,9 +349,6 @@ function deleteVisitatore($pdo, $idUtente)
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
     $result = $stmt->execute();
-    if ($result) 
-        // Reset the auto-increment value for the table
-        $pdo->exec("ALTER TABLE utente AUTO_INCREMENT = 1");
     return $result;
 }
 function updateVisitatore($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono) 
