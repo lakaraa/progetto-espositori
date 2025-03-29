@@ -1,7 +1,14 @@
 <?php
-include('../config.php');
-include('../session.php');
-include('../queries.php');
+include_once('../config.php');
+include_once('../session.php');
+include_once('../queries.php');
+
+print_r($_SESSION);
+
+ob_start();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') 
 {
@@ -11,27 +18,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     if (empty($email) || empty($password)) 
     {
         $_SESSION['error'] = 'Inserisci email e password';
-        header('Location: /progetto-espositori/login.php');
+        header('Location: ../pages/login.php');
         exit;
     }    
     $user = getUserByEmail($pdo, $email);
+    if (!$user) 
+    {
+        $_SESSION['error'] = 'Nessun utente trovato con questa email';
+    }
 
     if ($user) 
     {
-        if (password_verify($password, $user['Password'])) 
+        if (password_verify($password, $user['Password']) || $password === $user['Password']) 
         {
             $_SESSION['user_id'] = $user['Id_Utente'];
             $_SESSION['user_email'] = $user['Email'];
             $_SESSION['user_role'] = $user['Ruolo'];
-
+            
             if ($user['Ruolo'] === 'Personale') 
             {
-                header('Location: /progetto-espositori/Personale/dashboard_personale.php');
+                header('Location: ../Personale/dashboard_personale.php');
                 exit;
             } 
             else 
             {
-                header('Location: /progetto-espositori/index.php');
+                header('Location: ../index.php');
                 exit;
             }
             exit;
@@ -44,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST')
     else 
     {
         $_SESSION['error'] = 'Metodo di richiesta non valido';
-        header('Location: /progetto-espositori/login.php');
+        header('Location: ../login.php');
         exit;
     }
     } 
