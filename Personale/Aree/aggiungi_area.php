@@ -2,7 +2,7 @@
 include_once("../../config.php");
 include_once("../../queries.php");
 include_once("../../session.php");
-
+include_once("../../template_header.php");
 
 // Recupera le manifestazioni dal database
 $manifestazioni = getManifestazioni($pdo);
@@ -39,7 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 }
-include_once("../../template_header.php");
 ?>
 
 <!-- Breadcrumbs-->
