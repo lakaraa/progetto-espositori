@@ -2,6 +2,7 @@
 include_once("../../config.php");
 include_once("../../queries.php");
 include_once("../../session.php");
+include_once("../../template_header.php");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json');
@@ -15,7 +16,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $qualification = trim($_POST['qualification']);
     $cv = $_FILES['cv'];
 
-    // Validazione dei campi
     if (empty($username) || empty($password) || empty($first_name) || empty($last_name) || empty($email) || empty($phone) || empty($qualification)) {
         echo json_encode([
             'success' => false,
@@ -45,7 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Controlla la dimensione del file (16 MB massimo)
     if ($cv['size'] > 16 * 1024 * 1024) { // 16 MB
         echo json_encode([
             'success' => false,
@@ -70,13 +69,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Crea la directory uploads se non esiste
     $upload_dir = '../../uploads/';
     if (!is_dir($upload_dir)) {
         mkdir($upload_dir, 0777, true);
     }
 
-    // Salva il file con un nome personalizzato
     $cv_filename = 'cv_' . $username . '.pdf';
     $cv_path = $upload_dir . $cv_filename;
 
@@ -88,10 +85,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Hash della password
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-    // Inserimento nel database tramite la funzione
     try {
         $result = addEspositore($pdo, $username, $hashed_password, $first_name, $last_name, $email, $phone, $qualification, $cv_path);
         echo json_encode([
@@ -108,7 +103,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-include_once("../../template_header.php");
 ?>
 
 <!-- Breadcrumbs -->
@@ -117,8 +111,8 @@ include_once("../../template_header.php");
         <h2 class="breadcrumbs-custom-title">Aggiungi Espositore</h2>
     </div>
     <ul class="breadcrumbs-custom-path">
-        <li><a href="dashboardPersonale.html">Dashboard</a></li>
-        <li><a href="gestioneEspositori.html">Gestione Espositori</a></li>
+        <li><a href="../dashboard_personale.php">Dashboard</a></li>
+        <li><a href="gestisci_espositori.php">Gestione Espositori</a></li>
         <li class="active">Aggiungi Espositore</li>
     </ul>
 </section>
