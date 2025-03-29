@@ -1,34 +1,78 @@
 <?php
-include_once __DIR__ . '/config.php';
-include_once __DIR__ . '/session.php';
-include_once __DIR__ . '/queries.php';
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+include_once '../config.php';
+include_once '../session.php';
+include_once '../queries.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
-    $first_name = trim($_POST['nome']);
-    $last_name = trim($_POST['cognome']);
+    $first_name = trim($_POST['first_name']);
+    $last_name = trim($_POST['last_name']);
     $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
-    $phone = trim($_POST['telefono']);
-    $qualification = trim($_POST['qualifica']);
-    $cv = $_FILES['curriculum'];
+    $phone = trim($_POST['phone']);
+    $qualification = trim($_POST['qualification']);
+    $cv = $_FILES['cv'];
 
     // Validazione dei campi
-    if (empty($username) || empty($password) || empty($first_name) || empty($last_name) || empty($email) || empty($phone) || empty($qualification) || empty($cv)) {
-        header('Location: ../registration.php?message=Tutti i campi sono obbligatori.');
+    if (empty($username) || empty($password) || empty($first_name) || empty($last_name) || empty($email) || empty($phone) || empty($qualification)) {
+        $_SESSION['error'] = 'Tutti i campi sono obbligatori.';
+        header('Location: ../pages/registration.php');
         exit;
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        header('Location: ../registration.php?message=Inserisci un indirizzo email valido.');
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $_SESSION['error'] = 'Inserisci un indirizzo email valido.';
+        header('Location: ../pages/registration.php');
         exit;
-    } elseif ($cv['type'] !== 'application/pdf') {
-        header('Location: ../registration.php?message=Il curriculum deve essere un file PDF.');
+    }
+    if (!isset($_FILES['cv']) || $_FILES['cv']['error'] !== UPLOAD_ERR_OK) {
+        $_SESSION['error'] = 'Errore durante il caricamento del file.';
+        header('Location: ../pages/registration.php');
+        exit;
+    }
+    if ($cv['type'] !== 'application/pdf') {
+        $_SESSION['error'] = 'Il curriculum deve essere un file PDF.';
+        header('Location: ../pages/registration.php');
         exit;
     }
 
-    // Salvataggio del file CV
-    $cv_path = __DIR__ . '/../uploads/' . basename($cv['name']);
+    // Controlla la dimensione del file (16 MB massimo)
+    if ($cv['size'] > 16 * 1024 * 1024) { // 16 MB
+        $_SESSION['error'] = 'Il file è troppo grande. La dimensione massima consentita è 16 MB.';
+        header('Location: ../pages/registration.php');
+        exit;
+    }
+
+    // Mappa i valori ENUM
+    $qualification_map = [
+        'professional' => 'professionista del settore',
+        'amateur' => 'amatore',
+        'expert' => 'esperto non professionista'
+    ];
+    $qualification = $qualification_map[$qualification] ?? null;
+
+    if (!$qualification) {
+        $_SESSION['error'] = 'Qualifica non valida.';
+        header('Location: ../pages/registration.php');
+        exit;
+    }
+
+    // Crea la directory uploads se non esiste
+    $upload_dir = '../uploads/';
+    if (!is_dir($upload_dir)) {
+        mkdir($upload_dir, 0777, true);
+    }
+
+    // Salva il file con un nome personalizzato
+    $cv_filename = 'cv_' . $username . '.pdf';
+    $cv_path = $upload_dir . $cv_filename;
+
     if (!move_uploaded_file($cv['tmp_name'], $cv_path)) {
-        header('Location: ../registration.php?message=Errore durante il caricamento del file.');
+        $_SESSION['error'] = 'Errore durante il salvataggio del file.';
+        header('Location: ../pages/registration.php');
         exit;
     }
 
@@ -37,9 +81,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Inserimento nel database tramite la funzione
     if (addEspositore($pdo, $username, $hashed_password, $first_name, $last_name, $email, $phone, $qualification, $cv_path)) {
-        header('Location: ../registration.php?message=Registrazione completata con successo!');
+        $_SESSION['success'] = 'Registrazione completata con successo!';
+        header('Location: ../pages/login.php');
+        exit;
     } else {
-        header('Location: ../registration.php?message=Errore durante la registrazione. Riprova.');
+        $_SESSION['error'] = 'Errore durante la registrazione. Riprova.';
+        header('Location: ../pages/registration.php');
+        exit;
     }
-    exit;
 }
