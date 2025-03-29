@@ -3,25 +3,26 @@ include_once '../../config.php';
 include_once '../../queries.php';
 include_once '../../template_header.php';
 
-// Controlla se è stato passato un ID per la cancellazione
-if (isset($_GET['id']) && is_numeric($_GET['id'])) {
-    $idArea = intval($_GET['id']);
+// Gestione della cancellazione tramite POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id']) && is_numeric($_POST['id'])) {
+    $idArea = intval($_POST['id']);
     try {
         // Cancella l'area dal database
         if (deleteArea($pdo, $idArea)) {
-            echo "<p style='color: green;'>Area cancellata con successo.</p>";
+            $successMessage = "Area cancellata con successo.";
         } else {
-            echo "<p style='color: red;'>Errore durante la cancellazione dell'area.</p>";
+            $errorMessage = "Errore durante la cancellazione dell'area.";
         }
     } catch (PDOException $e) {
-        echo "<p style='color: red;'>Errore di connessione al database: " . $e->getMessage() . "</p>";
+        $errorMessage = "Errore di connessione al database: " . $e->getMessage();
     }
 }
 
+// Recupera tutte le aree dal database
 $aree = getAree($pdo);
 ?>
 
-<!-- Breadcrumbs-->
+<!-- Breadcrumbs -->
 <section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/bg-breadcrumbs-07-1920x480.jpg);">
     <div class="container">
         <h2 class="breadcrumbs-custom-title">Cancella Area</h2>
@@ -32,12 +33,22 @@ $aree = getAree($pdo);
         <li class="active">Cancella Area</li>
     </ul>
 </section>
-<!-- Main Content-->
+
+<!-- Main Content -->
 <section class="section section-lg bg-default text-center">
     <div class="container">
         <h2>Cancella Area</h2>
         <p>Seleziona una Area dalla lista sottostante per Cancellarla.</p>
         <br>
+
+        <!-- Messaggi di successo o errore -->
+        <?php if (!empty($successMessage)): ?>
+            <p style="color: green;"><?php echo htmlspecialchars($successMessage); ?></p>
+        <?php endif; ?>
+        <?php if (!empty($errorMessage)): ?>
+            <p style="color: red;"><?php echo htmlspecialchars($errorMessage); ?></p>
+        <?php endif; ?>
+
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
@@ -58,17 +69,17 @@ $aree = getAree($pdo);
                                 <td><?php echo htmlspecialchars($area['descrizione']); ?></td>
                                 <td><?php echo htmlspecialchars($area['capienza_massima']); ?></td>
                                 <td>
-                                <a class="button button-primary button-sm" 
-                                    href="cancella_area.php?id=<?php echo urlencode($area['id']); ?>" 
-                                    onclick="return confirm('Sei sicuro di voler cancellare questa area?');">
-                                    Cancella
-                                </a>
+                                    <!-- Modulo per la cancellazione -->
+                                    <form method="post" action="cancella_area.php" onsubmit="return confirm('Sei sicuro di voler cancellare questa area?');">
+                                        <input type="hidden" name="id" value="<?php echo htmlspecialchars($area['id']); ?>">
+                                        <button type="submit" class="button button-primary button-sm">Cancella</button>
+                                    </form>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6">Nessuna area trovata.</td>
+                            <td colspan="5">Nessuna area trovata.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
