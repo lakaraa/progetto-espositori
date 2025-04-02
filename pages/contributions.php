@@ -1,8 +1,8 @@
 <?php
-include_once 'config.php'; 
-include_once 'queries.php'; 
-include_once 'template_header.php'; 
-include_once 'session.php';
+include_once('../config.php'); 
+include_once('../queries.php');
+include_once('../session.php');
+include_once('../template_header.php'); 
 
 $idManifestazione = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $manifestazione = getManifestazioneById($pdo, $idManifestazione);
@@ -18,7 +18,7 @@ if (!$manifestazione)
     <h2 class="breadcrumbs-custom-title"><?php echo htmlspecialchars($manifestazione['Nome']); ?></h2>
   </div>
   <ul class="breadcrumbs-custom-path">
-    <li><a href="manifestazioni.php">Manifestazioni</a></li>
+    <li><a href="manifestazione.php">Manifestazioni</a></li>
     <li class="active">Contributions</li>
   </ul>
 </section>
@@ -53,16 +53,22 @@ if (!$manifestazione)
                   echo "<p><strong>Sintesi:</strong> " . htmlspecialchars($contributo['Sintesi']) . "</p>";
                   echo "<p><strong>Accettazione:</strong> " . ($contributo['Accettazione'] ? "Accettato" : "Non accettato") . "</p>";
                   echo "</li>";
+                  echo "<br>";
               }
           } else {
               echo "<li class='list-group-item'>Nessun contributo trovato.</li>";
           }
           ?>
         </ul>
+        <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'Espositore'): ?>
+            <div class="text-center mt-4">
+            <a href="candidati.php?id=<?php echo $idManifestazione; ?>" class="button-primary button-lg">Canditati</a>
+            </div>
+        <?php endif; ?>
       </div>
     </div>
   </div>
 </section>
 <?php
-include_once 'template_footer.php';
+include_once('../template_footer.php');
 ?>
