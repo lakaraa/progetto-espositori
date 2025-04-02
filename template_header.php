@@ -35,6 +35,9 @@
                 <nav class="rd-navbar rd-navbar-classic" data-layout="rd-navbar-fixed" data-sm-layout="rd-navbar-fixed" data-md-layout="rd-navbar-fixed" data-md-device-layout="rd-navbar-fixed" data-lg-layout="rd-navbar-fixed" data-lg-device-layout="rd-navbar-fixed" data-xl-layout="rd-navbar-static" data-xl-device-layout="rd-navbar-static" data-xxl-layout="rd-navbar-static" data-xxl-device-layout="rd-navbar-static" data-lg-stick-up-offset="46px" data-xl-stick-up-offset="46px" data-xxl-stick-up-offset="46px" data-lg-stick-up="true" data-xl-stick-up="true" data-xxl-stick-up="true">
                     <div class="rd-navbar-collapse-toggle rd-navbar-fixed-element-1" data-rd-navbar-toggle=".rd-navbar-collapse"><span></span></div>
                     <div class="rd-navbar-main-outer">
+                        <?php
+                        $current_page = basename($_SERVER['PHP_SELF']);
+                        ?>
                         <div class="rd-navbar-main">
                             <div class="rd-navbar-panel">
                                 <button class="rd-navbar-toggle" data-rd-navbar-toggle=".rd-navbar-nav-wrap"><span></span></button>
@@ -45,11 +48,11 @@
                             <div class="rd-navbar-main-element">
                                 <div class="rd-navbar-nav-wrap">
                                     <ul class="rd-navbar-nav">
-                                        <li class="rd-nav-item active"><a class="rd-nav-link" href="index.php">Home</a></li>
-                                        <li class="rd-nav-item"><a class="rd-nav-link" href="manifestazione.php">Manifestazioni</a></li>
-                                        <li class="rd-nav-item"><a class="rd-nav-link" href="/progetto-espositori/pages/about.php">About</a></li>
-                                        <li class="rd-nav-item"><a class="rd-nav-link" href="/progetto-espositori/pages/contacts.php">Contacts</a></li>
-                                        <li class="rd-nav-item"><a class="rd-nav-link" href="login.php">Login</a></li>
+                                        <li class="rd-nav-item <?php echo $current_page == 'index.php' ? 'active' : ''; ?>"><a class="rd-nav-link" href="/progetto-espositori/index.php">Home</a></li>
+                                        <li class="rd-nav-item <?php echo $current_page == 'manifestazione.php' ? 'active' : ''; ?>"><a class="rd-nav-link" href="/progetto-espositori/pages/manifestazione.php">Manifestazioni</a></li>
+                                        <li class="rd-nav-item <?php echo $current_page == 'about.php' ? 'active' : ''; ?>"><a class="rd-nav-link" href="/progetto-espositori/pages/about.php">About</a></li>
+                                        <li class="rd-nav-item <?php echo $current_page == 'contacts.php' ? 'active' : ''; ?>"><a class="rd-nav-link" href="/progetto-espositori/pages/contacts.php">Contacts</a></li>
+                                        <li class="rd-nav-item <?php echo $current_page == 'login.php' ? 'active' : ''; ?>"><a class="rd-nav-link" href="/progetto-espositori/pages/login.php">Login</a></li>
                                     </ul>
                                 </div>
                             </div>
