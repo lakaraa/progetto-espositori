@@ -10,59 +10,64 @@ $idManifestazione = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $manifestazione = getManifestazioneById($pdo, $idManifestazione);
 
 if (!$manifestazione) {
-    echo "<p style='color: red;'>Errore: Manifestazione non trovata.</p>";
+    echo "<p style='color: red;'>Manifestazione non trovata.</p>";
     exit;
 }
 
+// Inizializza il messaggio di errore o successo
+$successMessage = '';
+$errorMessage = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Recupera i dati dal form (se lasciati vuoti, mantieni i valori esistenti)
-    $nome = isset($_POST['Nome']) ? trim($_POST['Nome']) : $manifestazione['Nome'];
-    $descrizione = isset($_POST['Descrizione']) ? trim($_POST['Descrizione']) : $manifestazione['Descrizione'];
-    $luogo = isset($_POST['Luogo']) ? trim($_POST['Luogo']) : $manifestazione['Luogo'];
-    $data = isset($_POST['Data']) ? $_POST['Data'] : $manifestazione['Data'];
-    $durata = isset($_POST['Durata']) ? intval($_POST['Durata']) : $manifestazione['Durata'];
+    // Recupera i dati dal form (i campi non sono obbligatori)
+    $nome = !empty($_POST['Nome']) ? $_POST['Nome'] : $manifestazione['Nome'];
+    $descrizione = !empty($_POST['Descrizione']) ? $_POST['Descrizione'] : $manifestazione['Descrizione'];
+    $luogo = !empty($_POST['Luogo']) ? $_POST['Luogo'] : $manifestazione['Luogo'];
+    $durata = !empty($_POST['Durata']) ? $_POST['Durata'] : $manifestazione['Durata'];
+    $data = !empty($_POST['Data']) ? $_POST['Data'] : $manifestazione['Data'];
 
-    // Aggiorna solo se almeno un campo è cambiato
-    if ($nome !== $manifestazione['Nome'] || $descrizione !== $manifestazione['Descrizione'] ||
-        $luogo !== $manifestazione['Luogo'] || $data !== $manifestazione['Data'] ||
-        $durata !== $manifestazione['Durata']) {
+    
 
-        if (updateManifestazione($pdo, $idManifestazione, $nome, $descrizione, $luogo, $data, $durata)) {
-            // Redirect per evitare il reinvio del form con F5
-            header("Location: modifica_manifestazione_dettagli.php?id=$idManifestazione&success=1");
-            exit; // Interrompi l'esecuzione
-        } else {
-            echo "<p style='color: red;'>Errore durante l'aggiornamento della manifestazione.</p>";
-        }
+    // Aggiorna la manifestazione nel database
+    if (updateManifestazione($pdo, $idManifestazione, $nome, $descrizione, $luogo, $durata, $data)) {
+        $successMessage = "Manifestazione aggiornata con successo.";
+        // Ricarica i dettagli aggiornati della manifestazione
+        $manifestazione = getManifestazioneById($pdo, $idManifestazione);
     } else {
-        echo "<p style='color: orange;'>Nessuna modifica effettuata.</p>";
+        $errorMessage = "Errore durante l'aggiornamento della manifestazione.";
     }
 }
 
-// Se il parametro 'success' è presente nell'URL, mostra un messaggio di successo
-if (isset($_GET['success']) && $_GET['success'] == 1) {
-    echo "<p style='color: green;'>Modifica avvenuta con successo!</p>";
-}
 ?>
 
-<!-- Breadcrumbs -->
+<!-- Breadcrumbs-->
 <section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/bg-breadcrumbs-07-1920x480.jpg);">
   <div class="container">
       <h2 class="breadcrumbs-custom-title">Modifica Dettagli Manifestazione</h2>
   </div>
   <ul class="breadcrumbs-custom-path">
     <li><a href="../dashboard_personale.php">Dashboard</a></li>
-    <li><a href="gestisci_manifestazioni.php">Gestione Manifestazioni</a></li>
+    <li><a href="gestisci_manifestazione.php">Gestione Manifestazione</a></li>
+    <li><a href="modifica_manifestazione.php">Modifica Manifestazione</a></li>
     <li class="active">Modifica Dettagli Manifestazione</li>
   </ul>
 </section>
 
-<!-- Main Content -->
+<!-- Main Content-->
 <section class="section section-lg bg-default text-center">
   <div class="container">
     <h2>Modifica Manifestazione</h2>
-    <p>Compila il modulo per modificare la manifestazione. I campi non sono obbligatori.</p>
-    <form class="rd-form rd-mailform" method="post">
+    <p>Compila il modulo sottostante per modificare la manifestazione.</p>
+
+    <!-- Mostra i messaggi di errore o successo -->
+    <?php if (!empty($successMessage)): ?>
+        <p style="color: green;"><?php echo htmlspecialchars($successMessage); ?></p>
+    <?php endif; ?>
+    <?php if (!empty($errorMessage)): ?>
+        <p style="color: red;"><?php echo htmlspecialchars($errorMessage); ?></p>
+    <?php endif; ?>
+
+    <form class="rd-form rd-mailform" method="post" action="">
       <div class="row row-50">
         <div class="col-md-6">
           <div class="form-wrap">
@@ -78,14 +83,14 @@ if (isset($_GET['success']) && $_GET['success'] == 1) {
         </div>
         <div class="col-md-6">
           <div class="form-wrap">
-            <label class="form-label" for="manifestazione-data">Data</label>
-            <input class="form-input" id="manifestazione-data" type="date" name="Data" value="<?php echo htmlspecialchars($manifestazione['Data']); ?>">
+            <label class="form-label" for="manifestazione-durata">Durata</label>
+            <input class="form-input" id="manifestazione-durata" type="text" name="Durata" value="<?php echo htmlspecialchars($manifestazione['Durata']); ?>">
           </div>
         </div>
         <div class="col-md-6">
           <div class="form-wrap">
-            <label class="form-label" for="manifestazione-durata">Durata (giorni)</label>
-            <input class="form-input" id="manifestazione-durata" type="number" name="Durata" value="<?php echo htmlspecialchars($manifestazione['Durata']); ?>">
+            <label class="form-label" for="manifestazione-data">Data</label>
+            <input class="form-input" id="manifestazione-data" type="date" name="Data" value="<?php echo htmlspecialchars($manifestazione['Data']); ?>">
           </div>
         </div>
         <div class="col-12">
