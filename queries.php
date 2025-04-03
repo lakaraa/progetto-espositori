@@ -89,12 +89,34 @@ function addArea($pdo, $nome, $descrizione, $capienzaMassima, $idManifestazione)
 }
 function deleteArea($pdo, $idArea) 
 {
-    $sql = "DELETE FROM area WHERE Id_Area = :idArea";
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':idArea', $idArea, PDO::PARAM_INT);
-    $result = $stmt->execute();
-    return $result;
+    try {
+        // Inizia una transazione per garantire che tutte le operazioni vengano eseguite correttamente
+        $pdo->beginTransaction();
+
+        // Elimina i record nella tabella turno che fanno riferimento all'Id_Area
+        $sqlTurno = "DELETE FROM turno WHERE Id_Area = :idArea";
+        $stmtTurno = $pdo->prepare($sqlTurno);
+        $stmtTurno->bindParam(':idArea', $idArea, PDO::PARAM_INT);
+        $stmtTurno->execute();
+
+        // Ora elimina l'area dalla tabella area
+        $sqlArea = "DELETE FROM area WHERE Id_Area = :idArea";
+        $stmtArea = $pdo->prepare($sqlArea);
+        $stmtArea->bindParam(':idArea', $idArea, PDO::PARAM_INT);
+        $stmtArea->execute();
+
+        // Se entrambe le operazioni sono andate a buon fine, commit la transazione
+        $pdo->commit();
+
+        return true;
+    } catch (Exception $e) {
+        // Se c'è un errore, rollback della transazione
+        $pdo->rollBack();
+        // Puoi loggare l'errore o gestirlo come necessario
+        return false;
+    }
 }
+
 function updateArea($pdo, $idArea, $nome, $descrizione, $capienzaMassima, $idManifestazione) {
     $sql = "UPDATE area 
             SET Nome = :nome, 
