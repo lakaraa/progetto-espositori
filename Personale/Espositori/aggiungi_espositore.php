@@ -2,10 +2,10 @@
 include_once("../../config.php");
 include_once("../../queries.php");
 include_once("../../session.php");
-include_once("../../template_header.php");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json');
+    ob_clean(); // Pulisce il buffer di output
 
     $username = trim($_POST['username']);
     $password = trim($_POST['password']);
@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $qualification = trim($_POST['qualification']);
     $cv = $_FILES['cv'];
 
+    // Validazione dei campi
     if (empty($username) || empty($password) || empty($first_name) || empty($last_name) || empty($email) || empty($phone) || empty($qualification)) {
         echo json_encode([
             'success' => false,
@@ -27,6 +28,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode([
             'success' => false,
             'message' => 'Inserisci un indirizzo email valido.'
+        ]);
+        exit;
+    }
+    // Controllo se l'email esiste già
+    if (emailExists($pdo, $email)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'L\'email è già registrata.'
+        ]);
+        exit;
+    }
+    
+    // Controllo se lo username esiste già
+    if (usernameExists($pdo, $username)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Lo username è già in uso.'
         ]);
         exit;
     }
@@ -44,7 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
         exit;
     }
-
     if ($cv['size'] > 16 * 1024 * 1024) { // 16 MB
         echo json_encode([
             'success' => false,
@@ -69,7 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    $upload_dir = '../../uploads/';
+    // Gestione del caricamento del file
+    $upload_dir = '/progetto-espositori/uploads/';
     if (!is_dir($upload_dir)) {
         mkdir($upload_dir, 0777, true);
     }
@@ -85,8 +103,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    // Hash della password
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
+    // Inserimento nel database
     try {
         $result = addEspositore($pdo, $username, $hashed_password, $first_name, $last_name, $email, $phone, $qualification, $cv_path);
         echo json_encode([
@@ -103,6 +123,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Includi il template solo per richieste GET
+include_once("../../template_header.php");
 ?>
 
 <!-- Breadcrumbs -->
@@ -116,64 +138,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <li class="active">Aggiungi Espositore</li>
     </ul>
 </section>
+
 <!-- Main Content -->
-<section class="section section-lg bg-default">
+<section class="section section-lg bg-default text-center">
     <div class="container">
-        <div class="row row-50 justify-content-center">
-            <div class="col-md-10 col-lg-8">
-                <h3>Aggiungi Espositore</h3>
+        <h3>Aggiungi Espositore</h3>
+        <div id="form-message"></div>
         <form class="form-aggiungi-espositore" method="post" enctype="multipart/form-data">
             <div class="row row-30">
                 <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="registration-username">Username</label>
-                        <input class="form-input" id="registration-username" type="text" name="username" required>
+                        <input class="form-input" id="registration-username" type="text" name="username">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="registration-password">Password</label>
-                        <input class="form-input" id="registration-password" type="password" name="password" required>
+                        <input class="form-input" id="registration-password" type="password" name="password">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="registration-first-name">First Name</label>
-                        <input class="form-input" id="registration-first-name" type="text" name="first_name" required>
+                        <input class="form-input" id="registration-first-name" type="text" name="first_name">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="registration-last-name">Last Name</label>
-                        <input class="form-input" id="registration-last-name" type="text" name="last_name" required>
+                        <input class="form-input" id="registration-last-name" type="text" name="last_name">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="registration-email">Email</label>
-                        <input class="form-input" id="registration-email" type="email" name="email" required>
+                        <input class="form-input" id="registration-email" type="email" name="email">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="registration-phone">Phone</label>
-                        <input class="form-input" id="registration-phone" type="text" name="phone" required>
+                        <input class="form-input" id="registration-phone" type="text" name="phone">
                     </div>
                 </div>
                 <div class="col-md-12">
                     <div class="form-wrap">
                         <label class="form-label" for="registration-qualification">Qualification</label>
-                        <select class="form-input" id="registration-qualification" name="qualification" required>
-                            <option value="professional" style="color: black; background-color: white;">Professional</option>
-                            <option value="amateur" style="color: black; background-color: white;">Amateur</option>
-                            <option value="expert" style="color: black; background-color: white;">Expert Non-Professional</option>
+                        <select class="form-input" id="registration-qualification" name="qualification">
+                            <option value="professional" style="color: black; background-color: white;">Professionista del settore</option>
+                            <option value="amateur" style="color: black; background-color: white;">Amatore</option>
+                            <option value="expert" style="color: black; background-color: white;">Esperto non professionista</option>
                         </select>
                     </div>
                 </div>
                 <div class="col-md-12">
                     <div class="form-wrap">
-                        <label class="form-label" for="registration-cv">Curriculum Vitae (PDF)</label><br>
-                        <input class="form-input" id="registration-cv" type="file" name="cv" accept=".pdf" required>
+                        <label class="form-label" for="registration-cv">Curriculum Vitae (PDF)<small style="color: rgb(74, 196, 207);">* Il file deve essere in formato PDF e non deve superare i 16 MB.</small></label>
+                        <br><br>
+                        <input class="form-input" id="registration-cv" type="file" name="cv" accept=".pdf">
+                        
                     </div>
                 </div>
                 <div class="col-md-12">
@@ -181,8 +205,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
         </form>
-        </div>
-        </div>
     </div>
 </section>
 
@@ -201,15 +223,23 @@ $(function () {
             processData: false,
             contentType: false,
             success: function (response) {
-                const message = response.message || 'Errore sconosciuto.';
-                const isSuccess = response.success === true;
+                console.log("RISPOSTA RAW:", response); // Stampa la risposta grezza
+                try {
+                    const data = typeof response === "string" ? JSON.parse(response) : response;
+                    const message = data.message || "Messaggio non disponibile.";
+                    const isSuccess = data.success === true;
 
-                $('#form-message').html(
-                    `<p style="color: ${isSuccess ? 'green' : 'red'};">${message}</p>`
-                );
+                    $('#form-message').html(
+                        `<p style="color: ${isSuccess ? 'rgb(74, 196, 207)' : 'red'};">${message}</p>`
+                    );
 
-                if (isSuccess) {
-                    $('.form-aggiungi-espositore')[0].reset();
+                    if (isSuccess) {
+                        $('.form-aggiungi-espositore')[0].reset();
+                        //location.reload(); // Ricarica la pagina 
+                    }
+                } catch (e) {
+                    console.error("Errore JSON.parse:", e);
+                    $('#form-message').html('<p style="color: red;">Risposta non valida dal server.</p>');
                 }
             },
             error: function () {

@@ -211,7 +211,6 @@ function addEspositore($pdo, $username, $hashed_password, $first_name, $last_nam
     $stmt->bindParam(':curriculum', $cv_content, PDO::PARAM_LOB);
     return $stmt->execute();
 }
-
 function deleteEspositore($pdo, $idUtente) 
 {
     $sql = "DELETE FROM utente WHERE Id_Utente = :idUtente AND Ruolo = 'Espositore'";
@@ -244,6 +243,18 @@ function updateEspositore($pdo, $idUtente, $username, $password, $nome, $cognome
     $stmt->bindParam(':curriculum', $curriculum, PDO::PARAM_LOB);
     return $stmt->execute();
 }
+function emailExists($pdo, $email) {
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM utente WHERE Email = ?");
+    $stmt->execute([$email]);
+    return $stmt->fetchColumn() > 0;
+}
+
+function usernameExists($pdo, $username) {
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM utente WHERE Username = ?");
+    $stmt->execute([$username]);
+    return $stmt->fetchColumn() > 0;
+}
+
 //Gestione Manifestazione
 function addManifestazione($pdo, $nome, $descrizione, $luogo, $durata, $data) 
 {
