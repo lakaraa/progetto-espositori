@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Creato il: Mar 21, 2025 alle 22:04
+-- Creato il: Apr 03, 2025 alle 21:41
 -- Versione del server: 8.2.0
 -- Versione PHP: 8.3.0
 
@@ -91,41 +91,42 @@ CREATE TABLE `contributo` (
   `Immagine` blob,
   `Titolo` varchar(255) NOT NULL,
   `Sintesi` varchar(2000) NOT NULL,
-  `Accettazione` tinyint(1) DEFAULT '0'
+  `Accettazione` enum('Rifiutato','Accettato','In Approvazione') NOT NULL DEFAULT 'In Approvazione',
+  `URL` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dump dei dati per la tabella `contributo`
 --
 
-INSERT INTO `contributo` (`Id_Contributo`, `Id_Utente`, `Immagine`, `Titolo`, `Sintesi`, `Accettazione`) VALUES
-(1, 1, NULL, 'Titolo 1', 'Sintesi 1', 1),
-(2, 2, NULL, 'Titolo 2', 'Sintesi 2', 0),
-(3, 3, NULL, 'Titolo 3', 'Sintesi 3', 1),
-(4, 4, NULL, 'Titolo 4', 'Sintesi 4', 0),
-(5, 5, NULL, 'Titolo 5', 'Sintesi 5', 1),
-(6, 6, NULL, 'Titolo 6', 'Sintesi 6', 0),
-(7, 7, NULL, 'Titolo 7', 'Sintesi 7', 1),
-(8, 8, NULL, 'Titolo 8', 'Sintesi 8', 0),
-(9, 9, NULL, 'Titolo 9', 'Sintesi 9', 1),
-(10, 10, NULL, 'Titolo 10', 'Sintesi 10', 0);
+INSERT INTO `contributo` (`Id_Contributo`, `Id_Utente`, `Immagine`, `Titolo`, `Sintesi`, `Accettazione`, `URL`) VALUES
+(1, 1, NULL, 'Titolo 1', 'Sintesi 1', 'Accettato', NULL),
+(2, 2, NULL, 'Titolo 2', 'Sintesi 2', 'In Approvazione', NULL),
+(3, 3, NULL, 'Titolo 3', 'Sintesi 3', 'Accettato', NULL),
+(4, 4, NULL, 'Titolo 4', 'Sintesi 4', 'Rifiutato', NULL),
+(5, 5, NULL, 'Titolo 5', 'Sintesi 5', 'In Approvazione', NULL),
+(6, 6, NULL, 'Titolo 6', 'Sintesi 6', 'Rifiutato', NULL),
+(7, 7, NULL, 'Titolo 7', 'Sintesi 7', 'Accettato', NULL),
+(8, 8, NULL, 'Titolo 8', 'Sintesi 8', 'Rifiutato', NULL),
+(9, 9, NULL, 'Titolo 9', 'Sintesi 9', 'In Approvazione', NULL),
+(10, 10, NULL, 'Titolo 10', 'Sintesi 10', 'Rifiutato', NULL);
 
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `localizzazione`
+-- Struttura della tabella `esposizione`
 --
 
-CREATE TABLE `localizzazione` (
+CREATE TABLE `esposizione` (
   `Id_Manifestazione` int NOT NULL,
   `Id_Contributo` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dump dei dati per la tabella `localizzazione`
+-- Dump dei dati per la tabella `esposizione`
 --
 
-INSERT INTO `localizzazione` (`Id_Manifestazione`, `Id_Contributo`) VALUES
+INSERT INTO `esposizione` (`Id_Manifestazione`, `Id_Contributo`) VALUES
 (1, 1),
 (1, 2),
 (2, 3),
@@ -262,24 +263,25 @@ CREATE TABLE `turno` (
   `Id_Turno` int NOT NULL,
   `Data` date NOT NULL,
   `Ora` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `Numero_Persone` int NOT NULL
+  `Numero_Persone` int NOT NULL,
+  `Id_Area` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dump dei dati per la tabella `turno`
 --
 
-INSERT INTO `turno` (`Id_Turno`, `Data`, `Ora`, `Numero_Persone`) VALUES
-(1, '2025-03-20', '10:00', 10),
-(2, '2025-03-20', '11:00', 15),
-(3, '2025-03-20', '12:00', 20),
-(4, '2025-03-20', '13:00', 25),
-(5, '2025-03-20', '14:00', 30),
-(6, '2025-03-20', '15:00', 35),
-(7, '2025-03-20', '16:00', 40),
-(8, '2025-03-20', '17:00', 45),
-(9, '2025-03-20', '18:00', 50),
-(10, '2025-03-20', '19:00', 55);
+INSERT INTO `turno` (`Id_Turno`, `Data`, `Ora`, `Numero_Persone`, `Id_Area`) VALUES
+(1, '2025-03-20', '10:00', 10, 1),
+(2, '2025-03-20', '11:00', 15, 1),
+(3, '2025-03-20', '12:00', 20, 1),
+(4, '2025-03-20', '13:00', 25, 1),
+(5, '2025-03-20', '14:00', 30, 1),
+(6, '2025-03-20', '15:00', 35, 1),
+(7, '2025-03-20', '16:00', 40, 1),
+(8, '2025-03-20', '17:00', 45, 1),
+(9, '2025-03-20', '18:00', 50, 1),
+(10, '2025-03-20', '19:00', 55, 1);
 
 -- --------------------------------------------------------
 
@@ -297,7 +299,7 @@ CREATE TABLE `utente` (
   `Telefono` varchar(20) NOT NULL,
   `Ruolo` enum('Personale','Espositore','Visitatore') NOT NULL,
   `Qualifica` enum('professionista del settore','amatore','esperto non professionista') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `Curriculum` blob
+  `Curriculum` longblob
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -341,9 +343,9 @@ ALTER TABLE `contributo`
   ADD KEY `Id_Utente` (`Id_Utente`);
 
 --
--- Indici per le tabelle `localizzazione`
+-- Indici per le tabelle `esposizione`
 --
-ALTER TABLE `localizzazione`
+ALTER TABLE `esposizione`
   ADD PRIMARY KEY (`Id_Manifestazione`,`Id_Contributo`),
   ADD KEY `Id_Contributo` (`Id_Contributo`);
 
@@ -377,7 +379,8 @@ ALTER TABLE `tipologia`
 -- Indici per le tabelle `turno`
 --
 ALTER TABLE `turno`
-  ADD PRIMARY KEY (`Id_Turno`);
+  ADD PRIMARY KEY (`Id_Turno`),
+  ADD KEY `Id_Area` (`Id_Area`) USING BTREE;
 
 --
 -- Indici per le tabelle `utente`
@@ -395,7 +398,7 @@ ALTER TABLE `utente`
 -- AUTO_INCREMENT per la tabella `area`
 --
 ALTER TABLE `area`
-  MODIFY `Id_Area` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `Id_Area` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT per la tabella `categoria`
@@ -431,7 +434,7 @@ ALTER TABLE `turno`
 -- AUTO_INCREMENT per la tabella `utente`
 --
 ALTER TABLE `utente`
-  MODIFY `Id_Utente` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `Id_Utente` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- Limiti per le tabelle scaricate
@@ -450,11 +453,11 @@ ALTER TABLE `contributo`
   ADD CONSTRAINT `contributo_ibfk_1` FOREIGN KEY (`Id_Utente`) REFERENCES `utente` (`Id_Utente`) ON DELETE CASCADE;
 
 --
--- Limiti per la tabella `localizzazione`
+-- Limiti per la tabella `esposizione`
 --
-ALTER TABLE `localizzazione`
-  ADD CONSTRAINT `localizzazione_ibfk_1` FOREIGN KEY (`Id_Manifestazione`) REFERENCES `manifestazione` (`Id_Manifestazione`) ON DELETE CASCADE,
-  ADD CONSTRAINT `localizzazione_ibfk_2` FOREIGN KEY (`Id_Contributo`) REFERENCES `contributo` (`Id_Contributo`) ON DELETE CASCADE;
+ALTER TABLE `esposizione`
+  ADD CONSTRAINT `esposizione_ibfk_1` FOREIGN KEY (`Id_Manifestazione`) REFERENCES `manifestazione` (`Id_Manifestazione`) ON DELETE CASCADE,
+  ADD CONSTRAINT `esposizione_ibfk_2` FOREIGN KEY (`Id_Contributo`) REFERENCES `contributo` (`Id_Contributo`) ON DELETE CASCADE;
 
 --
 -- Limiti per la tabella `prenotazione`
@@ -469,6 +472,12 @@ ALTER TABLE `prenotazione`
 ALTER TABLE `tipologia`
   ADD CONSTRAINT `tipologia_ibfk_1` FOREIGN KEY (`Id_Contributo`) REFERENCES `contributo` (`Id_Contributo`) ON DELETE CASCADE,
   ADD CONSTRAINT `tipologia_ibfk_2` FOREIGN KEY (`Id_Categoria`) REFERENCES `categoria` (`Id_Categoria`) ON DELETE CASCADE;
+
+--
+-- Limiti per la tabella `turno`
+--
+ALTER TABLE `turno`
+  ADD CONSTRAINT `fk_turno_area` FOREIGN KEY (`Id_Area`) REFERENCES `area` (`Id_Area`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
