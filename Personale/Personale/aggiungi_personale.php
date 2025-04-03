@@ -22,10 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $cognome = $_POST['cognome'] ?? '';
     $email = $_POST['email'] ?? '';
     $telefono = $_POST['telefono'] ?? '';
-    $ruolo = $_POST['ruolo'] ?? '';
 
     // Verifica che tutti i campi siano compilati
-    if (empty($username) || empty($password) || empty($nome) || empty($cognome) || empty($email) || empty($telefono) || empty($ruolo)) {
+    if (empty($username) || empty($password) || empty($nome) || empty($cognome) || empty($email) || empty($telefono)) {
         echo json_encode([
             'success' => false,
             'message' => 'Tutti i campi sono obbligatori.'
@@ -35,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         // Aggiungi il personale alla tabella utente
-        $result = addPersonale($pdo, $username, $password, $nome, $cognome, $email, $telefono, $ruolo);
+        $result = addPersonale($pdo, $username, $password, $nome, $cognome, $email, $telefono);
         echo json_encode([
             'success' => $result,
             'message' => $result ? 'Personale aggiunto con successo!' : 'Errore durante l\'aggiunta del personale.'
