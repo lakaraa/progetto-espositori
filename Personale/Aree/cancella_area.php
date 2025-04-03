@@ -10,9 +10,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id']) && is_numeric($
         // Cancella l'area dal database
         if (deleteArea($pdo, $idArea)) {
             $successMessage = "Area cancellata con successo.";
+            $successStyle = "color: rgb(74, 196, 207);";
         } else {
             $errorMessage = "Errore durante la cancellazione dell'area.";
+            $errorStyle = "color: red;";
         }
+
     } catch (PDOException $e) {
         $errorMessage = "Errore di connessione al database: " . $e->getMessage();
     }
@@ -39,15 +42,15 @@ $aree = getAree($pdo);
     <div class="container">
         <h2>Cancella Area</h2>
         <p>Seleziona una Area dalla lista sottostante per Cancellarla.</p>
-        <br>
 
         <!-- Messaggi di successo o errore -->
         <?php if (!empty($successMessage)): ?>
-            <p style="color: green;"><?php echo htmlspecialchars($successMessage); ?></p>
+            <p style="<?php echo $successStyle; ?>"><?php echo htmlspecialchars($successMessage); ?></p>
         <?php endif; ?>
         <?php if (!empty($errorMessage)): ?>
-            <p style="color: red;"><?php echo htmlspecialchars($errorMessage); ?></p>
+            <p style="<?php echo $errorStyle; ?>"><?php echo htmlspecialchars($errorMessage); ?></p>
         <?php endif; ?>
+
 
         <div class="table-responsive">
             <table class="table table-striped">
