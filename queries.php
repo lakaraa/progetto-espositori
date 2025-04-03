@@ -189,6 +189,7 @@ function addEspositore($pdo, $username, $hashed_password, $first_name, $last_nam
     $stmt->bindParam(':curriculum', $cv_content, PDO::PARAM_LOB);
     return $stmt->execute();
 }
+
 function deleteEspositore($pdo, $idUtente) 
 {
     $sql = "DELETE FROM utente WHERE Id_Utente = :idUtente AND Ruolo = 'Espositore'";
