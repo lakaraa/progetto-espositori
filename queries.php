@@ -15,6 +15,7 @@ function getManifestazioni($pdo)
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
 //mandare un messaggio
 function insertMessaggio($pdo, $nome, $telefono, $messaggio) 
 {
