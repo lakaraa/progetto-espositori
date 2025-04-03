@@ -254,7 +254,24 @@ function usernameExists($pdo, $username) {
     $stmt->execute([$username]);
     return $stmt->fetchColumn() > 0;
 }
-
+function getEspositori($pdo) 
+{
+    $sql = "
+        SELECT u.Id_Utente AS id, 
+            u.Username AS username, 
+            u.Password AS password, 
+            u.Nome AS nome, 
+            u.Cognome AS cognome, 
+            u.Email AS email, 
+            u.Telefono AS telefono, 
+            u.Qualifica AS qualifica, 
+            u.Curriculum AS curriculum
+        FROM utente u
+        WHERE u.Ruolo = 'Espositore'";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 //Gestione Manifestazione
 function addManifestazione($pdo, $nome, $descrizione, $luogo, $durata, $data) 
 {
