@@ -44,6 +44,7 @@ include_once '../template_header.php';
                 </form>
                 <div class="text-center">
                     <p>Non hai un account? <a href="registration.php">Registrati</a></p>
+                    Sei un espositore? <a href="registrazione_espositore.php">Registrati come Espositore</a>
                 </div>
             </div>
         </div>

@@ -1,10 +1,9 @@
 <?php
-include 'config.php'; 
-include 'queries.php'; 
+include_once('../config.php');
+include_once('../queries.php');
+include_once('../template_header.php'); 
 
 $manifestazioni = getManifestazioni($pdo); 
-
-include 'template_header.php'; 
 ?>
 
 <!-- Breadcrumbs-->
@@ -26,7 +25,7 @@ include 'template_header.php';
         <div class="row">
             <?php foreach ($manifestazioni as $row): ?>
                 <div class="col-md-4">
-                    <img src="resources/images/events-01-553x316.jpg" alt="<?php echo htmlspecialchars($row['Nome']); ?>" class="manifestazione-img">
+                    <img src="/progetto-espositori/resources/images/events-01-553x316.jpg" alt="<?php echo htmlspecialchars($row['Nome']); ?>" class="manifestazione-img">
                     <a class="button button-primary button-lg" href="contributions.php?id=<?php echo $row['Id_Manifestazione']; ?>">
                         <?php echo htmlspecialchars($row['Nome']); ?>
                     </a> 
@@ -37,6 +36,7 @@ include 'template_header.php';
     </div>
 </section>
 
+
 <?php
-include 'template_footer.php'; 
+include_once('../template_footer.php'); 
 ?> 
