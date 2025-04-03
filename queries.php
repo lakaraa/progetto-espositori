@@ -258,6 +258,17 @@ function updateManifestazione($pdo, $idManifestazione, $nome, $descrizione, $luo
     return $stmt->execute();
 }
 //Gestione Personale
+function getPersonale($pdo) {
+    $stmt = $pdo->query("SELECT * FROM utente WHERE Ruolo = 'Personale'");
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function getPersonaleById($pdo, $id) {
+    $stmt = $pdo->prepare("SELECT * FROM utente WHERE Id_Utente = ?");
+    $stmt->execute([$id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
 function addPersonale($pdo, $username, $password, $nome, $cognome, $email, $telefono) 
 {
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
@@ -279,25 +290,55 @@ function deletePersonale($pdo, $idUtente) {
     $result = $stmt->execute();
     return $result;
 }
-function updatePersonale($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono) 
-{
-    $sql = "UPDATE utente 
-            SET Username = :username, 
-                Password = :password, 
-                Nome = :nome, 
-                Cognome = :cognome, 
-                Email = :email, 
-                Telefono = :telefono 
-            WHERE Id_Utente = :idUtente AND Ruolo = 'Personale'";
+function updatePersonale($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono) {
+    // Verifica che l'ID utente sia valido
+    if ($idUtente <= 0) {
+        return false;
+    }
+
+    // Se la password è vuota, non la modificare
+    if (empty($password)) {
+        $sql = "UPDATE utente 
+                SET Username = :username, 
+                    Nome = :nome, 
+                    Cognome = :cognome, 
+                    Email = :email, 
+                    Telefono = :telefono
+                WHERE Id_Utente = :idUtente AND Ruolo = 'Personale'";
+    } else {
+        // Altrimenti, aggiorna anche la password
+        $sql = "UPDATE utente 
+                SET Username = :username, 
+                    Password = :password, 
+                    Nome = :nome, 
+                    Cognome = :cognome, 
+                    Email = :email, 
+                    Telefono = :telefono
+                WHERE Id_Utente = :idUtente AND Ruolo = 'Personale'";
+    }
+
     $stmt = $pdo->prepare($sql);
+
+    // Binding dei parametri
     $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
     $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-    $stmt->bindParam(':password', $password ? password_hash($password, PASSWORD_BCRYPT) : null, PDO::PARAM_STR);
     $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
     $stmt->bindParam(':cognome', $cognome, PDO::PARAM_STR);
     $stmt->bindParam(':email', $email, PDO::PARAM_STR);
     $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
-    return $stmt->execute();
+
+    // Se la password è stata cambiata, la hashiamo
+    if (!empty($password)) {
+        $passwordHashed = password_hash($password, PASSWORD_BCRYPT);
+        $stmt->bindParam(':password', $passwordHashed, PDO::PARAM_STR);
+    }
+
+    // Eseguiamo la query e controlliamo se è andata a buon fine
+    if ($stmt->execute()) {
+        return true;
+    } else {
+        return false;
+    }
 }
 //Gestione Prenoatazione
 function addPrenotazione($pdo, $idUtente, $idTurno) 
