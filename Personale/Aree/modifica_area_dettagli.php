@@ -1,11 +1,10 @@
 <?php
-//durante la modifica i campi non devono essere obbligatori.
-//Reindirizza alla pagina 'modifica_area.php'.
-?>
-<?php
-include_once '../../config.php';
-include_once '../../queries.php';
-include_once '../../template_header.php';
+ob_start(); // Inizia il buffer di output
+
+include_once("../../config.php");
+include_once("../../queries.php");
+include_once("../../session.php");
+include_once("../../template_header.php");
 
 // Recupera l'ID dell'area dalla query string
 $idArea = isset($_GET['id']) ? intval($_GET['id']) : 0;
@@ -19,17 +18,18 @@ if (!$area) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Recupera i dati dal form
-    $nome = $_POST['nome'];
-    $descrizione = $_POST['descrizione'];
-    $capienza = $_POST['capienza'];
-    $idManifestazione = $_POST['manifestazione'];
+    // Recupera i dati dal form, usa i valori esistenti se i campi sono vuoti
+    $nome = !empty($_POST['nome']) ? $_POST['nome'] : $area['nome'];
+    $descrizione = !empty($_POST['descrizione']) ? $_POST['descrizione'] : $area['descrizione'];
+    $capienza = !empty($_POST['capienza']) ? $_POST['capienza'] : $area['capienza_massima'];
+    $idManifestazione = !empty($_POST['manifestazione']) ? $_POST['manifestazione'] : $area['id_manifestazione'];
 
     // Aggiorna l'area nel database
     if (updateArea($pdo, $idArea, $nome, $descrizione, $capienza, $idManifestazione)) {
-      //echo "<p style='color: green;'>Area aggiornata con successo.</p>";
+        header('Location: modifica_area.php');
+        exit;
     } else {
-      echo "<p style='color: red;'>Errore durante l'aggiornamento dell'area.</p>";
+        echo "<p style='color: red;'>Errore durante l'aggiornamento dell'area.</p>";
     }
 }
 ?>
@@ -57,10 +57,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="col-md-6">
           <div class="form-wrap">
             <label class="form-label" for="area-manifestazione">Manifestazione</label>
-            <select class="form-input" id="area-manifestazione" name="manifestazione" required>
+            <select class="form-input" id="area-manifestazione" name="manifestazione">
               <?php foreach (getManifestazioni($pdo) as $manifestazione): ?>
                 <option value="<?php echo $manifestazione['Id_Manifestazione']; ?>" 
-                  <?php echo $manifestazione['Id_Manifestazione'] == $area['id_manifestazione'] ? 'selected' : ''; ?>>
+                  <?php echo $manifestazione['Id_Manifestazione'] == $area['id_manifestazione'] ? 'selected' : ''; ?> style="color: black; background-color: white;">
                   <?php echo htmlspecialchars($manifestazione['Nome']); ?>
                 </option>
               <?php endforeach; ?>
@@ -70,19 +70,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="col-md-6">
           <div class="form-wrap">
             <label class="form-label" for="area-nome">Nome</label>
-            <input class="form-input" id="area-nome" type="text" name="nome" value="<?php echo htmlspecialchars($area['nome']); ?>" required>
+            <input class="form-input" id="area-nome" type="text" name="nome" value="<?php echo htmlspecialchars($area['nome']); ?>">
           </div>
         </div>
         <div class="col-md-6">
           <div class="form-wrap">
             <label class="form-label" for="area-capienza">Capienza Massima</label>
-            <input class="form-input" id="area-capienza" type="number" name="capienza" value="<?php echo htmlspecialchars($area['capienza_massima']); ?>" required>
+            <input class="form-input" id="area-capienza" type="number" name="capienza" value="<?php echo htmlspecialchars($area['capienza_massima']); ?>">
           </div>
         </div>
         <div class="col-12">
           <div class="form-wrap">
             <label class="form-label" for="area-descrizione">Descrizione</label>
-            <textarea class="form-input" id="area-descrizione" name="descrizione" required><?php echo htmlspecialchars($area['descrizione']); ?></textarea>
+            <textarea class="form-input" id="area-descrizione" name="descrizione"><?php echo htmlspecialchars($area['descrizione']); ?></textarea>
           </div>
         </div>
       </div>
@@ -92,5 +92,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </section>
 
 <?php
-include_once '../../template_footer.php';
+include_once ('../../template_footer.php');
+ob_end_flush(); // Termina il buffer di output
 ?>
