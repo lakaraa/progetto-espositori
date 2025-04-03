@@ -10,7 +10,7 @@ include_once '../template_header.php';
         <h2 class="breadcrumbs-custom-title">Dashboard</h2>
     </div>
     <ul class="breadcrumbs-custom-path">
-        <li><a href="../index.html">Home</a></li>
+        <li><a href="../index.php">Home</a></li>
         <li class="active">Dashboard</li>
     </ul>
 </section>
