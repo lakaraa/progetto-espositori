@@ -2,14 +2,11 @@
 include_once("../../config.php");
 include_once("../../queries.php");
 include_once("../../session.php");
-include_once("../../template_header.php");
 
-// Recupera le manifestazioni dal database
-$manifestazioni = getManifestazioni($pdo);
-
-// Gestione invio del form via AJAX
+// Gestione delle richieste POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json');
+    ob_clean(); // Pulisce il buffer di output
 
     $idManifestazione = $_POST['manifestazione'] ?? '';
     $nome = $_POST['nome'] ?? '';
@@ -39,9 +36,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 }
+
+// Includi il template solo per richieste GET
+include_once("../../template_header.php");
+
+// Recupera le manifestazioni dal database
+$manifestazioni = getManifestazioni($pdo);
 ?>
 
-<!-- Breadcrumbs-->
+<!-- Breadcrumbs -->
 <section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/bg-breadcrumbs-07-1920x480.jpg);">
     <div class="container">
         <h2 class="breadcrumbs-custom-title">Crea Aree</h2>
@@ -53,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </ul>
 </section>
 
-<!-- Main Content-->
+<!-- Main Content -->
 <section class="section section-lg bg-default text-center">
     <div class="container">
         <h2>Crea Aree</h2>
@@ -100,7 +103,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </section>
 
-<!-- Script AJAX -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(function () {
@@ -112,25 +114,24 @@ $(function () {
             method: 'POST',
             data: $(this).serialize(),
             success: function (response) {
-    console.log("RISPOSTA RAW:", response); // << stampa nel browser
-    try {
-        const data = typeof response === "string" ? JSON.parse(response) : response;
-        const message = data.message || "Messaggio non disponibile.";
-        const isSuccess = data.success === true;
+                console.log("RISPOSTA RAW:", response); // Stampa la risposta grezza
+                try {
+                    const data = typeof response === "string" ? JSON.parse(response) : response;
+                    const message = data.message || "Messaggio non disponibile.";
+                    const isSuccess = data.success === true;
 
-        $('#form-message').html(
-            `<p style="color: ${isSuccess ? 'green' : 'red'};">${message}</p>`
-        );
+                    $('#form-message').html(
+                        `<p style="color: ${isSuccess ? 'rgb(74, 196, 207)' : 'red'};">${message}</p>`
+                    );
 
-        if (isSuccess) {
-            $('.form-crea-area')[0].reset();
-        }
-    } catch (e) {
-        console.error("Errore JSON.parse:", e);
-        $('#form-message').html('<p style="color: red;">Risposta non valida dal server.</p>');
-    }
-}
-,
+                    if (isSuccess) {
+                        $('.form-crea-area')[0].reset();
+                    }
+                } catch (e) {
+                    console.error("Errore JSON.parse:", e);
+                    $('#form-message').html('<p style="color: red;">Risposta non valida dal server.</p>');
+                }
+            },
             error: function () {
                 $('#form-message').html('<p style="color: red;">Errore di comunicazione con il server.</p>');
             }
