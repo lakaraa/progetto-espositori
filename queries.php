@@ -219,29 +219,61 @@ function deleteEspositore($pdo, $idUtente)
     $result = $stmt->execute();
     return $result;
 }
-function updateEspositore($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono, $qualifica, $curriculum) 
-{
-    $sql = "UPDATE utente 
-            SET Username = :username, 
-                Password = :password, 
-                Nome = :nome, 
-                Cognome = :cognome, 
-                Email = :email, 
-                Telefono = :telefono, 
-                Qualifica = :qualifica, 
-                Curriculum = :curriculum 
-            WHERE Id_Utente = :idUtente AND Ruolo = 'Espositore'";
+function updateEspositore($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono, $qualifica, $curriculum) {
+    // Verifica che l'ID utente sia valido
+    if ($idUtente <= 0) {
+        return false;
+    }
+
+    // Se la password è vuota, non la modificare
+    if (empty($password)) {
+        $sql = "UPDATE utente 
+                SET Username = :username, 
+                    Nome = :nome, 
+                    Cognome = :cognome, 
+                    Email = :email, 
+                    Telefono = :telefono, 
+                    Qualifica = :qualifica, 
+                    Curriculum = :curriculum
+                WHERE Id_Utente = :idUtente AND Ruolo = 'Espositore'";
+    } else {
+        // Altrimenti, aggiorna anche la password
+        $sql = "UPDATE utente 
+                SET Username = :username, 
+                    Password = :password, 
+                    Nome = :nome, 
+                    Cognome = :cognome, 
+                    Email = :email, 
+                    Telefono = :telefono, 
+                    Qualifica = :qualifica, 
+                    Curriculum = :curriculum
+                WHERE Id_Utente = :idUtente AND Ruolo = 'Espositore'";
+    }
+
     $stmt = $pdo->prepare($sql);
+
+    // Binding dei parametri
     $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
     $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-    $stmt->bindParam(':password', $password ? password_hash($password, PASSWORD_BCRYPT) : null, PDO::PARAM_STR);
     $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
     $stmt->bindParam(':cognome', $cognome, PDO::PARAM_STR);
     $stmt->bindParam(':email', $email, PDO::PARAM_STR);
     $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
     $stmt->bindParam(':qualifica', $qualifica, PDO::PARAM_STR);
     $stmt->bindParam(':curriculum', $curriculum, PDO::PARAM_LOB);
-    return $stmt->execute();
+
+    // Se la password è stata cambiata, la hashiamo
+    if (!empty($password)) {
+        $passwordHashed = password_hash($password, PASSWORD_BCRYPT);
+        $stmt->bindParam(':password', $passwordHashed, PDO::PARAM_STR);
+    }
+
+    // Eseguiamo la query e controlliamo se è andata a buon fine
+    if ($stmt->execute()) {
+        return true;
+    } else {
+        return false;
+    }
 }
 function emailExists($pdo, $email) {
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM utente WHERE Email = ?");
@@ -272,6 +304,12 @@ function getEspositori($pdo)
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+function getEspositoreById($pdo, $id) {
+    $stmt = $pdo->prepare("SELECT * FROM utente WHERE Id_Utente = ? AND Ruolo = 'Espositore'");
+    $stmt->execute([$id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
 //Gestione Manifestazione
 function addManifestazione($pdo, $nome, $descrizione, $luogo, $durata, $data) 
 {
