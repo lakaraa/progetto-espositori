@@ -87,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Gestione del caricamento del file
-    $upload_dir = '/progetto-espositori/uploads/';
+    $upload_dir = '../../uploads/';
     if (!is_dir($upload_dir)) {
         mkdir($upload_dir, 0777, true);
     }
