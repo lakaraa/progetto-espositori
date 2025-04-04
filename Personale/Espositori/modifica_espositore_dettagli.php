@@ -25,36 +25,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = !empty($_POST['Email']) ? $_POST['Email'] : $espositore['Email'];
     $telefono = !empty($_POST['Telefono']) ? $_POST['Telefono'] : $espositore['Telefono'];
     $qualifica = !empty($_POST['Qualifica']) ? $_POST['Qualifica'] : $espositore['Qualifica'];
-    $curriculum = $espositore['Curriculum']; 
+    $curriculum = $espositore['Curriculum'];  // Contiene i dati binari del curriculum
 
     if (isset($_FILES['Curriculum']) && $_FILES['Curriculum']['error'] === UPLOAD_ERR_OK) {
         $fileTmpPath = $_FILES['Curriculum']['tmp_name'];
         $fileType = mime_content_type($fileTmpPath);
         
         if ($fileType === 'application/pdf') { // Verifica MIME type
-            $uploadDir = __DIR__ . '/../../uploads/';
+            $uploadDir = __DIR__ . '/../../uploads/'; // Percorso assoluto corretto
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
             }
-
+    
             $fileName = 'cv_' . $idEspositore . '_' . time() . '.pdf';
             $filePath = $uploadDir . $fileName;
-
-            if (!empty($curriculum) && file_exists($uploadDir . $curriculum)) {
-                unlink($uploadDir . $curriculum);
-            }
-
-            if (move_uploaded_file($fileTmpPath, $filePath)) {
-                $curriculum = $fileName;
+    
+            // Mostra il percorso assoluto per il debug
+            echo "<p>Debug: Percorso di salvataggio: $filePath</p>";
+    
+            // A questo punto non cancelliamo il vecchio file, perché lo salviamo come dati binari
+            // Carichiamo i dati del file come dati binari nel database
+    
+            $fileData = file_get_contents($fileTmpPath);  // Legge i dati binari del file
+            
+            if ($fileData !== false) {
+                $curriculum = $fileData;  // Salviamo i dati binari del file
+                echo "<p style='color: green;'>File caricato correttamente: $filePath</p>";
             } else {
-                $errorMessage = "Errore durante il caricamento del file.";
+                $errorMessage = "Errore durante la lettura del file.";
+                echo "<p style='color: red;'>$errorMessage</p>";
             }
         } else {
             $errorMessage = "Il file caricato non è un PDF valido.";
+            echo "<p style='color: red;'>$errorMessage</p>";
         }
     } elseif (isset($_FILES['Curriculum']) && $_FILES['Curriculum']['error'] !== UPLOAD_ERR_NO_FILE) {
         $errorMessage = "Errore durante il caricamento del file: " . $_FILES['Curriculum']['error'];
+        echo "<p style='color: red;'>$errorMessage</p>";
     }
+    
 
     if (updateEspositore($pdo, $idEspositore, $username, $password, $nome, $cognome, $email, $telefono, $qualifica, $curriculum)) {
         $successMessage = "Espositore aggiornato con successo.";
@@ -128,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="espositore-password">Password</label>
-                        <input class="form-input" id="espositore-password" type="password" name="Password" value="">
+                        <input class="form-input" id="espositore-password" type="password" name="Password" value=""/>
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -142,11 +151,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <label class="form-label" for="espositore-curriculum">Curriculum</label><br><br>
                         <div class="input-group">
                             <input class="form-control" id="espositore-curriculum" type="file" name="Curriculum" accept=".pdf" onchange="showFileName(this)">
-                            <?php if (!empty($espositore['Curriculum'])): ?>
-                                <div class="mt-2">
-                                <a href="<?php echo '../../uploads/' . htmlspecialchars($espositore['Curriculum']); ?>" target="_blank" class="btn btn-outline-info">
-                                    <i class="fas fa-file-pdf"></i> Visualizza Curriculum Attuale</a>
-                                </div>
+                            <?php 
+                                if (!empty($espositore['Curriculum'])): 
+                            ?>
+                                <a href="view_curriculum.php?id=<?php echo $idEspositore; ?>" target="_blank" class="btn btn-outline-info">
+                                    <i class="fas fa-file-pdf"></i> Visualizza Curriculum Attuale
+                                </a>
+                            <?php else: ?>
+                                <p style="color: red;">Curriculum non trovato.</p>
                             <?php endif; ?>
                         </div>
                         <small id="fileName" class="form-text text-muted mt-2"></small>
@@ -157,7 +169,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
     </div>
 </section>
-
 
 <!-- JavaScript per mostrare il nome del file selezionato -->
 <script>
