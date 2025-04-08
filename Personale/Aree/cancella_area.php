@@ -51,7 +51,6 @@ $aree = getAree($pdo);
             <p style="<?php echo $errorStyle; ?>"><?php echo htmlspecialchars($errorMessage); ?></p>
         <?php endif; ?>
 
-
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
