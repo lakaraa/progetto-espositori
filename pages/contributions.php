@@ -65,6 +65,12 @@ if (!$manifestazione)
             <a href="candidati.php?id=<?php echo $idManifestazione; ?>" class="button-primary button-lg">Canditati</a>
             </div>
         <?php endif; ?>
+        <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'Visitatore'): ?>
+            <div class="text-center mt-4">
+          <!-- qui va messa la pagina del form -->
+            <a href="prenotazione.php?id=<?php echo $idManifestazione; ?>" class="button-primary button-lg">Prenota</a>
+            </div>
+        <?php endif; ?>
       </div>
     </div>
   </div>
