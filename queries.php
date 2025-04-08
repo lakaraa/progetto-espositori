@@ -160,6 +160,23 @@ function getAree($pdo)
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+function getAreeByManifestazione($pdo, $idManifestazione) 
+{
+    $sql = "
+        SELECT a.Id_Area AS id, 
+            a.Nome AS nome, 
+            m.Nome AS manifestazione, 
+            a.Descrizione AS descrizione, 
+            a.Capienza_Massima AS capienza_massima
+        FROM area a
+        INNER JOIN manifestazione m ON a.Id_Manifestazione = m.Id_Manifestazione
+        WHERE m.Id_Manifestazione = :idManifestazione
+    ";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 //Gestione Candidatura
 function addCandidatura($pdo, $idUtente, $immagine, $titolo, $sintesi) 
 {
@@ -438,8 +455,7 @@ function addPrenotazione($pdo, $idUtente, $idTurno)
     $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
     return $stmt->execute();
 }
-function deletePrenotazione($pdo, $idUtente, $idTurno) 
-{
+function deletePrenotazione($pdo, $idUtente, $idTurno) {
     $sql = "DELETE FROM prenotazione 
             WHERE Id_Utente = :idUtente AND Id_Turno = :idTurno";
     $stmt = $pdo->prepare($sql);
@@ -459,6 +475,62 @@ function updatePrenotazione($pdo, $idUtente, $idTurno, $newIdTurno)
     $stmt->bindParam(':newIdTurno', $newIdTurno, PDO::PARAM_INT);
     return $stmt->execute();
 }
+function getPrenotazioni($pdo) {
+    $stmt = $pdo->prepare("
+    SELECT 
+        p.Id_Utente,
+        p.Id_Turno,
+        u.Nome AS Nome_Visitatore,
+        u.Cognome AS Cognome_Visitatore,
+        u.Email,
+        m.Nome AS Nome_Manifestazione,
+        t.Data AS Data_Turno,
+        t.Ora AS Ora_Turno
+    FROM prenotazione p
+    JOIN utente u ON p.Id_Utente = u.Id_Utente
+    JOIN turno t ON p.Id_Turno = t.Id_Turno
+    JOIN area a ON t.Id_Area = a.Id_Area
+    JOIN manifestazione m ON a.Id_Manifestazione = m.Id_Manifestazione
+    WHERE u.Ruolo = 'Visitatore';
+    ");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+function getTurni($pdo) {
+    $stmt = $pdo->prepare("
+    SELECT t.Id_Turno, t.Data, t.Ora, a.Nome AS Nome_Area, m.Nome AS Nome_Manifestazione
+    FROM turno t
+    JOIN area a ON t.Id_Area = a.Id_Area
+    JOIN manifestazione m ON a.Id_Manifestazione = m.Id_Manifestazione
+    ");
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+function getTurniByArea($pdo, $idArea) {
+    $stmt = $pdo->prepare("
+    SELECT t.Id_Turno, t.Data, t.Ora, a.Nome AS Nome_Area, m.Nome AS Nome_Manifestazione
+    FROM turno t
+    JOIN area a ON t.Id_Area = a.Id_Area
+    JOIN manifestazione m ON a.Id_Manifestazione = m.Id_Manifestazione
+    WHERE a.Id_Area = :idArea
+    ");
+    $stmt->bindParam(':idArea', $idArea, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+function getTurniByManifestazione($pdo, $idManifestazione) {
+    $stmt = $pdo->prepare("
+    SELECT t.Id_Turno, t.Data, t.Ora, a.Nome AS Nome_Area, m.Nome AS Nome_Manifestazione
+    FROM turno t
+    JOIN area a ON t.Id_Area = a.Id_Area
+    JOIN manifestazione m ON a.Id_Manifestazione = m.Id_Manifestazione
+    WHERE m.Id_Manifestazione = :idManifestazione
+    ");
+    $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 //Gestione visitore
 function addVisitatore($pdo, $username, $password, $nome, $cognome, $email, $telefono) 
 {
@@ -501,4 +573,11 @@ function updateVisitatore($pdo, $idUtente, $username, $password, $nome, $cognome
     $stmt->bindParam(':email', $email, PDO::PARAM_STR);
     $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
     return $stmt->execute();
+}
+function getVisitatori($pdo) 
+{
+    $sql = "SELECT * FROM utente WHERE Ruolo = 'Visitatore'";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
