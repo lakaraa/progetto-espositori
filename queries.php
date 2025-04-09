@@ -530,7 +530,33 @@ function getTurniByManifestazione($pdo, $idManifestazione) {
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+function addPrenotazioneByPersonale($pdo, $idUtente, $idTurno) {
+    // Verifica se esiste già una prenotazione per questo visitatore e turno
+    $sqlCheck = "SELECT COUNT(*) FROM prenotazione WHERE Id_Utente = :idUtente AND Id_Turno = :idTurno";
+    $stmtCheck = $pdo->prepare($sqlCheck);
+    $stmtCheck->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    $stmtCheck->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
+    $stmtCheck->execute();
 
+    if ($stmtCheck->fetchColumn() > 0) {
+        error_log("Prenotazione già esistente per il visitatore e il turno selezionati.");
+        return false; // Prenotazione già esistente
+    }
+
+    // Inserisce la prenotazione
+    $sqlInsert = "INSERT INTO prenotazione (Id_Utente, Id_Turno) VALUES (:idUtente, :idTurno)";
+    $stmtInsert = $pdo->prepare($sqlInsert);
+    $stmtInsert->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    $stmtInsert->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
+
+    if ($stmtInsert->execute()) {
+        error_log("Prenotazione inserita con successo.");
+        return true;
+    } else {
+        error_log("Errore durante l'inserimento della prenotazione.");
+        return false;
+    }
+}
 //Gestione visitore
 function addVisitatore($pdo, $username, $password, $nome, $cognome, $email, $telefono) 
 {
