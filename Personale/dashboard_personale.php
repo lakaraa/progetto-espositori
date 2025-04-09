@@ -41,7 +41,7 @@ include_once '../template_header.php';
                 <a class="button button-primary button-lg" href="Manifestazioni/gestisci_manifestazione.php">Gestisci Manifestazioni</a>
             </div>
             <div class="col-md-4 dashboard-button">
-                <a class="button button-primary button-lg" href="Statiche/statiche.php">Statistiche</a>
+                <a class="button button-primary button-lg" href="Statistiche/statistiche.php">Statistiche</a>
             </div>
         </div>
     </div>
