@@ -1,26 +1,32 @@
 <?php
 include_once '../../config.php';
 
-// Recupera i turni in base alla manifestazione
-if (isset($_POST['manifestazione_id'])) {
-    $manifestazione_id = $_POST['manifestazione_id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['manifestazione_id'])) {
+    $manifestazioneId = $_POST['manifestazione_id'];
 
-    // Ottieni i turni per questa manifestazione
-    $sql = "SELECT t.Id_Turno, t.Nome 
-            FROM turno t
-            JOIN area a ON t.Id_Area = a.Id_Area
-            JOIN manifestazione m ON a.Id_Manifestazione = m.Id_Manifestazione
-            WHERE m.Id_Manifestazione = :manifestazione_id";  // Aggiunto filtro per manifestazione_id
+    // Recupera direttamente i turni collegati alla manifestazione
+    $sqlTurni = "
+        SELECT turno.Id_Turno, turno.Data, turno.Ora
+        FROM manifestazione
+        JOIN area ON manifestazione.Id_Manifestazione = area.Id_Manifestazione
+        JOIN turno ON turno.Id_Area = area.Id_Area
+        WHERE manifestazione.Id_Manifestazione = :id
+    ";
+    $stmtTurni = $pdo->prepare($sqlTurni);
+    $stmtTurni->bindParam(':id', $manifestazioneId, PDO::PARAM_INT);
+    $stmtTurni->execute();
+    $turni = $stmtTurni->fetchAll(PDO::FETCH_ASSOC);
 
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':manifestazione_id', $manifestazione_id, PDO::PARAM_INT);
-    $stmt->execute();
-
-    $turni = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Costruisci le opzioni dei turni
-    foreach ($turni as $turno) {
-        echo '<option value="' . $turno['Id_Turno'] . '">' . htmlspecialchars($turno['Nome']) . '</option>';
+    if ($turni) {
+        foreach ($turni as $turno) {
+            echo '<option value="' . htmlspecialchars($turno['Id_Turno']) . '" style="color: black; background-color: white;">' .
+                 htmlspecialchars($turno['Data']) . ' - ' . htmlspecialchars($turno['Ora']) .
+                 '</option>';
+        }
+    } else {
+        echo '<option value="">Nessun turno disponibile</option>';
     }
+} else {
+    echo '<option value="">Richiesta non valida</option>';
 }
 ?>
