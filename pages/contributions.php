@@ -144,8 +144,9 @@ $contributi = getContributiByManifestazione($pdo, $idManifestazione);
 
     <!-- Contributions Section -->
     <section class="container mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0 text-center">Contributi</h2>
+      <br><br>
+    <h2 class="mb-0 text-center">Contributi</h2>
+    <div style="text-align: right;">
         <span class="badge bg-primary rounded-pill"><?php echo count($contributi); ?> contributi</span>
     </div>
     
@@ -202,18 +203,12 @@ $contributi = getContributiByManifestazione($pdo, $idManifestazione);
     <!-- Action Buttons -->
     <section class="container mb-5">
         <div class="text-center">
-            <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'Espositore'): ?>
                 <a href="candidati.php?id=<?php echo $idManifestazione; ?>" class="btn btn-primary-custom btn-lg me-3">
-                    <i class="fas fa-paper-plane me-2"></i>Candidati come espositore
+                    <i></i>Candidati come espositore
                 </a>
-            <?php endif; ?>
-            
-            <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'Visitatore'): ?>
                 <a href="prenotazione.php?id=<?php echo $idManifestazione; ?>" class="btn btn-primary-custom btn-lg">
                     <i class="fas fa-ticket-alt me-2"></i>Prenota il tuo posto
-                </a>
-            <?php endif; ?>
-            
+                </a> 
             <a href="../manifestazioni.php" class="btn btn-outline-secondary btn-lg ms-3">
                 <i class="fas fa-arrow-left me-2"></i>Torna alle manifestazioni
             </a>
