@@ -65,7 +65,7 @@ $espositori = getEspositoriByManifestazioneTop4($pdo, $id);
             </div>
 
             <div class="text-center mt-4">
-                <a href="contributi.php?manifestazione_id=<?php echo $id; ?>" class="btn btn-primary">
+                <a href="pages/contributions.php?manifestazione_id=<?php echo $id; ?>" class="btn btn-primary">
                     Vedi tutti i contributi →
                 </a>
             </div>
