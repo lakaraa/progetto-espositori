@@ -203,10 +203,10 @@ $contributi = getContributiByManifestazione($pdo, $idManifestazione);
     <!-- Action Buttons -->
     <section class="container mb-5">
         <div class="text-center">
-                <a href="candidati.php?id=<?php echo $idManifestazione; ?>" class="btn btn-primary-custom btn-lg me-3">
+                <a href="/pages/registrazione_espositore.php echo $idManifestazione; ?>" class="btn btn-primary-custom btn-lg me-3">
                     <i></i>Candidati come espositore
                 </a>
-                <a href="prenotazione.php?id=<?php echo $idManifestazione; ?>" class="btn btn-primary-custom btn-lg">
+                <a href="registrazione_visitatore.php?id=<?php echo $idManifestazione; ?>" class="btn btn-primary-custom btn-lg">
                     <i class="fas fa-ticket-alt me-2"></i>Prenota il tuo posto
                 </a> 
             <a href="../manifestazioni.php" class="btn btn-outline-secondary btn-lg ms-3">
