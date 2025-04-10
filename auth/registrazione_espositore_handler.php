@@ -20,29 +20,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validazione dei campi
     if (empty($username) || empty($password) || empty($first_name) || empty($last_name) || empty($email) || empty($phone) || empty($qualification)) {
         $_SESSION['error'] = 'Tutti i campi sono obbligatori.';
-        header('Location: ../pages/registration.php');
+        header('Location: ../pages/registrazione_espositore.php');
         exit;
     }
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $_SESSION['error'] = 'Inserisci un indirizzo email valido.';
-        header('Location: ../pages/registration.php');
+        header('Location: ../pages/registrazione_espositore.php');
         exit;
     }
     if (!isset($_FILES['cv']) || $_FILES['cv']['error'] !== UPLOAD_ERR_OK) {
         $_SESSION['error'] = 'Errore durante il caricamento del file.';
-        header('Location: ../pages/registration.php');
+        header('Location: ../pages/registrazione_espositore.php');
         exit;
     }
     if ($cv['type'] !== 'application/pdf') {
         $_SESSION['error'] = 'Il curriculum deve essere un file PDF.';
-        header('Location: ../pages/registration.php');
+        header('Location: ../pages/registrazione_espositore.php');
         exit;
     }
 
     // Controlla la dimensione del file (16 MB massimo)
     if ($cv['size'] > 16 * 1024 * 1024) { // 16 MB
         $_SESSION['error'] = 'Il file è troppo grande. La dimensione massima consentita è 16 MB.';
-        header('Location: ../pages/registration.php');
+        header('Location: ../pages/registrazione_espositore.php');
         exit;
     }
 
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$qualification) {
         $_SESSION['error'] = 'Qualifica non valida.';
-        header('Location: ../pages/registration.php');
+        header('Location: ../pages/registrazione_espositore.php');
         exit;
     }
 
@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!move_uploaded_file($cv['tmp_name'], $cv_path)) {
         $_SESSION['error'] = 'Errore durante il salvataggio del file.';
-        header('Location: ../pages/registration.php');
+        header('Location: ../pages/registrazione_espositore.php');
         exit;
     }
 
