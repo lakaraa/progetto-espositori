@@ -49,7 +49,7 @@
                                 <div class="rd-navbar-nav-wrap">
                                     <ul class="rd-navbar-nav">
                                         <li class="rd-nav-item <?php echo $current_page == 'index.php' ? 'active' : ''; ?>"><a class="rd-nav-link" href="/progetto-espositori/index.php">Home</a></li>
-                                        <li class="rd-nav-item <?php echo $current_page == 'manifestazione.php' ? 'active' : ''; ?>"><a class="rd-nav-link" href="/progetto-espositori/pages/manifestazione.php">Manifestazioni</a></li>
+                                        <li class="rd-nav-item <?php echo $current_page == 'manifestazioni.php' ? 'active' : ''; ?>"><a class="rd-nav-link" href="/progetto-espositori/pages/manifestazioni.php">Manifestazioni</a></li>
                                         <li class="rd-nav-item <?php echo $current_page == 'about.php' ? 'active' : ''; ?>"><a class="rd-nav-link" href="/progetto-espositori/pages/about.php">About</a></li>
                                         <li class="rd-nav-item <?php echo $current_page == 'contacts.php' ? 'active' : ''; ?>"><a class="rd-nav-link" href="/progetto-espositori/pages/contacts.php">Contacts</a></li>
                                         <li class="rd-nav-item <?php echo $current_page == 'login.php' ? 'active' : ''; ?>"><a class="rd-nav-link" href="/progetto-espositori/pages/login.php">Login</a></li>
