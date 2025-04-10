@@ -20,7 +20,10 @@ if (!$manifestazione) {
 }
 
 // Recupera i contributi legati alla manifestazione
+// Recupera i contributi legati alla manifestazione
 $contributi = getContributiByManifestazione($pdo, $idManifestazione);
+
+
 
 
 ?>
@@ -128,6 +131,28 @@ $contributi = getContributiByManifestazione($pdo, $idManifestazione);
     .container h2 {
         text-align: center;
     }
+
+    /* Aggiungi questo al tuo stile esistente */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -15px;
+    margin-left: -15px;
+}
+
+.col-lg-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+@media (max-width: 992px) {
+    .col-lg-6 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
 </style>
 
 
@@ -151,62 +176,67 @@ $contributi = getContributiByManifestazione($pdo, $idManifestazione);
     </div>
     
     <?php if (!empty($contributi)): ?>
-        <div class="row">
-            <?php foreach ($contributi as $contributo): ?>
-                <div class="col-lg-6 mb-4">
-                    <div class="card card-contributo h-100">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h4 class="mb-0"><?php echo htmlspecialchars($contributo['Titolo']); ?></h4>
-                            <span class="status-badge 
-                                <?php echo $contributo['Accettazione'] === 'Accettato' ? 'status-accepted' : 
-                                    ($contributo['Accettazione'] === 'In Approvazione' ? 'status-pending' : 'status-rejected'); ?>">
-                                <?php echo htmlspecialchars($contributo['Accettazione']); ?>
-                            </span>
-                        </div>
-                        <div class="card-body">
-                            <!-- Sintesi del contributo -->
-                            <h5 class="card-title">Sintesi</h5>
-                            <p class="card-text"><?php echo htmlspecialchars($contributo['Sintesi']); ?></p>
-                            
-                            <!-- Mostra l'immagine se presente -->
-                            <?php if (!empty($contributo['Immagine'])): ?>
-                                <img src="<?php echo htmlspecialchars($contributo['Immagine']); ?>" alt="Immagine Contributo" class="img-fluid mb-3">
-                            <?php endif; ?>
-                            
-                            
-                            <!-- Link URL se presente -->
-                            <?php if (!empty($contributo['URL'])): ?>
-                                <a href="<?php echo htmlspecialchars($contributo['URL']); ?>" class="btn btn-sm btn-outline-primary" target="_blank">
-                                    <i class="fas fa-external-link-alt"></i> Vedi risorse
+    <div class="row">
+        <?php foreach ($contributi as $contributo): ?>
+            <div class="col-lg-6 mb-4">
+                <div class="card card-contributo h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0"><?php echo htmlspecialchars($contributo['Titolo']); ?></h4>
+                        <span class="status-badge 
+                            <?php echo $contributo['Accettazione'] === 'Accettato' ? 'status-accepted' : 
+                                ($contributo['Accettazione'] === 'In Approvazione' ? 'status-pending' : 'status-rejected'); ?>">
+                            <?php echo htmlspecialchars($contributo['Accettazione']); ?>
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Sintesi</h5>
+                        <p class="card-text"><?php echo htmlspecialchars($contributo['Sintesi']); ?></p>
+                        
+                        <?php if (!empty($contributo['Immagine'])): ?>
+                            <img src="<?php echo htmlspecialchars($contributo['Immagine']); ?>" alt="Immagine Contributo" class="img-fluid mb-3">
+                        <?php endif; ?>
+                        
+                        <?php if (!empty($contributo['URL'])): ?>
+                            <a href="<?php echo htmlspecialchars($contributo['URL']); ?>" class="btn btn-sm btn-outline-primary" target="_blank">
+                                <i class="fas fa-external-link-alt"></i> Vedi risorse
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small>
+                                <i class="fas fa-user"></i> 
+                                <a href="espositore.php?id=<?= htmlspecialchars($contributo['Id_Utente']) ?>" 
+                                  class="text-decoration-none" 
+                                  style="color: var(--secondary-color);">
+                                    <?= htmlspecialchars($contributo['NomeEspositore'] . ' ' . $contributo['CognomeEspositore']) ?>
                                 </a>
-                            <?php endif; ?>
-                        </div>
-                        <div class="card-footer bg-transparent">
-                            <small class="text-muted">
-                                <i class="fas fa-user"></i> Espositore #<?php echo htmlspecialchars($contributo['Id_Utente']); ?>
                             </small>
+                            
+                            <?php if (!empty($contributo['Categorie'])): ?>
+                                <small class="text-muted">
+                                    <i class="fas fa-tags"></i> <?= htmlspecialchars($contributo['Categorie']) ?>
+                                </small>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
-            <?php endforeach; ?>
-        </div>
-    <?php else: ?>
-        <div class="text-center py-5">
-            <i class="fas fa-inbox fa-4x mb-3 text-muted"></i>
-            <h3>Nessun contributo trovato</h3>
-            <p class="text-muted">Non ci sono ancora contributi per questa manifestazione</p>
-        </div>
-    <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
+<?php else: ?>
+    <!-- Messaggio nessun contributo -->
+<?php endif; ?>
 </section>
 
 
     <!-- Action Buttons -->
     <section class="container mb-5">
         <div class="text-center">
-                <a href="/pages/registrazione_espositore.php echo $idManifestazione; ?>" class="btn btn-primary-custom btn-lg me-3">
-                    <i></i>Candidati come espositore
+                <a href="registrazione_espositore.php" class="btn btn-primary-custom btn-lg me-3">
+                    <i class="fas fa-user-plus me-2"></i>Candidati come espositore
                 </a>
-                <a href="registrazione_visitatore.php?id=<?php echo $idManifestazione; ?>" class="btn btn-primary-custom btn-lg">
+                <a href="registrazione_visitatore.php" class="btn btn-primary-custom btn-lg">
                     <i class="fas fa-ticket-alt me-2"></i>Prenota il tuo posto
                 </a> 
             <a href="../manifestazioni.php" class="btn btn-outline-secondary btn-lg ms-3">
