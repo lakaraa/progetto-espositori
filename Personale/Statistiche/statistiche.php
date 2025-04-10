@@ -5,66 +5,17 @@ include_once("../../queries.php");
 include_once("../../session.php");
 
 // Query partecipanti per mese
-$sqlPartecipanti = "
-    SELECT
-        MONTH(Turno.data) AS mese,
-        COUNT(DISTINCT Prenotazione.Id_Utente) AS numero_partecipanti
-    FROM
-        Prenotazione
-    JOIN
-        Turno ON Prenotazione.Id_Turno = Turno.Id_Turno
-    GROUP BY mese
-    ORDER BY mese;
-";
+$sqlPartecipanti = getQueryPartecipantiPerMese();
 
 // Query contributi per manifestazione
-$sqlContributi = "
-    SELECT
-        m.Nome AS nome_manifestazione,
-        COUNT(c.Id_Contributo) AS numero_contributi
-    FROM
-        Manifestazione m
-    JOIN
-        Esposizione e ON m.Id_Manifestazione = e.Id_Manifestazione
-    JOIN
-        Contributo c ON e.Id_Contributo = c.Id_Contributo
-    GROUP BY m.Id_Manifestazione
-    ORDER BY m.Nome;
-";
+$sqlContributi = getQueryContributiPerManifestazione();
 
 // Query espositori per manifestazione
-$sqlEspositori = "
-    SELECT
-        m.Nome AS nome_manifestazione,
-        COUNT(DISTINCT CASE WHEN u.Ruolo = 'Espositore' THEN u.Id_Utente ELSE NULL END) AS numero_espositori
-    FROM
-        Manifestazione m
-    LEFT JOIN
-        Area a ON m.Id_Manifestazione = a.Id_Manifestazione
-    LEFT JOIN
-        Turno t ON a.Id_Area = t.Id_Area
-    LEFT JOIN
-        Prenotazione p ON t.Id_Turno = p.Id_Turno
-    LEFT JOIN
-        Utente u ON p.Id_Utente = u.Id_Utente
-    GROUP BY m.Id_Manifestazione
-    ORDER BY m.Nome;
-";
-
+$sqlEspositori = getQueryEspositoriPerManifestazione();
 
 // Query prenotazioni per data
-$sqlPrenotazioni = "
-    SELECT
-    t.data AS turno_data,
-    COUNT(*) AS numero_prenotazioni
-FROM
-    Turno t
-JOIN
-    Prenotazione p ON t.Id_Turno = p.Id_Turno
-GROUP BY t.data
-ORDER BY turno_data;
+$sqlPrenotazioni = getQueryPrenotazioniPerData();
 
-";
 
 // Recupero dati
 try {
