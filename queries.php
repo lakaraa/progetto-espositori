@@ -56,19 +56,42 @@ function getManifestazioneById($pdo, $idManifestazione) {
 function getContributiByManifestazione($pdo, $idManifestazione) 
 {
     try {
-        $sql = "
-            SELECT c.*
-            FROM contributo c
-            INNER JOIN esposizione e ON c.Id_Contributo = e.Id_Contributo
-            WHERE e.Id_Manifestazione = :idManifestazione
-        ";
+        // Prima verifica solo i contributi base
+        $sql = "SELECT c.* FROM Contributo c 
+                INNER JOIN Esposizione e ON c.Id_Contributo = e.Id_Contributo
+                WHERE e.Id_Manifestazione = :idManifestazione";
+                
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
         $stmt->execute();
         
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $contributi = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Poi per ogni contributo, recupera i dettagli aggiuntivi
+        foreach ($contributi as &$contributo) {
+            // Info espositore
+            $sql_utente = "SELECT Nome, Cognome FROM Utente WHERE Id_Utente = ?";
+            $stmt = $pdo->prepare($sql_utente);
+            $stmt->execute([$contributo['Id_Utente']]);
+            $utente = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            $contributo['NomeEspositore'] = $utente['Nome'] ?? '';
+            $contributo['CognomeEspositore'] = $utente['Cognome'] ?? '';
+            
+            // Categorie
+            $sql_categorie = "SELECT cat.Nome FROM Categoria cat
+                             INNER JOIN Tipologia t ON cat.Id_Categoria = t.Id_Categoria
+                             WHERE t.Id_Contributo = ?";
+            $stmt = $pdo->prepare($sql_categorie);
+            $stmt->execute([$contributo['Id_Contributo']]);
+            $categorie = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            $contributo['Categorie'] = implode(', ', $categorie);
+        }
+        
+        return $contributi;
     } catch (PDOException $e) {
-        echo "Errore nella query: " . $e->getMessage();
+        error_log("Errore in getContributiByManifestazione: " . $e->getMessage());
         return [];
     }
 }
