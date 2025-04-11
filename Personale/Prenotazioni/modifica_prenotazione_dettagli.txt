@@ -1,0 +1,165 @@
+<?php
+include_once("../../config.php");
+include_once("../../queries.php");
+include_once("../../session.php");
+include_once("../../template_header.php");
+
+// Recupera gli id dell'utente e del turno
+$Id_Utente = isset($_GET['Id_Utente']) ? intval($_GET['Id_Utente']) : 0;
+$Id_Turno = isset($_GET['Id_Turno']) ? intval($_GET['Id_Turno']) : 0;
+
+// Recupera i dettagli della prenotazione
+$prenotazione = getPrenotazioneById($pdo, $Id_Utente, $Id_Turno);
+if (!$prenotazione) {
+    echo "<p style='color: red;'>Prenotazione non trovata.</p>";
+    exit;
+}
+
+$manifestazioni = getManifestazioni($pdo);
+$turni = getTurniByArea($pdo, $prenotazione['Id_Area']);  // Recupera i turni per l'area corrente
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Recupera i dati dal form, usa i valori esistenti se i campi sono vuoti
+    $Id_Utente = !empty($_POST['Id_Utente']) ? $_POST['Id_Utente'] : $prenotazione['Id_Utente'];
+    $Id_Turno = !empty($_POST['Id_Turno']) ? $_POST['Id_Turno'] : $prenotazione['Id_Turno'];
+    $Nome = !empty($_POST['Nome']) ? $_POST['Nome'] : $prenotazione['Nome_Visitatore'];
+    $Cognome = !empty($_POST['Cognome']) ? $_POST['Cognome'] : $prenotazione['Cognome_Visitatore'];
+    $Email = !empty($_POST['Email']) ? $_POST['Email'] : $prenotazione['Email'];
+    $Telefono = !empty($_POST['Telefono']) ? $_POST['Telefono'] : $prenotazione['Telefono'];
+    $Data = !empty($_POST['Data']) ? $_POST['Data'] : $prenotazione['Data_Turno'];
+    $Orario = !empty($_POST['Orario']) ? $_POST['Orario'] : $prenotazione['Ora_Turno'];
+    $Manifestazione_scelta = !empty($_POST['manifestazione']) ? $_POST['manifestazione'] : $prenotazione['Nome_Manifestazione'];
+
+    // Aggiorna la prenotazione nel database
+    if (updatePrenotazione($pdo, $Id_Utente, $prenotazione['Id_Turno'], $Id_Turno)) {
+        header('Location: modifica_prenotazione.php');
+        exit;
+    } else {
+        echo "<p style='color: red;'>Errore durante l'aggiornamento della prenotazione.</p>";
+    }
+}
+?>
+
+<!-- Breadcrumbs-->
+<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(images/bg-breadcrumbs-07-1920x480.jpg);">
+    <div class="container">
+        <h2 class="breadcrumbs-custom-title">Modifica Dettagli Prenotazione</h2>
+    </div>
+    <ul class="breadcrumbs-custom-path">
+        <li><a href="../dashboard_personale.php">Dashboard</a></li>
+        <li><a href="gestisci_prenotazione.php">Gestione Prenotazioni</a></li>
+        <li><a href="modifica_prenotazione.php">Modifica Prenotazione</a></li>
+        <li class="active">Modifica Dettagli Prenotazione</li>
+    </ul>
+</section>
+<!-- Main Content-->
+<section class="section section-lg bg-default text-center">
+    <div class="container">
+        <h2>Modifica Dettagli Prenotazione</h2>
+        <p>Compila il modulo sottostante per modificare i dettagli della prenotazione.</p>
+        <form class="rd-form rd-mailform" method="post" action="">
+            <div class="row row-50">
+                <div class="col-md-12">
+                    <div class="form-wrap">
+                        <input class="form-input" id="prenotazione-nome-cognome" type="text" name="NomeCognome" 
+                                value="<?php echo htmlspecialchars($prenotazione['Nome_Visitatore'] . ' ' . $prenotazione['Cognome_Visitatore']); ?>" readonly 
+                                title="Modificabile solo dalla pagina Gestione Visitatori">
+                        <label class="form-label" for="prenotazione-nome-cognome">Nome e Cognome (Modificabile solo da Gestione Visitatori)</label>
+                    </div>
+                </div>
+
+               <!-- Seleziona Manifestazione -->
+<div class="col-md-6">
+    <select class="form-input" id="manifestazione" name="manifestazione">
+        <option value="">Seleziona Manifestazione</option>
+        <?php foreach ($manifestazioni as $manifestazione): ?>
+            <option value="<?php echo htmlspecialchars($manifestazione['Id_Manifestazione']); ?>"
+                <?php echo ($prenotazione['Id_Manifestazione'] == $manifestazione['Id_Manifestazione']) ? 'selected' : ''; ?>
+                style="color: black; background-color: white;">
+                <?php echo htmlspecialchars($manifestazione['Nome']); ?>
+                </option>
+        <?php endforeach; ?>
+    </select>
+</div>
+
+                <!-- Seleziona Area -->
+                <div class="col-md-6">
+                    <select class="form-input" id="area" name="area">
+                        <option value="">Seleziona Area</option>
+                        <!-- Le aree verranno caricate dinamicamente in base alla manifestazione -->
+                    </select>
+                </div>
+
+                <!-- Seleziona Turno -->
+                <div class="col-md-6">
+                    <select class="form-input" id="turno" name="Id_Turno">
+                        <option value="">Seleziona Turno</option>
+                        <?php foreach ($turni as $turno): ?>
+                            <option value="<?php echo htmlspecialchars($turno['Id_Turno']); ?>" 
+                                    <?php echo ($prenotazione['Id_Turno'] == $turno['Id_Turno']) ? 'selected' : ''; ?> style="color: black; background-color: white;">
+                                <?php echo htmlspecialchars($turno['Orario']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <button class="button button-primary button-lg" type="submit">Salva Modifiche</button>
+        </form>
+    </div>
+</section>
+
+<!-- Script per caricare le aree e i turni dinamicamente -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Carica le aree in base alla manifestazione
+        $('#manifestazione').change(function () {
+            var manifestazioneId = $(this).val();
+
+            if (manifestazioneId) {
+                $.ajax({
+                    url: 'get_aree.php',
+                    type: 'POST',
+                    data: { manifestazione_id: manifestazioneId },
+                    success: function (data) {
+                        $('#area').html(data).prop('disabled', false);
+                    },
+                    error: function () {
+                        $('#area').html('<option value="">Errore nel recupero delle aree</option>');
+                    }
+                });
+            } else {
+                $('#area').prop('disabled', true).html('<option value="">Seleziona Manifestazione prima</option>');
+            }
+        });
+
+        // Carica i turni in base all'area selezionata
+        $('#area').change(function () {
+            var areaId = $(this).val();
+            var manifestazioneId = $('#manifestazione').val();
+
+            if (areaId && manifestazioneId) {
+                $.ajax({
+                    url: 'get_turni.php',
+                    type: 'POST',
+                    data: { 
+                        manifestazione_id: manifestazioneId,
+                        area_id: areaId
+                    },
+                    success: function (data) {
+                        $('#turno').html(data).prop('disabled', false);
+                    },
+                    error: function () {
+                        $('#turno').html('<option value="">Errore nel recupero dei turni</option>');
+                    }
+                });
+            } else {
+                $('#turno').prop('disabled', true).html('<option value="">Seleziona Area prima</option>');
+            }
+        });
+    });
+</script>
+
+<?php
+include_once("../../template_footer.php");
+?>
