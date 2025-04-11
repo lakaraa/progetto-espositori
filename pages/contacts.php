@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $messaggio = htmlspecialchars($_POST['message']);
 
     // Funzione per inserire i dati nel database
-    if (insertMessaggio($pdo, $nome, $telefono, $messaggio)) {
+    if (insertMessaggio($pdo, $nome, $email, $telefono, $messaggio)) {
         $successMessage = "Messaggio inviato correttamente!";
     } else {
         $errorMessage = "C'è stato un errore nell'invio del messaggio. Riprova.";

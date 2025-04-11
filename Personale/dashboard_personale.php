@@ -43,6 +43,9 @@ include_once '../template_header.php';
             <div class="col-md-4 dashboard-button">
                 <a class="button button-primary button-lg" href="Statistiche/statistiche.php">Statistiche</a>
             </div>
+            <div class="col-md-4 dashboard-button">
+                <a class="button button-primary button-lg" href="Messaggi/messaggi.php">Messaggi</a>
+            </div>
         </div>
     </div>
 </section>
