@@ -16,13 +16,14 @@ function getManifestazioni($pdo)
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-//mandare un messaggio
-function insertMessaggio($pdo, $nome, $telefono, $messaggio) 
+//Messaggi
+function insertMessaggio($pdo, $nome, $mail, $telefono, $messaggio) 
 {
-    $sql = "INSERT INTO messaggio (Nome, Telefono, Messaggio, Data_Invio) VALUES (:nome, :telefono, :messaggio, NOW())";
+    $sql = "INSERT INTO messaggio (Nome, Email, Telefono, Messaggio, Data_Invio) VALUES (:nome, :mail, :telefono, :messaggio, NOW())";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
     $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
+    $stmt->bindParam(':mail', $mail, PDO::PARAM_STR);
     $stmt->bindParam(':messaggio', $messaggio, PDO::PARAM_STR);
 
     try {
@@ -31,6 +32,13 @@ function insertMessaggio($pdo, $nome, $telefono, $messaggio)
         return false;
     }
 }
+function getMessaggi($pdo) {
+    $query = "SELECT Nome, Email, Telefono, Messaggio, DATE(Data_Invio) AS Data, TIME(Data_Invio) AS Ora FROM messaggio";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 //tutti i contributi per la pagina contributi
 function getContributi($pdo) 
 {
@@ -778,6 +786,5 @@ function getEspositoriByManifestazioneTop4($pdo, $id_manifestazione) {
     $stmt->execute(['Id_Manifestazione' => $id_manifestazione]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-
 
 ?>
