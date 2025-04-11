@@ -1,11 +1,57 @@
 <?php
 include_once '../../config.php';
-include_once '../../queries.php';
+//include_once '../../queries.php';
 include_once '../../template_header.php';
+
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 // Recupera l'ID dell'espositore dalla query string
 $idEspositore = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
+function updateEspositore($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono, $qualifica, $curriculum = null) {
+    if ($idUtente <= 0) {
+        return false;
+    }
+    
+    $sql = "UPDATE utente 
+            SET Username = :username, 
+                Nome = :nome, 
+                Cognome = :cognome, 
+                Email = :email, 
+                Telefono = :telefono, 
+                Qualifica = :qualifica";
+                
+    if (!empty($password)) {
+        $sql .= ", Password = :password";
+        $passwordHashed = password_hash($password, PASSWORD_BCRYPT);
+    }
+    
+    $sql .= " WHERE Id_Utente = :idUtente AND Ruolo = 'Espositore'";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+    $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
+    $stmt->bindParam(':cognome', $cognome, PDO::PARAM_STR);
+    $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+    $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
+    $stmt->bindParam(':qualifica', $qualifica, PDO::PARAM_STR);
+    
+    if (!empty($password)) {
+        $stmt->bindParam(':password', $passwordHashed, PDO::PARAM_STR);
+    }
+    
+    return $stmt->execute();
+}
+
+function getEspositoreById($pdo, $id) {
+    $stmt = $pdo->prepare("SELECT * FROM utente WHERE Id_Utente = ? AND Ruolo = 'Espositore'");
+    $stmt->execute([$id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
 // Recupera i dettagli dell'espositore
 $espositore = getEspositoreById($pdo, $idEspositore);
 
@@ -18,52 +64,19 @@ if (!$espositore) {
 $successMessage = '';
 $errorMessage = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = !empty($_POST['Username']) ? $_POST['Username'] : $espositore['Username'];
-    $password = !empty($_POST['Password']) ? password_hash($_POST['Password'], PASSWORD_DEFAULT) : ''; // Hash della password
-    $nome = !empty($_POST['Nome']) ? $_POST['Nome'] : $espositore['Nome'];
-    $cognome = !empty($_POST['Cognome']) ? $_POST['Cognome'] : $espositore['Cognome'];
-    $email = !empty($_POST['Email']) ? $_POST['Email'] : $espositore['Email'];
-    $telefono = !empty($_POST['Telefono']) ? $_POST['Telefono'] : $espositore['Telefono'];
-    $qualifica = !empty($_POST['Qualifica']) ? $_POST['Qualifica'] : $espositore['Qualifica'];
-    $curriculum = $espositore['Curriculum'];  // Contiene i dati binari del curriculum
-
+    $username = $_POST['Username'] ?? $espositore['Username'];
+    $password = !empty($_POST['Password']) ? $_POST['Password'] : '';
+    $nome = $_POST['Nome'] ?? $espositore['Nome'];
+    $cognome = $_POST['Cognome'] ?? $espositore['Cognome'];
+    $email = $_POST['Email'] ?? $espositore['Email'];
+    $telefono = $_POST['Telefono'] ?? $espositore['Telefono'];
+    $qualifica = $_POST['Qualifica'] ?? $espositore['Qualifica'];
+    
+    // Gestione del curriculum
+    $curriculum = null;
     if (isset($_FILES['Curriculum']) && $_FILES['Curriculum']['error'] === UPLOAD_ERR_OK) {
-        $fileTmpPath = $_FILES['Curriculum']['tmp_name'];
-        $fileType = mime_content_type($fileTmpPath);
-        
-        if ($fileType === 'application/pdf') { // Verifica MIME type
-            $uploadDir = __DIR__ . '/../../uploads/'; // Percorso assoluto corretto
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
-    
-            $fileName = 'cv_' . $idEspositore . '_' . time() . '.pdf';
-            $filePath = $uploadDir . $fileName;
-    
-            // Mostra il percorso assoluto per il debug
-            echo "<p>Debug: Percorso di salvataggio: $filePath</p>";
-    
-            // A questo punto non cancelliamo il vecchio file, perché lo salviamo come dati binari
-            // Carichiamo i dati del file come dati binari nel database
-    
-            $fileData = file_get_contents($fileTmpPath);  // Legge i dati binari del file
-            
-            if ($fileData !== false) {
-                $curriculum = $fileData;  // Salviamo i dati binari del file
-                echo "<p style='color: green;'>File caricato correttamente: $filePath</p>";
-            } else {
-                $errorMessage = "Errore durante la lettura del file.";
-                echo "<p style='color: red;'>$errorMessage</p>";
-            }
-        } else {
-            $errorMessage = "Il file caricato non è un PDF valido.";
-            echo "<p style='color: red;'>$errorMessage</p>";
-        }
-    } elseif (isset($_FILES['Curriculum']) && $_FILES['Curriculum']['error'] !== UPLOAD_ERR_NO_FILE) {
-        $errorMessage = "Errore durante il caricamento del file: " . $_FILES['Curriculum']['error'];
-        echo "<p style='color: red;'>$errorMessage</p>";
+        $curriculum = $_FILES['Curriculum'];
     }
-    
 
     if (updateEspositore($pdo, $idEspositore, $username, $password, $nome, $cognome, $email, $telefono, $qualifica, $curriculum)) {
         $successMessage = "Espositore aggiornato con successo.";
@@ -72,7 +85,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errorMessage = "Errore durante l'aggiornamento dell'espositore.";
     }
 }
-
 ?>
 
 <!-- Breadcrumbs-->
@@ -102,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p style="color: red;"><?php echo htmlspecialchars($errorMessage); ?></p>
         <?php endif; ?>
 
-        <form class="rd-form rd-mailform" method="post" enctype="multipart/form-data" action="">
+        <form class="rd-form rd-mailform" method="post" id="form-modifica-espositore" action="">
             <div class="row row-50">
                 <div class="col-md-6">
                     <div class="form-wrap">
@@ -151,17 +163,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <label class="form-label" for="espositore-curriculum">Curriculum</label><br><br>
                         <div class="input-group">
                             <input class="form-control" id="espositore-curriculum" type="file" name="Curriculum" accept=".pdf" onchange="showFileName(this)">
-                            <?php 
-                                if (!empty($espositore['Curriculum'])): 
-                            ?>
-                                <a href="view_curriculum.php?id=<?php echo $idEspositore; ?>" target="_blank" class="btn btn-outline-info">
-                                    <i class="fas fa-file-pdf"></i> Visualizza Curriculum Attuale
-                                </a>
-                            <?php else: ?>
-                                <p style="color: red;">Curriculum non trovato.</p>
-                            <?php endif; ?>
                         </div>
                         <small id="fileName" class="form-text text-muted mt-2"></small>
+                        <div id="cv-upload-status" class="mt-2"></div>
+
+                        <?php if (!empty($espositore['Curriculum'])): ?>
+                            <div class="mt-3">
+                                <a href="/progetto-espositori/uploads/cv_<?php echo $espositore['Username']; ?>.pdf" 
+                                    class="btn btn-sm btn-outline-primary" 
+                                    style="width: 100%; font-size: larger;"
+                                    target="_blank">
+                                    <i class="fas fa-file-pdf"></i> Visualizza Curriculum                    
+                                    <small class="form-text text-muted">Dimensioni: <?php echo round(strlen($espositore['Curriculum']) / 1024, 2); ?> KB</small>
+                                </a>
+                            </div>
+                        <?php else: ?>
+                            <p class="text-muted mt-2">Nessun curriculum caricato</p>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -169,15 +187,97 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
     </div>
 </section>
-
-<!-- JavaScript per mostrare il nome del file selezionato -->
 <script>
-    function showFileName(input) {
-        const fileName = input.files[0] ? input.files[0].name : "Nessun file selezionato.";
-        document.getElementById('fileName').innerText = "File selezionato: " + fileName;
+function showFileName(input) {
+    const fileNameDisplay = document.getElementById('fileName');
+    if (fileNameDisplay && input.files[0]) {
+        fileNameDisplay.textContent = "File selezionato: " + input.files[0].name;
     }
-</script>
+}
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('form-modifica-espositore');
+    const cvInput = document.getElementById('espositore-curriculum');
+    const statusDiv = document.getElementById('cv-upload-status');
 
+    // Previeni il submit del form quando si carica solo il CV
+    form.addEventListener('submit', function(e) {
+        if (cvInput.files.length > 0 && !statusDiv.querySelector('.alert-success')) {
+            e.preventDefault();
+            alert('Completare prima il caricamento del CV');
+        }
+    });
+
+    if (cvInput && statusDiv) {
+        cvInput.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            statusDiv.innerHTML = '<div class="alert alert-info">Caricamento in corso...</div>';
+
+            try {
+                const formData = new FormData();
+                formData.append('cv_file', file);
+                formData.append('id_espositore', <?php echo $idEspositore; ?>);
+                formData.append('username', '<?php echo $espositore["Username"]; ?>');
+
+                const response = await fetch('save_cv.php', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Errore server (${response.status}): ${errorText}`);
+                }
+
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.message || 'Operazione fallita');
+                }
+
+                statusDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+                updateCvLink(data.file_url, file.size);
+
+            } catch (error) {
+                console.error('Upload error:', error);
+                statusDiv.innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
+                e.target.value = '';
+            }
+        });
+    }
+
+    function updateCvLink(fileUrl, fileSize) {
+        let cvLink = document.querySelector('.cv-download-link');
+        const fileSizeKB = (fileSize / 1024).toFixed(2);
+        
+        if (!cvLink) {
+            const cvContainer = document.createElement('div');
+            cvContainer.className = 'mt-3';
+            cvContainer.innerHTML = `
+                <a href="${fileUrl}" 
+                   class="btn btn-sm btn-outline-primary cv-download-link" 
+                   style="width: 100%; font-size: larger;"
+                   target="_blank">
+                    <i class="fas fa-file-pdf"></i> Visualizza CV
+                </a>
+                <small class="form-text text-muted">${fileSizeKB} KB</small>
+            `;
+            
+            document.querySelector('.form-wrap')?.appendChild(cvContainer);
+        } else {
+            cvLink.href = fileUrl;
+            const sizeElement = cvLink.nextElementSibling;
+            if (sizeElement) {
+                sizeElement.textContent = `${fileSizeKB} KB`;
+            }
+        }
+    }
+});
+</script>
 <?php
 include_once '../../template_footer.php';
 ?>
