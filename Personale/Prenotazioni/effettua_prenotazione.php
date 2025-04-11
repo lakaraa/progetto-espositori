@@ -32,6 +32,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     try {
+        // Controlla se la prenotazione esiste già
+        $prenotazioneEsistente = checkExistingPrenotazione($pdo, $visitatore, $turno);
+        if ($prenotazioneEsistente) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Esiste già una prenotazione per questo visitatore in questo turno.'
+            ]);
+            exit;
+        }
+
         // Funzione per aggiungere la prenotazione
         $result = addPrenotazioneByPersonale($pdo, $visitatore, $turno);
         echo json_encode([
@@ -57,7 +67,7 @@ include_once '../../template_header.php';
     </div>
     <ul class="breadcrumbs-custom-path">
         <li><a href="../dashboard_personale.php">Dashboard</a></li>
-        <li><a href="gestione_prenotazioni.php">Gestisci Prenotazioni</a></li>
+        <li><a href="gestisci_prenotazione.php">Gestisci Prenotazioni</a></li>
         <li class="active">Effettua Prenotazione</li>
     </ul>
 </section>
