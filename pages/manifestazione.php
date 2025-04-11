@@ -58,12 +58,11 @@ $espositori = getEspositoriByManifestazioneTop4($pdo, $id);
             <h5 class="text-center mb-3"><strong>Tra gli espositori:</strong></h5>
             <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
                 <?php foreach ($espositori as $e): ?>
-                    <button class="btn btn-outline-dark rounded-pill px-4">
+                    <button class="btn btn-outline-dark rounded-pill px-4" onclick="location.href='espositore.php?id=<?php echo urlencode($e['Id_Utente']); ?>'">
                         <?php echo htmlspecialchars($e['Nome'] . ' ' . $e['Cognome']); ?>
                     </button>
                 <?php endforeach; ?>
             </div>
-
             <div class="text-center mt-4">
                 <a href="contributions.php?manifestazione_id=<?php echo $id; ?>" class="btn btn-primary">
                     Vedi tutti i contributi →
