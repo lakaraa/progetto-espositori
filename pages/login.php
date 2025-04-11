@@ -43,7 +43,7 @@ include_once '../template_header.php';
                     </div>
                 </form>
                 <div class="text-center">
-                    <p>Non hai un account? <a href="registration.php">Registrati</a></p>
+                    <p>Non hai un account? <a href="registrazione_visitatore.php">Registrati come visitatore</a></p>
                     Sei un espositore? <a href="registrazione_espositore.php">Registrati come Espositore</a>
                 </div>
             </div>

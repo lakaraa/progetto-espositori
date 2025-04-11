@@ -55,17 +55,48 @@ function getManifestazioneById($pdo, $idManifestazione) {
 // Recupera tutti i contributi associati a una manifestazione specifica
 function getContributiByManifestazione($pdo, $idManifestazione) 
 {
-    $sql = "
-        SELECT c.*
-        FROM contributo c
-        INNER JOIN localizzazione l ON c.Id_Contributo = l.Id_Contributo
-        WHERE l.Id_Manifestazione = :idManifestazione
-    ";
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    try {
+        // Prima verifica solo i contributi base
+        $sql = "SELECT c.* FROM Contributo c 
+                INNER JOIN Esposizione e ON c.Id_Contributo = e.Id_Contributo
+                WHERE e.Id_Manifestazione = :idManifestazione";
+                
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        $contributi = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Poi per ogni contributo, recupera i dettagli aggiuntivi
+        foreach ($contributi as &$contributo) {
+            // Info espositore
+            $sql_utente = "SELECT Nome, Cognome FROM Utente WHERE Id_Utente = ?";
+            $stmt = $pdo->prepare($sql_utente);
+            $stmt->execute([$contributo['Id_Utente']]);
+            $utente = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            $contributo['NomeEspositore'] = $utente['Nome'] ?? '';
+            $contributo['CognomeEspositore'] = $utente['Cognome'] ?? '';
+            
+            // Categorie
+            $sql_categorie = "SELECT cat.Nome FROM Categoria cat
+                             INNER JOIN Tipologia t ON cat.Id_Categoria = t.Id_Categoria
+                             WHERE t.Id_Contributo = ?";
+            $stmt = $pdo->prepare($sql_categorie);
+            $stmt->execute([$contributo['Id_Contributo']]);
+            $categorie = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            $contributo['Categorie'] = implode(', ', $categorie);
+        }
+        
+        return $contributi;
+    } catch (PDOException $e) {
+        error_log("Errore in getContributiByManifestazione: " . $e->getMessage());
+        return [];
+    }
 }
+
+
 //login
 function getUserByEmail($pdo, $email) {
     $sql = "SELECT * FROM utente WHERE Email = :email";
@@ -662,3 +693,91 @@ function getVisitatori($pdo)
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+
+// Query partecipanti per mese
+function getQueryPartecipantiPerMese() {
+    return "
+        SELECT
+            MONTH(Turno.data) AS mese,
+            COUNT(DISTINCT Prenotazione.Id_Utente) AS numero_partecipanti
+        FROM
+            Prenotazione
+        JOIN
+            Turno ON Prenotazione.Id_Turno = Turno.Id_Turno
+        GROUP BY mese
+        ORDER BY mese;
+    ";
+}
+
+// Query contributi per manifestazione
+function getQueryContributiPerManifestazione() {
+    return "
+        SELECT
+            m.Nome AS nome_manifestazione,
+            COUNT(c.Id_Contributo) AS numero_contributi
+        FROM
+            Manifestazione m
+        JOIN
+            Esposizione e ON m.Id_Manifestazione = e.Id_Manifestazione
+        JOIN
+            Contributo c ON e.Id_Contributo = c.Id_Contributo
+        GROUP BY m.Id_Manifestazione
+        ORDER BY m.Nome;
+    ";
+}
+
+// Query espositori per manifestazione
+function getQueryEspositoriPerManifestazione() {
+    return "
+        SELECT
+            m.Nome AS nome_manifestazione,
+            COUNT(DISTINCT CASE WHEN u.Ruolo = 'Espositore' THEN u.Id_Utente ELSE NULL END) AS numero_espositori
+        FROM
+            Manifestazione m
+        LEFT JOIN
+            Area a ON m.Id_Manifestazione = a.Id_Manifestazione
+        LEFT JOIN
+            Turno t ON a.Id_Area = t.Id_Area
+        LEFT JOIN
+            Prenotazione p ON t.Id_Turno = p.Id_Turno
+        LEFT JOIN
+            Utente u ON p.Id_Utente = u.Id_Utente
+        GROUP BY m.Id_Manifestazione
+        ORDER BY m.Nome;
+    ";
+}
+
+// Query prenotazioni per data
+function getQueryPrenotazioniPerData() {
+    return "
+        SELECT
+            t.data AS turno_data,
+            COUNT(*) AS numero_prenotazioni
+        FROM
+            Turno t
+        JOIN
+            Prenotazione p ON t.Id_Turno = p.Id_Turno
+        GROUP BY t.data
+        ORDER BY turno_data;
+    ";
+}
+
+function getEspositoriByManifestazioneTop4($pdo, $id_manifestazione) {
+    $sql = "
+        SELECT DISTINCT u.Id_Utente, u.Nome, u.Cognome, u.Email
+        FROM Utente u
+        INNER JOIN Contributo c ON u.Id_Utente = c.Id_Utente
+        INNER JOIN Esposizione e ON c.Id_Contributo = e.Id_Contributo
+        WHERE e.Id_Manifestazione = :Id_Manifestazione
+        AND u.Ruolo = 'Espositore'
+        LIMIT 4
+    ";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['Id_Manifestazione' => $id_manifestazione]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+?>
