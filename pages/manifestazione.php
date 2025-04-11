@@ -1,8 +1,8 @@
 <?php
 
-include_once('config.php'); 
-include_once('queries.php'); 
-include_once('template_header.php');
+include_once('../config.php'); 
+include_once('../queries.php'); 
+include_once('../template_header.php');
 
 // Recupera ID dalla query string
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -24,7 +24,7 @@ $espositori = getEspositoriByManifestazioneTop4($pdo, $id);
         </div>
         <ul class="breadcrumbs-custom-path">
             <li><a href="index.php">Home</a></li>
-            <li><a href="pages/manifestazioni.php">Manifestazioni</a></li>
+            <li><a href="manifestazioni.php">Manifestazioni</a></li>
             <li class="active"><?php echo htmlspecialchars($manifestazione['Nome']); ?></li>
         </ul>
     </section>
@@ -59,13 +59,13 @@ $espositori = getEspositoriByManifestazioneTop4($pdo, $id);
             <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
                 <?php foreach ($espositori as $e): ?>
                     <button class="btn btn-outline-dark rounded-pill px-4">
-                        <?php echo htmlspecialchars($e['Nome']); ?>
+                        <?php echo htmlspecialchars($e['Nome'] . ' ' . $e['Cognome']); ?>
                     </button>
                 <?php endforeach; ?>
             </div>
 
             <div class="text-center mt-4">
-                <a href="pages/contributions.php?manifestazione_id=<?php echo $id; ?>" class="btn btn-primary">
+                <a href="contributions.php?manifestazione_id=<?php echo $id; ?>" class="btn btn-primary">
                     Vedi tutti i contributi →
                 </a>
             </div>
@@ -78,4 +78,4 @@ $espositori = getEspositoriByManifestazioneTop4($pdo, $id);
     </div>
 <?php endif; ?>
 
-<?php include_once('template_footer.php'); ?>
+<?php include_once('../template_footer.php'); ?>
