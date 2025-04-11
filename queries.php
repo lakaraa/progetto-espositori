@@ -464,16 +464,34 @@ function deletePrenotazione($pdo, $idUtente, $idTurno) {
     $result = $stmt->execute();
     return $result;
 }
-function updatePrenotazione($pdo, $idUtente, $idTurno, $newIdTurno) 
+function getPrenotazioneById($pdo, $idUtente, $idTurno) 
 {
-    $sql = "UPDATE prenotazione 
-            SET Id_Turno = :newIdTurno 
-            WHERE Id_Utente = :idUtente AND Id_Turno = :idTurno";
+    $sql = "
+        SELECT 
+            p.Id_Utente,
+            p.Id_Turno,
+            u.Nome AS Nome_Visitatore,
+            u.Cognome AS Cognome_Visitatore,
+            u.Email,
+            u.Telefono,
+            m.Nome AS Nome_Manifestazione,
+            m.Id_Manifestazione,
+            t.Data AS Data_Turno,
+            t.Ora AS Ora_Turno,
+            a.Nome AS Nome_Area,
+            a.Id_Area
+        FROM prenotazione p
+        JOIN utente u ON p.Id_Utente = u.Id_Utente
+        JOIN turno t ON p.Id_Turno = t.Id_Turno
+        JOIN area a ON t.Id_Area = a.Id_Area
+        JOIN manifestazione m ON a.Id_Manifestazione = m.Id_Manifestazione
+        WHERE p.Id_Utente = :idUtente AND p.Id_Turno = :idTurno
+    ";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
     $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
-    $stmt->bindParam(':newIdTurno', $newIdTurno, PDO::PARAM_INT);
-    return $stmt->execute();
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 function getPrenotazioni($pdo) {
     $stmt = $pdo->prepare("
@@ -485,7 +503,8 @@ function getPrenotazioni($pdo) {
         u.Email,
         m.Nome AS Nome_Manifestazione,
         t.Data AS Data_Turno,
-        t.Ora AS Ora_Turno
+        t.Ora AS Ora_Turno,
+        a.Nome AS Nome_Area
     FROM prenotazione p
     JOIN utente u ON p.Id_Utente = u.Id_Utente
     JOIN turno t ON p.Id_Turno = t.Id_Turno
@@ -556,6 +575,42 @@ function addPrenotazioneByPersonale($pdo, $idUtente, $idTurno) {
         error_log("Errore durante l'inserimento della prenotazione.");
         return false;
     }
+}
+
+function checkExistingPrenotazione($pdo, $idUtente, $newIdTurno) {
+    $sql = "SELECT COUNT(*) FROM prenotazione WHERE Id_Utente = :idUtente AND Id_Turno = :newIdTurno";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    $stmt->bindParam(':newIdTurno', $newIdTurno, PDO::PARAM_INT);
+    $stmt->execute();
+
+    // Restituisce true se esiste almeno una prenotazione, altrimenti false
+    return $stmt->fetchColumn() > 0;
+}
+
+function updatePrenotazione($pdo, $idUtente, $idTurno, $newIdTurno) {
+    // Prima verifica se esiste già una prenotazione per questo utente e nuovo turno
+    $sqlCheck = "SELECT COUNT(*) FROM prenotazione 
+                    WHERE Id_Utente = :idUtente AND Id_Turno = :newIdTurno";
+    $stmtCheck = $pdo->prepare($sqlCheck);
+    $stmtCheck->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    $stmtCheck->bindParam(':newIdTurno', $newIdTurno, PDO::PARAM_INT);
+    $stmtCheck->execute();
+    
+    if ($stmtCheck->fetchColumn() > 0) {
+        // Esiste già una prenotazione per questo utente e turno
+        return false;
+    }
+
+    // Procedi con l'aggiornamento
+    $sql = "UPDATE prenotazione 
+            SET Id_Turno = :newIdTurno 
+            WHERE Id_Utente = :idUtente AND Id_Turno = :idTurno";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
+    $stmt->bindParam(':newIdTurno', $newIdTurno, PDO::PARAM_INT);
+    return $stmt->execute();
 }
 //Gestione visitore
 function addVisitatore($pdo, $username, $password, $nome, $cognome, $email, $telefono) 
