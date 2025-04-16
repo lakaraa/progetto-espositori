@@ -31,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
         exit;
     }
+
     // Controllo se l'email esiste già
     if (emailExists($pdo, $email)) {
         echo json_encode([
@@ -48,6 +49,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
         exit;
     }
+
+    // Controllo del formato dello username
+    if (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Lo username può contenere solo lettere, numeri e underscore.'
+        ]);
+        exit;
+    }
+
     if (!isset($_FILES['cv']) || $_FILES['cv']['error'] !== UPLOAD_ERR_OK) {
         echo json_encode([
             'success' => false,
@@ -126,6 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Includi il template solo per richieste GET
 include_once("../../template_header.php");
 ?>
+
 
 <!-- Breadcrumbs -->
 <section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(images/bg-breadcrumbs-07-1920x480.jpg);">
