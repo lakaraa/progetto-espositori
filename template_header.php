@@ -1,4 +1,6 @@
-<!-- template_header.php -->
+<?php
+session_start(); // Deve essere all'inizio, prima di qualunque output
+?>
 <!DOCTYPE html>
 <html class="wide wow-animation" lang="en">
 <head>
@@ -14,11 +16,16 @@
     <style>
         .ie-panel{display: none;background: #212121;padding: 10px 0;box-shadow: 3px 3px 5px 0 rgba(0,0,0,.3);clear: both;text-align:center;position: relative;z-index: 1;} 
         html.ie-10 .ie-panel, html.lt-ie-10 .ie-panel {display: block;}
-        .manifestazione-img { width: 100%; height: auto; margin-bottom: 10px; transition: transform 0.3s ease; } /* Aumenta il margine inferiore */
+        .manifestazione-img { width: 100%; height: auto; margin-bottom: 10px; transition: transform 0.3s ease; }
         .manifestazione-img:hover { transform: scale(1.05); }
         .button { margin-top: 20px; }
     </style>
 </head>
+
+<!-- JS -->
+<script src="/progetto-espositori/resources/js/core.min.js"></script>
+<script src="/progetto-espositori/resources/js/script.js"></script>
+
 <body>
     <div class="ie-panel"><a href="http://windows.microsoft.com/en-US/internet-explorer/"><img src="/progetto-espositori/resources/images/ie8-panel/warning_bar_0000_us.jpg" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today."></a></div>
     <div class="preloader">
@@ -32,27 +39,71 @@
         <!-- Page Header-->
         <header class="section page-header">
             <div class="rd-navbar-wrap" style="position: absolute">
-                <nav class="rd-navbar rd-navbar-classic" data-layout="rd-navbar-fixed" data-sm-layout="rd-navbar-fixed" data-md-layout="rd-navbar-fixed" data-md-device-layout="rd-navbar-fixed" data-lg-layout="rd-navbar-fixed" data-lg-device-layout="rd-navbar-fixed" data-xl-layout="rd-navbar-static" data-xl-device-layout="rd-navbar-static" data-xxl-layout="rd-navbar-static" data-xxl-device-layout="rd-navbar-static" data-lg-stick-up-offset="46px" data-xl-stick-up-offset="46px" data-xxl-stick-up-offset="46px" data-lg-stick-up="true" data-xl-stick-up="true" data-xxl-stick-up="true">
+                <nav class="rd-navbar rd-navbar-classic" 
+                    data-layout="rd-navbar-fixed"
+                    data-sm-layout="rd-navbar-fixed"
+                    data-md-layout="rd-navbar-fixed"
+                    data-lg-layout="rd-navbar-fixed"
+                    data-xl-layout="rd-navbar-static"
+                    data-xxl-layout="rd-navbar-static"
+                    data-lg-stick-up="true"
+                    data-xl-stick-up="true"
+                    data-xxl-stick-up="true"
+                    data-lg-stick-up-offset="46px"
+                    data-xl-stick-up-offset="46px"
+                    data-xxl-stick-up-offset="46px"
+                >
                     <div class="rd-navbar-collapse-toggle rd-navbar-fixed-element-1" data-rd-navbar-toggle=".rd-navbar-collapse"><span></span></div>
                     <div class="rd-navbar-main-outer">
-                        <?php
-                        $current_page = basename($_SERVER['PHP_SELF']);
-                        ?>
+                        <?php $current_page = basename($_SERVER['PHP_SELF']); ?>
                         <div class="rd-navbar-main">
                             <div class="rd-navbar-panel">
                                 <button class="rd-navbar-toggle" data-rd-navbar-toggle=".rd-navbar-nav-wrap"><span></span></button>
                                 <div class="rd-navbar-brand">
-                                    <a class="brand" href="index.php"><img src="/progetto-espositori/resources/images/logo-default-296x52.png" alt="" width="148" height="26"/></a>
+                                    <a class="brand" href="/progetto-espositori/index.php">
+                                        <img src="/progetto-espositori/resources/images/logo-default-296x52.png" alt="" width="148" height="26"/>
+                                    </a>
                                 </div>
                             </div>
                             <div class="rd-navbar-main-element">
                                 <div class="rd-navbar-nav-wrap">
                                     <ul class="rd-navbar-nav">
-                                        <li class="rd-nav-item <?php echo $current_page == 'index.php' ? 'active' : ''; ?>"><a class="rd-nav-link" href="/progetto-espositori/index.php">Home</a></li>
-                                        <li class="rd-nav-item <?php echo $current_page == 'manifestazioni.php' ? 'active' : ''; ?>"><a class="rd-nav-link" href="/progetto-espositori/pages/manifestazioni.php">Manifestazioni</a></li>
-                                        <li class="rd-nav-item <?php echo $current_page == 'about.php' ? 'active' : ''; ?>"><a class="rd-nav-link" href="/progetto-espositori/pages/about.php">About</a></li>
-                                        <li class="rd-nav-item <?php echo $current_page == 'contacts.php' ? 'active' : ''; ?>"><a class="rd-nav-link" href="/progetto-espositori/pages/contacts.php">Contacts</a></li>
-                                        <li class="rd-nav-item <?php echo $current_page == 'login.php' ? 'active' : ''; ?>"><a class="rd-nav-link" href="/progetto-espositori/pages/login.php">Login</a></li>
+                                        <li class="rd-nav-item <?php echo $current_page == 'index.php' ? 'active' : ''; ?>">
+                                            <a class="rd-nav-link" href="/progetto-espositori/index.php">Home</a>
+                                        </li>
+                                        <li class="rd-nav-item <?php echo $current_page == 'manifestazioni.php' ? 'active' : ''; ?>">
+                                            <a class="rd-nav-link" href="/progetto-espositori/pages/manifestazioni.php">Manifestazioni</a>
+                                        </li>
+
+                                        <?php
+                                        if (!empty($_SESSION['ruolo'])) {
+                                            $ruolo = $_SESSION['ruolo'];
+                                            $ruoloLower = strtolower($ruolo);
+                                            $dashboardPage = "dashboard_" . $ruoloLower . ".php";
+                                            $dashboardPath = "/progetto-espositori/$ruolo/$dashboardPage";
+                                            $isDashboard = $current_page === $dashboardPage;
+                                            ?>
+                                            <li class="rd-nav-item <?php echo $isDashboard ? 'active' : ''; ?>">
+                                                <a class="rd-nav-link" href="<?php echo $dashboardPath; ?>">Dashboard</a>
+                                            </li>
+                                        <?php } ?>
+
+                                        <li class="rd-nav-item <?php echo $current_page == 'about.php' ? 'active' : ''; ?>">
+                                            <a class="rd-nav-link" href="/progetto-espositori/pages/about.php">About</a>
+                                        </li>
+                                        <li class="rd-nav-item <?php echo $current_page == 'contacts.php' ? 'active' : ''; ?>">
+                                            <a class="rd-nav-link" href="/progetto-espositori/pages/contacts.php">Contacts</a>
+                                        </li>
+
+                                        <?php if (isset($_SESSION['email'])): ?>
+                                            <li class="rd-nav-item">
+                                                <a class="rd-nav-link" href="/progetto-espositori/auth/logout_handler.php">Logout</a>
+                                            </li>
+                                        <?php else: ?>
+                                            <li class="rd-nav-item <?php echo $current_page == 'login.php' ? 'active' : ''; ?>">
+                                                <a class="rd-nav-link" href="/progetto-espositori/pages/login.php">Login</a>
+                                            </li>
+                                        <?php endif; ?>
                                     </ul>
                                 </div>
                             </div>
