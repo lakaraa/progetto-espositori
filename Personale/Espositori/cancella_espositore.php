@@ -4,12 +4,23 @@ include_once("../../queries.php");
 include_once("../../session.php");
 include_once("../../template_header.php");
 
-// Gestione della cancellazione tramite POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id']) && is_numeric($_POST['id'])) {
     $idEspositore = intval($_POST['id']);
+
     try {
-        // Cancella l'espositore dal database
+        // Recupera username dal database
+        $username = getUsername($pdo, $idEspositore); // Funzione che recupera lo username
+
+        // Costruisce il percorso del file
+        $cvPath = "../../uploads/cv_" . $username . ".pdf";
+
+        // Elimina l'espositore dal database
         if (deleteEspositore($pdo, $idEspositore)) {
+            // Se il file esiste, lo elimina
+            if (file_exists($cvPath)) {
+                unlink($cvPath);
+            }
+
             $successMessage = "Espositore cancellato con successo.";
             $successStyle = "color: rgb(74, 196, 207);";
         } else {
@@ -89,7 +100,7 @@ $espositori = getEspositori($pdo);
                     <?php endforeach; ?>
                     <?php if (empty($espositori)): ?>
                         <tr>
-                            <td colspan="9">Nessun espositore trovato.</td>
+                            <td colspan="7">Nessun espositore trovato.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -99,4 +110,15 @@ $espositori = getEspositori($pdo);
 </section>
 <?php
 include_once("../../template_footer.php");
+
+// Funzione per recuperare lo username dell'espositore
+function getUsername($pdo, $idEspositore) {
+    $sql = "SELECT username FROM utente WHERE Id_Utente = :idEspositore";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idEspositore', $idEspositore, PDO::PARAM_INT);
+    $stmt->execute();
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $row ? $row['username'] : null;
+}
+
 ?>
