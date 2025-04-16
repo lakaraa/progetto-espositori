@@ -1,7 +1,26 @@
 <?php
 include_once ("../../config.php");
-include_once ("../../queries.php");
+//include_once ("../../queries.php");
 include_once ("../../template_header.php");
+
+function getEspositori($pdo) 
+{
+    $sql = "
+        SELECT u.Id_Utente AS id, 
+            u.Username AS username, 
+            u.Password AS password, 
+            u.Nome AS nome, 
+            u.Cognome AS cognome, 
+            u.Email AS email, 
+            u.Telefono AS telefono, 
+            u.Qualifica AS qualifica, 
+            u.Curriculum AS curriculum
+        FROM utente u
+        WHERE u.Ruolo = 'Espositore'";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 $espositori = getEspositori($pdo);
 ?>
@@ -11,8 +30,9 @@ $espositori = getEspositori($pdo);
         <h2 class="breadcrumbs-custom-title">Modifica Espositore</h2>
     </div>
     <ul class="breadcrumbs-custom-path">
-        <li><a href="../../index.php">Home</a></li>
-        <li class="active">Modifica Espositore</li>
+    <li><a href="../dashboard_personale.php">Dashboard</a></li>
+    <li><a href="gestisci_espositori.php">Gestione Espositori</a></li>
+    <li class="active">Modifica Espositore</li>
     </ul>
 </section>
 <!-- Main Content-->
@@ -32,6 +52,7 @@ $espositori = getEspositori($pdo);
                         <th>Telefono</th>
                         <th>Qualifica</th>
                         <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -48,6 +69,13 @@ $espositori = getEspositori($pdo);
                                     <a class="button button-primary button-sm" 
                                         href="modifica_espositore_dettagli.php?id=<?php echo urlencode($espositore['id']); ?>" >
                                         Modifica
+                                    </a>
+                                </td>
+                                <td>
+                                    <a class="button button-danger button-sm"
+                                        href="visualizza_cv.php?id=<?php echo urlencode($espositore['id']); ?>"
+                                        target="_blank">
+                                        Visualizza CV
                                     </a>
                                 </td>
                             </tr>

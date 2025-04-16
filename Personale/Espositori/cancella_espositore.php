@@ -30,7 +30,8 @@ $espositori = getEspositori($pdo);
         <h2 class="breadcrumbs-custom-title">Elimina Espositore</h2>
     </div>
     <ul class="breadcrumbs-custom-path">
-        <li><a href="index.html">Home</a></li>
+        <li><a href="../dashboard_personale.php">Dashboard</a></li>
+        <li><a href="gestisci_espositori.php">Gestione Espositori</a></li>
         <li class="active">Elimina Espositore</li>
     </ul>
 </section>
@@ -59,6 +60,7 @@ $espositori = getEspositori($pdo);
                         <th>Telefono</th>
                         <th>Qualifica</th>
                         <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -75,6 +77,13 @@ $espositori = getEspositori($pdo);
                                     <input type="hidden" name="id" value="<?php echo htmlspecialchars($espositore['id']); ?>">
                                     <button type="submit" class="button button-primary button-sm">Elimina</button>
                                 </form>
+                            </td>
+                            <td>
+                                <a class="button button-danger button-sm"
+                                    href="visualizza_cv.php?id=<?php echo urlencode($espositore['id']); ?>"
+                                    target="_blank">
+                                    Visualizza CV
+                                </a>
                             </td>
                         </tr>
                     <?php endforeach; ?>
