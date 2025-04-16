@@ -281,67 +281,57 @@ function updateEspositore($pdo, $idUtente, $username, $password, $nome, $cognome
         return false;
     }
 
-    // Prepara la query base
-    $sqlBase = "UPDATE utente 
+    // Se la password è vuota e il curriculum non è modificato
+    if (empty($password) && $curriculum === null) {
+        $sql = "UPDATE utente 
                 SET Username = :username, 
                     Nome = :nome, 
                     Cognome = :cognome, 
                     Email = :email, 
                     Telefono = :telefono, 
-                    Qualifica = :qualifica";
-    
-    // Aggiungi password se fornita
-    if (!empty($password)) {
-        $sqlBase .= ", Password = :password";
-        $passwordHashed = password_hash($password, PASSWORD_BCRYPT);
+                    Qualifica = :qualifica
+                WHERE Id_Utente = :idUtente AND Ruolo = 'Espositore'";
+    } 
+    // Se la password è vuota ma il curriculum è modificato
+    elseif (empty($password)) {
+        $sql = "UPDATE utente 
+                SET Username = :username, 
+                    Nome = :nome, 
+                    Cognome = :cognome, 
+                    Email = :email, 
+                    Telefono = :telefono, 
+                    Qualifica = :qualifica, 
+                    Curriculum = :curriculum
+                WHERE Id_Utente = :idUtente AND Ruolo = 'Espositore'";
+    } 
+    // Se il curriculum non è modificato ma la password è cambiata
+    elseif ($curriculum === null) {
+        $sql = "UPDATE utente 
+                SET Username = :username, 
+                    Password = :password, 
+                    Nome = :nome, 
+                    Cognome = :cognome, 
+                    Email = :email, 
+                    Telefono = :telefono, 
+                    Qualifica = :qualifica
+                WHERE Id_Utente = :idUtente AND Ruolo = 'Espositore'";
+    } 
+    // Se sia la password che il curriculum sono modificati
+    else {
+        $sql = "UPDATE utente 
+                SET Username = :username, 
+                    Password = :password, 
+                    Nome = :nome, 
+                    Cognome = :cognome, 
+                    Email = :email, 
+                    Telefono = :telefono, 
+                    Qualifica = :qualifica, 
+                    Curriculum = :curriculum
+                WHERE Id_Utente = :idUtente AND Ruolo = 'Espositore'";
     }
 
-    // Gestione del curriculum
-    $cvPath = null;
-    $cvBlob = null;
-    
-    // Se è stato fornito un nuovo CV
-    if ($curriculum !== null && is_array($curriculum) && $curriculum['error'] === UPLOAD_ERR_OK) {
-        // 1. Validazione del file
-        $maxSize = 5 * 1024 * 1024; // 5MB
-        $allowedTypes = ['application/pdf'];
-        
-        if ($curriculum['size'] > $maxSize) {
-            throw new Exception("Il file del CV supera la dimensione massima consentita (5MB)");
-        }
-        
-        $finfo = new finfo(FILEINFO_MIME_TYPE);
-        $mime = $finfo->file($curriculum['tmp_name']);
-        
-        if (!in_array($mime, $allowedTypes)) {
-            throw new Exception("Sono accettati solo file PDF per il CV");
-        }
-        
-        // 2. Salvataggio su filesystem
-        $uploadDir = 'uploads/';
-        if (!file_exists($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-        
-        $cvPath = $uploadDir . uniqid('cv_') . '.pdf';
-        if (!move_uploaded_file($curriculum['tmp_name'], $cvPath)) {
-            throw new Exception("Errore nel salvataggio del file CV");
-        }
-        
-        // 3. Preparazione BLOB per database
-        $cvBlob = file_get_contents($cvPath);
-        
-        $sqlBase .= ", Curriculum = :curriculum, CurriculumPath = :curriculumPath";
-    } else {
-        // Se non viene fornito un nuovo CV, mantieni quello esistente
-        $sqlBase .= ", Curriculum = Curriculum"; // Mantiene il valore corrente
-    }
-    
-    $sqlBase .= " WHERE Id_Utente = :idUtente AND Ruolo = 'Espositore'";
-    
-    // Prepara e esegui la query
-    $stmt = $pdo->prepare($sqlBase);
-    
+    $stmt = $pdo->prepare($sql);
+
     // Binding dei parametri
     $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
     $stmt->bindParam(':username', $username, PDO::PARAM_STR);
@@ -350,26 +340,21 @@ function updateEspositore($pdo, $idUtente, $username, $password, $nome, $cognome
     $stmt->bindParam(':email', $email, PDO::PARAM_STR);
     $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
     $stmt->bindParam(':qualifica', $qualifica, PDO::PARAM_STR);
-    
+
+    // Se la password è stata cambiata, la hashiamo
     if (!empty($password)) {
+        $passwordHashed = password_hash($password, PASSWORD_BCRYPT);
         $stmt->bindParam(':password', $passwordHashed, PDO::PARAM_STR);
     }
-    
-    if ($curriculum !== null && $cvBlob !== null) {
-        $stmt->bindParam(':curriculum', $cvBlob, PDO::PARAM_LOB);
-        $stmt->bindParam(':curriculumPath', $cvPath, PDO::PARAM_STR);
+
+    // Se il curriculum è stato modificato
+    if ($curriculum !== null) {
+        // Sostituisce il vecchio curriculum con il nuovo
+        $stmt->bindParam(':curriculum', $curriculum, PDO::PARAM_LOB);
     }
-    
-    try {
-        return $stmt->execute();
-    } catch (PDOException $e) {
-        // Se c'è un errore, cancella il file eventualmente salvato
-        if ($cvPath !== null && file_exists($cvPath)) {
-            unlink($cvPath);
-        }
-        error_log("Errore aggiornamento espositore: " . $e->getMessage());
-        return false;
-    }
+
+    // Eseguiamo la query e controlliamo se è andata a buon fine
+    return $stmt->execute();
 }
 function emailExists($pdo, $email) {
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM utente WHERE Email = ?");
