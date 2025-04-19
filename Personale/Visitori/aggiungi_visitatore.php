@@ -53,7 +53,7 @@ include_once("../../template_header.php");
     </div>
     <ul class="breadcrumbs-custom-path">
         <li><a href="../dashboard_personale.php">Dashboard</a></li>
-        <li><a href="gestisci_visitatori.php">Gestione Visitatori</a></li>
+        <li><a href="/progetto-espositori/Personale/Visitori/gestisci_visitatori.php">Gestione Visitatori</a></li>
         <li class="active">Aggiungi Visitatore</li>
     </ul>
 </section>

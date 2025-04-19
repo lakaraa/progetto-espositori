@@ -13,7 +13,7 @@ $visitatori = getVisitatori($pdo);
     </div>
     <ul class="breadcrumbs-custom-path">
         <li><a href="../dashboard_personale.php">Dashboard</a></li>
-        <li><a href="gestisci_visitatori.php">Gestione Visitatori</a></li>
+        <li><a href="/progetto-espositori/Personale/Visitori/gestisci_visitatore.php">Gestione Visitatori</a></li>
         <li class="active">Modifica Visitatore</li>
     </ul>
 </section>

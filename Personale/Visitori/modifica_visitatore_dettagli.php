@@ -45,8 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </div>
   <ul class="breadcrumbs-custom-path">
     <li><a href="../dashboard_personale.php">Dashboard</a></li>
-    <li><a href="gestisci_visitatori.php">Gestione Visitatori</a></li>
-    <li><a href="modifica_visitatore.php">Modifica Visitatori</a></li>
+    <li><a href="/progetto-espositori/Personale/Visitori/gestisci_visitatore.php">Gestione Visitatori</a></li>
+    <li><a href="/progetto-espositori/Personale/Visitori/modifica_visitatore.php">Modifica Visitatori</a></li>
     <li class="active">Modifica Dettagli Visitatore</li>
   </ul>
 </section>
