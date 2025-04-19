@@ -679,12 +679,12 @@ function updatePrenotazione($pdo, $idUtente, $idTurno, $newIdTurno) {
 //Gestione visitore
 function addVisitatore($pdo, $username, $password, $nome, $cognome, $email, $telefono) 
 {
-    $hashedPassword = password_hash($password, PASSWORD_BCRYPT); 
+    // Non serve fare l'hash qui perché lo facciamo già prima di chiamare la funzione
     $sql = "INSERT INTO utente (Username, Password, Nome, Cognome, Email, Telefono, Ruolo) 
             VALUES (:username, :password, :nome, :cognome, :email, :telefono, 'Visitatore')";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-    $stmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR);
+    $stmt->bindParam(':password', $password, PDO::PARAM_STR);
     $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
     $stmt->bindParam(':cognome', $cognome, PDO::PARAM_STR);
     $stmt->bindParam(':email', $email, PDO::PARAM_STR);
