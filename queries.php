@@ -691,13 +691,10 @@ function addVisitatore($pdo, $username, $password, $nome, $cognome, $email, $tel
     $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
     return $stmt->execute();
 }
-function deleteVisitatore($pdo, $idUtente) 
-{
-    $sql = "DELETE FROM utente WHERE Id_Utente = :idUtente AND Ruolo = 'Visitatore'";
+function deleteVisitatore($pdo, $id) {
+    $sql = "DELETE FROM utente WHERE Id_Utente = ? AND Ruolo = 'Visitatore'";
     $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
-    $result = $stmt->execute();
-    return $result;
+    return $stmt->execute([$id]);
 }
 function updateVisitatore($pdo, $id, $username, $password, $nome, $cognome, $email, $telefono) {
     $sql = "UPDATE utente SET 
@@ -711,11 +708,12 @@ function updateVisitatore($pdo, $id, $username, $password, $nome, $cognome, $ema
     $stmt = $pdo->prepare($sql);
     return $stmt->execute([$username, $password, $nome, $cognome, $email, $telefono, $id]);
 }
-function getVisitatori($pdo) 
-{
-    $sql = "SELECT * FROM utente WHERE Ruolo = 'Visitatore'";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute();
+function getVisitatori($pdo) {
+    $sql = "SELECT Id_Utente, Username, Nome, Cognome, Email, Telefono 
+            FROM utente 
+            WHERE Ruolo = 'Visitatore'
+            ORDER BY Cognome, Nome";
+    $stmt = $pdo->query($sql);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
