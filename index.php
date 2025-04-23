@@ -25,7 +25,7 @@ $manifestazioni = getManifestazioniTop6($pdo);
             <?php foreach ($manifestazioni as $row): ?>
                 <div class="col-md-4">
                     <img src="/progetto-espositori/resources/images/events-01-553x316.jpg" alt="<?php echo htmlspecialchars($row['Nome']); ?>" class="manifestazione-img">
-                    <a class="button button-primary button-lg" href="manifestazione.php?id=<?php echo $row['Id_Manifestazione']; ?>">
+                    <a class="button button-primary button-lg" href="pages/manifestazione.php?id=<?php echo $row['Id_Manifestazione']; ?>">
                         <?php echo htmlspecialchars($row['Nome']); ?>
                     </a> <br> <br> <br>
                 </div>
