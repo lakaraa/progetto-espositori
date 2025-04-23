@@ -7,13 +7,14 @@ $prenotazioni = getPrenotazioniDisponibili($pdo);
 if (count($prenotazioni) > 0) {
     foreach ($prenotazioni as $row) {
         echo "<tr>
-            <td>{$row['Manifestazione']}</td>
-            <td>{$row['DataInizio']}</td>
-            <td>{$row['Durata']}</td>
-            <td>{$row['PostiDisponibili']}</td>
+            <td>" . htmlspecialchars($row['Manifestazione']) . "</td>
+            <td>" . htmlspecialchars($row['DataInizio']) . "</td>
+            <td>" . htmlspecialchars($row['Durata']) . "</td>
+            <td>" . htmlspecialchars($row['PostiDisponibili']) . "</td>
+            <td><a href='form_prenotazione.php?id=" . urlencode($row['Id_Manifestazione']) . "' style='color: rgb(74, 196, 207); text-decoration: underline;'>Prenota</a></td>
         </tr>";
     }
 } else {
-    echo "<tr><td colspan='4' class='text-center'>Nessuna prenotazione disponibile al momento.</td></tr>";
+    echo "<tr><td colspan='5' class='text-center'>Nessuna prenotazione disponibile al momento.</td></tr>";
 }
 ?>
