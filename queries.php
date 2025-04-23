@@ -679,54 +679,50 @@ function updatePrenotazione($pdo, $idUtente, $idTurno, $newIdTurno) {
 //Gestione visitore
 function addVisitatore($pdo, $username, $password, $nome, $cognome, $email, $telefono) 
 {
-    $hashedPassword = password_hash($password, PASSWORD_BCRYPT); 
+    // Non serve fare l'hash qui perché lo facciamo già prima di chiamare la funzione
     $sql = "INSERT INTO utente (Username, Password, Nome, Cognome, Email, Telefono, Ruolo) 
             VALUES (:username, :password, :nome, :cognome, :email, :telefono, 'Visitatore')";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-    $stmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR);
+    $stmt->bindParam(':password', $password, PDO::PARAM_STR);
     $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
     $stmt->bindParam(':cognome', $cognome, PDO::PARAM_STR);
     $stmt->bindParam(':email', $email, PDO::PARAM_STR);
     $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
     return $stmt->execute();
 }
-function deleteVisitatore($pdo, $idUtente) 
-{
-    $sql = "DELETE FROM utente WHERE Id_Utente = :idUtente AND Ruolo = 'Visitatore'";
+function deleteVisitatore($pdo, $id) {
+    $sql = "DELETE FROM utente WHERE Id_Utente = ? AND Ruolo = 'Visitatore'";
     $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
-    $result = $stmt->execute();
-    return $result;
+    return $stmt->execute([$id]);
 }
-function updateVisitatore($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono) 
-{
-    $sql = "UPDATE utente 
-            SET Username = :username, 
-                Password = :password, 
-                Nome = :nome, 
-                Cognome = :cognome, 
-                Email = :email, 
-                Telefono = :telefono 
-            WHERE Id_Utente = :idUtente AND Ruolo = 'Visitatore'";
+function updateVisitatore($pdo, $id, $username, $password, $nome, $cognome, $email, $telefono) {
+    $sql = "UPDATE utente SET 
+            Username = ?, 
+            Password = ?, 
+            Nome = ?, 
+            Cognome = ?, 
+            Email = ?, 
+            Telefono = ?
+            WHERE Id_Utente = ? AND Ruolo = 'Visitatore'";
     $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
-    $stmt->bindParam(':username', $username, PDO::PARAM_STR);
-    $stmt->bindParam(':password', $password ? password_hash($password, PASSWORD_BCRYPT) : null, PDO::PARAM_STR);
-    $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
-    $stmt->bindParam(':cognome', $cognome, PDO::PARAM_STR);
-    $stmt->bindParam(':email', $email, PDO::PARAM_STR);
-    $stmt->bindParam(':telefono', $telefono, PDO::PARAM_STR);
-    return $stmt->execute();
+    return $stmt->execute([$username, $password, $nome, $cognome, $email, $telefono, $id]);
 }
-function getVisitatori($pdo) 
-{
-    $sql = "SELECT * FROM utente WHERE Ruolo = 'Visitatore'";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute();
+function getVisitatori($pdo) {
+    $sql = "SELECT Id_Utente, Username, Nome, Cognome, Email, Telefono 
+            FROM utente 
+            WHERE Ruolo = 'Visitatore'
+            ORDER BY Cognome, Nome";
+    $stmt = $pdo->query($sql);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+function getVisitatoreById($pdo, $id) {
+    $sql = "SELECT * FROM utente WHERE Id_Utente = ? AND Ruolo = 'Visitatore'";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
 
 // Query partecipanti per mese
 function getQueryPartecipantiPerMese() {
