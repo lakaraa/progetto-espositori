@@ -512,6 +512,11 @@ function updatePersonale($pdo, $idUtente, $username, $password, $nome, $cognome,
 //Gestione Prenoatazione
 function addPrenotazione($pdo, $idUtente, $idTurno) 
 {
+    // Verifica se c'è ancora spazio disponibile
+    if (!checkAreaCapacity($pdo, $idTurno)) {
+        return false;
+    }
+
     $sql = "INSERT INTO prenotazione (Id_Utente, Id_Turno) 
             VALUES (:idUtente, :idTurno)";
     $stmt = $pdo->prepare($sql);
@@ -626,6 +631,12 @@ function addPrenotazioneByPersonale($pdo, $idUtente, $idTurno) {
         return false; // Prenotazione già esistente
     }
 
+    // Verifica se c'è ancora spazio disponibile
+    if (!checkAreaCapacity($pdo, $idTurno)) {
+        error_log("Capienza massima raggiunta per questo turno.");
+        return false;
+    }
+
     // Inserisce la prenotazione
     $sqlInsert = "INSERT INTO prenotazione (Id_Utente, Id_Turno) VALUES (:idUtente, :idTurno)";
     $stmtInsert = $pdo->prepare($sqlInsert);
@@ -663,6 +674,11 @@ function updatePrenotazione($pdo, $idUtente, $idTurno, $newIdTurno) {
     
     if ($stmtCheck->fetchColumn() > 0) {
         // Esiste già una prenotazione per questo utente e turno
+        return false;
+    }
+
+    // Verifica se c'è ancora spazio disponibile nel nuovo turno
+    if (!checkAreaCapacity($pdo, $newIdTurno)) {
         return false;
     }
 
@@ -817,6 +833,7 @@ function getPrenotazioniInCorso($pdo, $userId) {
             m.Durata, 
             a.Nome AS Area, 
             t.Id_Turno AS Turno, 
+            t.Data AS Data,
             t.Ora 
         FROM prenotazione p
         JOIN turno t ON p.Id_Turno = t.Id_Turno
@@ -834,6 +851,7 @@ function getPrenotazioniInCorso($pdo, $userId) {
 function getPrenotazioniDisponibili($pdo) {
     $sql = "
         SELECT 
+            m.Id_Manifestazione,
             m.Nome AS Manifestazione, 
             t.Data AS DataInizio, 
             m.Durata,
@@ -846,7 +864,7 @@ function getPrenotazioniDisponibili($pdo) {
         JOIN manifestazione m ON a.Id_Manifestazione = m.Id_Manifestazione
         LEFT JOIN prenotazione p ON p.Id_Turno = t.Id_Turno
         WHERE t.Data > CURDATE()
-        GROUP BY t.Id_Turno
+        GROUP BY t.Id_Turno, m.Id_Manifestazione, m.Nome, t.Data, m.Durata, a.Nome, t.Ora
         HAVING PostiDisponibili > 0
         ORDER BY t.Data ASC
     ";
@@ -878,5 +896,72 @@ function getPrenotazioniPassate($pdo, $userId) {
 }
 
 
+// Funzione per ottenere le aree disponibili per una manifestazione
+function getAreeDisponibili($pdo, $idManifestazione) {
+    $sql = "SELECT a.Id_Area, a.Nome as NomeArea
+            FROM area a
+            WHERE a.Id_Manifestazione = ?
+            ORDER BY a.Nome ASC";
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$idManifestazione]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Funzione per ottenere i turni disponibili per una manifestazione
+function getTurniDisponibili($pdo, $idManifestazione) {
+    $sql = "SELECT t.Id_Turno, t.Nome as NomeTurno, t.Orario
+            FROM turno t
+            WHERE t.Id_Manifestazione = ?
+            ORDER BY t.Orario ASC";
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$idManifestazione]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Funzione per creare una nuova prenotazione
+function createPrenotazione($pdo, $userId, $idManifestazione, $idArea, $idTurno) {
+    $sql = "INSERT INTO prenotazione (Id_Utente, Id_Manifestazione, Id_Area, Id_Turno, DataPrenotazione)
+            VALUES (?, ?, ?, ?, CURDATE())";
+    
+    $stmt = $pdo->prepare($sql);
+    return $stmt->execute([$userId, $idManifestazione, $idArea, $idTurno]);
+}
+
+// Funzione per verificare se un utente ha già una prenotazione per una manifestazione
+function checkPrenotazioneEsistente($pdo, $userId, $idManifestazione) {
+    $sql = "SELECT COUNT(*) as count
+            FROM prenotazione
+            WHERE Id_Utente = ? AND Id_Manifestazione = ?";
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$userId, $idManifestazione]);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $result['count'] > 0;
+}
+
+function checkAreaCapacity($pdo, $idTurno) {
+    $sql = "
+        SELECT 
+            a.Capienza_Massima,
+            COUNT(p.Id_Utente) AS PrenotazioniAttuali
+        FROM turno t
+        JOIN area a ON t.Id_Area = a.Id_Area
+        LEFT JOIN prenotazione p ON p.Id_Turno = t.Id_Turno
+        WHERE t.Id_Turno = :idTurno
+        GROUP BY a.Capienza_Massima
+    ";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$result) {
+        return false;
+    }
+    
+    return $result['Capienza_Massima'] > $result['PrenotazioniAttuali'];
+}
 
 ?>
