@@ -31,8 +31,8 @@ $nomeUtente = $_SESSION['nome'];
         <!-- Prenotazioni in corso -->
         <div class="row mb-5">
             <div class="col-md-12">
-                <h3 class="text-center">Prenotazioni in Corso</h3>
-                <table class="table table-bordered table-striped">
+                <h3>Prenotazioni in Corso</h3>
+                <table class="custom-table">
                     <thead>
                         <tr>                                 
                             <th>Manifestazione</th>
@@ -52,8 +52,8 @@ $nomeUtente = $_SESSION['nome'];
         <!-- Prenotazioni disponibili -->
         <div class="row mb-5">
             <div class="col-md-12">
-                <h3 class="text-center">Prenotazioni Disponibili</h3>
-                <table class="table table-bordered table-striped">
+                <h3>Prenotazioni Disponibili</h3>
+                <table class="custom-table">
                     <thead>
                         <tr>                                 
                             <th>Manifestazione</th>
@@ -64,7 +64,7 @@ $nomeUtente = $_SESSION['nome'];
                         </tr>
                     </thead>
                     <tbody id="prenotazioni-disponibili">
-                        <!-- Le prenotazioni disponibili verranno caricate qui tramite AJAX -->>
+                        <!-- Le prenotazioni disponibili verranno caricate qui tramite AJAX -->
                     </tbody>
                 </table>
             </div>
@@ -72,8 +72,8 @@ $nomeUtente = $_SESSION['nome'];
         <!-- Prenotazioni passate -->
         <div class="row mb-5">
             <div class="col-md-12">
-                <h3 class="text-center">Prenotazioni Passate</h3>
-                <table class="table table-bordered table-striped">
+                <h3>Prenotazioni Passate</h3>
+                <table class="custom-table">
                     <thead>
                         <tr>
                             <th>Manifestazione</th>
@@ -119,6 +119,18 @@ $nomeUtente = $_SESSION['nome'];
                 righe.each(function () {
                     const chiave = $(this).find('td:first').text().trim(); // manifestazione
                     if (!visualizzate.includes(chiave)) {
+                        // Mantieni il link originale con l'ID della manifestazione
+                        const prenotaLink = $(this).find('a');
+                        const href = prenotaLink.attr('href');
+                        if (href) {
+                            prenotaLink.attr('href', href);
+                            // Aggiungi un gestore di eventi per prevenire il comportamento predefinito
+                            prenotaLink.on('click', function(e) {
+                                e.preventDefault();
+                                window.location.href = href;
+                            });
+                        }
+                        
                         $('#prenotazioni-disponibili').append($(this));
                         visualizzate.push(chiave);
                     }
@@ -146,3 +158,43 @@ $nomeUtente = $_SESSION['nome'];
 <?php
 include_once('../template_footer.php');
 ?>
+
+
+
+
+
+
+
+<style>
+.custom-table {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+    background-color: transparent;
+    color: white;
+}
+
+.custom-table th,
+.custom-table td {
+    border: none;
+    padding: 12px;
+}
+
+.custom-table thead th {
+    background-color: transparent;
+    color: white;
+    font-weight: bold;
+}
+
+.custom-table tbody tr:nth-child(even) {
+  background-color: rgb(34, 45, 79); /* stesso colore dello sfondo */
+}
+
+.custom-table tbody tr:nth-child(odd) {
+  background-color: rgb(44, 56, 99); /* una tonalità più chiara/sicura */
+}
+
+.custom-table tbody tr:hover {
+  background-color: rgb(166, 169, 181); /* leggera variazione per hover */
+}
+</style>
