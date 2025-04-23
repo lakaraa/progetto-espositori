@@ -812,4 +812,75 @@ function getEspositoriByManifestazioneTop4($pdo, $id_manifestazione) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+//Dashboard visitatore
+function getPrenotazioniInCorso($pdo, $userId) {
+    $sql = "
+        SELECT 
+            m.Nome AS Manifestazione, 
+            m.Data AS DataInizio, 
+            m.Durata, 
+            a.Nome AS Area, 
+            t.Id_Turno AS Turno, 
+            t.Ora 
+        FROM prenotazione p
+        JOIN turno t ON p.Id_Turno = t.Id_Turno
+        JOIN area a ON t.Id_Area = a.Id_Area
+        JOIN manifestazione m ON a.Id_Manifestazione = m.Id_Manifestazione
+        WHERE p.Id_Utente = :userId AND t.Data >= CURDATE()
+        ORDER BY t.Data ASC
+    ";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function getPrenotazioniDisponibili($pdo) {
+    $sql = "
+        SELECT 
+            m.Nome AS Manifestazione, 
+            t.Data AS DataInizio, 
+            m.Durata,
+            a.Nome AS Area,
+            t.Id_Turno,
+            t.Ora,
+            (a.Capienza_Massima - COUNT(p.Id_Utente)) AS PostiDisponibili
+        FROM turno t
+        JOIN area a ON t.Id_Area = a.Id_Area
+        JOIN manifestazione m ON a.Id_Manifestazione = m.Id_Manifestazione
+        LEFT JOIN prenotazione p ON p.Id_Turno = t.Id_Turno
+        WHERE t.Data > CURDATE()
+        GROUP BY t.Id_Turno
+        HAVING PostiDisponibili > 0
+        ORDER BY t.Data ASC
+    ";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function getPrenotazioniPassate($pdo, $userId) {
+    $sql = "
+        SELECT 
+            m.Nome AS Manifestazione, 
+            m.Data AS DataInizio, 
+            m.Durata, 
+            a.Nome AS Area, 
+            t.Id_Turno AS Turno, 
+            t.Ora 
+        FROM prenotazione p
+        JOIN turno t ON p.Id_Turno = t.Id_Turno
+        JOIN area a ON t.Id_Area = a.Id_Area
+        JOIN manifestazione m ON a.Id_Manifestazione = m.Id_Manifestazione
+        WHERE p.Id_Utente = :userId AND t.Data < CURDATE()
+        ORDER BY t.Data DESC
+    ";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+
 ?>

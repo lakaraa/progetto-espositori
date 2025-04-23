@@ -37,14 +37,18 @@ include_once '../template_header.php';
                                 <input class="form-input" id="password" type="password" name="password" style="text-transform: none;" required>
                             </div>
                         </div>
-                        <div class="col-md-12">
-                            <button type="submit" class="button button-primary">Login</button>
+                        <div class="col-md-12 d-flex justify-content-center">
+                            <button class="button button-primary" type="submit">Login</button><br>
                         </div>
+
                     </div>
                 </form>
-                <div class="text-center">
-                    <p>Non hai un account? <a href="registrazione_visitatore.php">Registrati come visitatore</a></p>
-                    Sei un espositore? <a href="registrazione_espositore.php">Registrati come Espositore</a>
+                <div class="col-md-12">
+                    <div class="text-center">
+                        <br>
+                        <p>Non hai un account? <a href="registrazione_visitatore.php">Registrati come visitatore</a></p>
+                        Sei un espositore? <a href="registrazione_espositore.php">Registrati come Espositore</a>
+                    </div>
                 </div>
             </div>
         </div>
