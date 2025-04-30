@@ -1,5 +1,5 @@
 <?php
-session_start(); // Deve essere all'inizio, prima di qualunque output
+include_once 'session.php';
 ?>
 <!DOCTYPE html>
 <html class="wide wow-animation" lang="en">
