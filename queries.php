@@ -1000,7 +1000,7 @@ function addContributo($pdo, $idUtente, $immagine, $titolo, $sintesi, $accettazi
 }
 
 function getCandidature($pdo) {
-    $sql = "SELECT c.Id_Contributo, u.Email, c.Titolo, c.Sintesi, c.Accettazione
+    $sql = "SELECT c.Id_Contributo, u.Email, c.Titolo, c.Sintesi, c.Accettazione, c.Immagine, c.URL
             FROM Contributo c
             JOIN Utente u ON c.Id_Utente = u.Id_Utente";
     $stmt = $pdo->prepare($sql);
