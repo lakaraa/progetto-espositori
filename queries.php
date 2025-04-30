@@ -965,7 +965,7 @@ function checkAreaCapacity($pdo, $idTurno) {
 }
 
 function getUtenti($pdo) {
-    $sql = "SELECT Id_Utente, Nome FROM Utente";
+    $sql = "SELECT Id_Utente, Email FROM Utente";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);

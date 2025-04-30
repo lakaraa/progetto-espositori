@@ -108,10 +108,10 @@ include_once("../../template_header.php");
                     <div class="form-wrap">
                         <label class="form-label" for="utente">Utente</label>
                         <select class="form-input" id="utente" name="Id_Utente" required>
-                            <option value="">Seleziona Utente</option>
+                            <option value="" style="color: black;">Seleziona Utente</option>
                             <?php foreach ($utenti as $utente): ?>
-                                <option value="<?php echo htmlspecialchars($utente['Id_Utente']); ?>">
-                                    <?php echo htmlspecialchars($utente['Nome']); ?>
+                                <option value="<?php echo htmlspecialchars($utente['Id_Utente']); ?>" style="color: black;">
+                                    <?php echo htmlspecialchars($utente['Email']); ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
@@ -138,6 +138,7 @@ include_once("../../template_header.php");
                 <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="immagine">Immagine</label>
+                        <br>
                         <input class="form-input" id="immagine" type="file" name="Immagine" accept="image/*">
                     </div>
                 </div>
