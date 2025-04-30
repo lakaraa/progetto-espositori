@@ -965,7 +965,7 @@ function checkAreaCapacity($pdo, $idTurno) {
 }
 
 function getUtenti($pdo) {
-    $sql = "SELECT Id_Utente, Email FROM Utente";
+    $sql = "SELECT Id_Utente, Email FROM Utente WHERE Ruolo = 'Espositore'";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -1011,6 +1011,32 @@ function getCandidature($pdo) {
 function deleteContributo($pdo, $idContributo) {
     $sql = "DELETE FROM Contributo WHERE Id_Contributo = :idContributo";
     $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idContributo', $idContributo, PDO::PARAM_INT);
+    return $stmt->execute();
+}
+
+function getCandidatureInApprovazione($pdo, $manifestazione) {
+    $sql = "SELECT c.Id_Contributo, u.Nome AS Nome_Utente, m.Nome AS Manifestazione, c.Titolo, c.Sintesi
+            FROM Contributo c
+            JOIN Utente u ON c.Id_Utente = u.Id_Utente
+            JOIN Esposizione e ON c.Id_Contributo = e.Id_Contributo
+            JOIN Manifestazione m ON e.Id_Manifestazione = m.Id_Manifestazione
+            WHERE c.Accettazione = 'In Approvazione'";
+    if (!empty($manifestazione)) {
+        $sql .= " AND m.Nome LIKE :manifestazione";
+    }
+    $stmt = $pdo->prepare($sql);
+    if (!empty($manifestazione)) {
+        $stmt->bindValue(':manifestazione', '%' . $manifestazione . '%', PDO::PARAM_STR);
+    }
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function aggiornaStatoCandidatura($pdo, $idContributo, $stato) {
+    $sql = "UPDATE Contributo SET Accettazione = :stato WHERE Id_Contributo = :idContributo";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':stato', $stato, PDO::PARAM_STR);
     $stmt->bindParam(':idContributo', $idContributo, PDO::PARAM_INT);
     return $stmt->execute();
 }
