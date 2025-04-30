@@ -964,4 +964,80 @@ function checkAreaCapacity($pdo, $idTurno) {
     return $result['Capienza_Massima'] > $result['PrenotazioniAttuali'];
 }
 
+function getUtenti($pdo) {
+    $sql = "SELECT Id_Utente, Email FROM Utente WHERE Ruolo = 'Espositore'";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function getUsernameById($pdo, $idUtente) {
+    $sql = "SELECT Username, Nome, Cognome FROM Utente WHERE Id_Utente = :idUtente";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+function addContributo($pdo, $idUtente, $immagine, $titolo, $sintesi, $accettazione, $url) {
+    // Recupera username, nome e cognome dell'utente
+    $userInfo = getUsernameById($pdo, $idUtente);
+    
+    // Genera un nome file con username_nome_cognome
+    $fileExtension = pathinfo($immagine, PATHINFO_EXTENSION);
+    $newFilename = $userInfo['Username'] . '_' . $userInfo['Nome'] . '_' . $userInfo['Cognome'] . '.' . $fileExtension;
+    
+    $sql = "INSERT INTO Contributo (Id_Utente, Immagine, Titolo, Sintesi, Accettazione, URL) 
+            VALUES (:idUtente, :immagine, :titolo, :sintesi, :accettazione, :url)";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    $stmt->bindParam(':immagine', $newFilename, PDO::PARAM_STR);
+    $stmt->bindParam(':titolo', $titolo, PDO::PARAM_STR);
+    $stmt->bindParam(':sintesi', $sintesi, PDO::PARAM_STR);
+    $stmt->bindParam(':accettazione', $accettazione, PDO::PARAM_STR);
+    $stmt->bindParam(':url', $url, PDO::PARAM_STR);
+    return $stmt->execute();
+}
+
+function getCandidature($pdo) {
+    $sql = "SELECT c.Id_Contributo, u.Email, c.Titolo, c.Sintesi, c.Accettazione
+            FROM Contributo c
+            JOIN Utente u ON c.Id_Utente = u.Id_Utente";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function deleteContributo($pdo, $idContributo) {
+    $sql = "DELETE FROM Contributo WHERE Id_Contributo = :idContributo";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idContributo', $idContributo, PDO::PARAM_INT);
+    return $stmt->execute();
+}
+
+function getCandidatureInApprovazione($pdo, $manifestazione) {
+    $sql = "SELECT c.Id_Contributo, u.Nome AS Nome_Utente, m.Nome AS Manifestazione, c.Titolo, c.Sintesi
+            FROM Contributo c
+            JOIN Utente u ON c.Id_Utente = u.Id_Utente
+            JOIN Esposizione e ON c.Id_Contributo = e.Id_Contributo
+            JOIN Manifestazione m ON e.Id_Manifestazione = m.Id_Manifestazione
+            WHERE c.Accettazione = 'In Approvazione'";
+    if (!empty($manifestazione)) {
+        $sql .= " AND m.Nome LIKE :manifestazione";
+    }
+    $stmt = $pdo->prepare($sql);
+    if (!empty($manifestazione)) {
+        $stmt->bindValue(':manifestazione', '%' . $manifestazione . '%', PDO::PARAM_STR);
+    }
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function aggiornaStatoCandidatura($pdo, $idContributo, $stato) {
+    $sql = "UPDATE Contributo SET Accettazione = :stato WHERE Id_Contributo = :idContributo";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':stato', $stato, PDO::PARAM_STR);
+    $stmt->bindParam(':idContributo', $idContributo, PDO::PARAM_INT);
+    return $stmt->execute();
+}
 ?>
