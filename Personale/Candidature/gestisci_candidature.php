@@ -20,18 +20,18 @@ include '../../template_header.php';
         <p>Crea Candidature pere gli espositori, cancella, modifica e accetta le Candidature.</p>
         <div class="row row-50 justify-content-center">
         <div class="col-md-4">
-            <a class="button button-primary button-lg w-100" href="aggiungi_manifestazione.php">Aggiungi Candidatura</a>
+            <a class="button button-primary button-lg w-100" href="effettua_candidatura.php">Aggiungi Candidatura</a>
         </div>
         <div class="col-md-4">
-            <a class="button button-primary button-lg w-100" href="modifica_manifestazione.php">Modifica Candidatura</a>
+            <a class="button button-primary button-lg w-100" href="modifica_candidatura.php">Modifica Candidatura</a>
         </div>
         </div>
         <div class="row row-50 justify-content-center mt-3">
             <div class="col-md-4">
-                <a class="button button-primary button-lg w-100" href="cancella_manifestazione.php">Cancella Candidatura</a>
+                <a class="button button-primary button-lg w-100" href="cancella_candidatura.php">Cancella Candidatura</a>
             </div>
             <div class="col-md-4">
-                <a class="button button-primary button-lg w-100" href="cancella_manifestazione.php">Accetta Candidature</a>
+                <a class="button button-primary button-lg w-100" href="accetta_candidature.php">Accetta Candidature</a>
             </div>
         </div>
     </div>
