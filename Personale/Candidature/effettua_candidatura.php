@@ -30,7 +30,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             mkdir($uploadDir, 0775, true);
         }
 
-        $immagine = basename($_FILES['Immagine']['name']);
+        // Recupera username, nome e cognome dell'utente
+        $userInfo = getUsernameById($pdo, $idUtente);
+        
+        // Genera un nome file con username_nome_cognome
+        $fileExtension = pathinfo($_FILES['Immagine']['name'], PATHINFO_EXTENSION);
+        $immagine = $userInfo['Username'] . '_' . $userInfo['Nome'] . '_' . $userInfo['Cognome'] . '.' . $fileExtension;
         $targetFile = $uploadDir . $immagine;
 
         // Controlla che il file sia un'immagine
