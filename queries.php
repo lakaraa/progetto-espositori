@@ -971,12 +971,27 @@ function getUtenti($pdo) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+function getUsernameById($pdo, $idUtente) {
+    $sql = "SELECT Username, Nome, Cognome FROM Utente WHERE Id_Utente = :idUtente";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
 function addContributo($pdo, $idUtente, $immagine, $titolo, $sintesi, $accettazione, $url) {
+    // Recupera username, nome e cognome dell'utente
+    $userInfo = getUsernameById($pdo, $idUtente);
+    
+    // Genera un nome file con username_nome_cognome
+    $fileExtension = pathinfo($immagine, PATHINFO_EXTENSION);
+    $newFilename = $userInfo['Username'] . '_' . $userInfo['Nome'] . '_' . $userInfo['Cognome'] . '.' . $fileExtension;
+    
     $sql = "INSERT INTO Contributo (Id_Utente, Immagine, Titolo, Sintesi, Accettazione, URL) 
             VALUES (:idUtente, :immagine, :titolo, :sintesi, :accettazione, :url)";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
-    $stmt->bindParam(':immagine', $immagine, PDO::PARAM_STR);
+    $stmt->bindParam(':immagine', $newFilename, PDO::PARAM_STR);
     $stmt->bindParam(':titolo', $titolo, PDO::PARAM_STR);
     $stmt->bindParam(':sintesi', $sintesi, PDO::PARAM_STR);
     $stmt->bindParam(':accettazione', $accettazione, PDO::PARAM_STR);
