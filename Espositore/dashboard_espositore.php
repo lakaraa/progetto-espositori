@@ -57,10 +57,10 @@ $nomeUtente = $_SESSION['nome'];
                     <thead>
                         <tr>                                 
                             <th>Manifestazione</th>
+                            <th>Data Manifestazione</th>
                             <th>Data Accettazione</th>
                             <th>Tipo Contributo</th>
                             <th>Stato</th>
-                            <th>Azioni</th>
                         </tr>
                     </thead>
                     <tbody id="contributi">
@@ -71,16 +71,16 @@ $nomeUtente = $_SESSION['nome'];
         </div>
 
         <!-- Manifestazioni Disponibili -->
-        <div class="row mb-5">
+        <div class="row mb-6">
             <div class="col-md-12">
                 <h3>Manifestazioni Disponibili</h3>
                 <table class="custom-table">
                     <thead>
                         <tr>                                 
-                            <th>Nome Manifestazione</th>
+                            <th>Manifestazione</th>
                             <th>Data Inizio</th>
-                            <th>Data Fine</th>
                             <th>Durata gg</th>
+                            <th>Descrizione</th>
                             <th>Azioni</th>
                         </tr>
                     </thead>
