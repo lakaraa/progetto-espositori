@@ -964,4 +964,39 @@ function checkAreaCapacity($pdo, $idTurno) {
     return $result['Capienza_Massima'] > $result['PrenotazioniAttuali'];
 }
 
+function getUtenti($pdo) {
+    $sql = "SELECT Id_Utente, Email FROM Utente";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function addContributo($pdo, $idUtente, $immagine, $titolo, $sintesi, $accettazione, $url) {
+    $sql = "INSERT INTO Contributo (Id_Utente, Immagine, Titolo, Sintesi, Accettazione, URL) 
+            VALUES (:idUtente, :immagine, :titolo, :sintesi, :accettazione, :url)";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    $stmt->bindParam(':immagine', $immagine, PDO::PARAM_STR);
+    $stmt->bindParam(':titolo', $titolo, PDO::PARAM_STR);
+    $stmt->bindParam(':sintesi', $sintesi, PDO::PARAM_STR);
+    $stmt->bindParam(':accettazione', $accettazione, PDO::PARAM_STR);
+    $stmt->bindParam(':url', $url, PDO::PARAM_STR);
+    return $stmt->execute();
+}
+
+function getCandidature($pdo) {
+    $sql = "SELECT c.Id_Contributo, u.Nome AS Nome_Utente, c.Titolo, c.Sintesi, c.Accettazione
+            FROM Contributo c
+            JOIN Utente u ON c.Id_Utente = u.Id_Utente";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function deleteContributo($pdo, $idContributo) {
+    $sql = "DELETE FROM Contributo WHERE Id_Contributo = :idContributo";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idContributo', $idContributo, PDO::PARAM_INT);
+    return $stmt->execute();
+}
 ?>
