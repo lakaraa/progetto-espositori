@@ -13,10 +13,7 @@ if ($idEspositore <= 0) {
 }
 
 // Recupera i dettagli dell'espositore
-$stmt = $pdo->prepare("SELECT * FROM utente WHERE Id_Utente = :idEspositore AND Ruolo = 'Espositore'");
-$stmt->bindParam(':idEspositore', $idEspositore, PDO::PARAM_INT);
-$stmt->execute();
-$espositore = $stmt->fetch(PDO::FETCH_ASSOC);
+$espositore = getEspositoreById($pdo, $idEspositore);
 
 if (!$espositore) {
     die("Espositore non trovato.");
@@ -68,41 +65,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errorMessage)) {
         try {
-            // Costruisci query dinamica
-            $sql = "UPDATE utente 
-                    SET Nome = :nome, Cognome = :cognome, Email = :email, Telefono = :telefono, 
-                        Username = :username, Qualifica = :qualifica";
-
-            if (!empty($password)) {
-                $sql .= ", Password = :password";
-            }
-
-            if (!empty($cvData)) {
-                $sql .= ", Curriculum = :cv";
-            }
-
-            $sql .= " WHERE Id_Utente = :idEspositore";
-
-            $stmt = $pdo->prepare($sql);
-            $stmt->bindParam(':nome', $nome);
-            $stmt->bindParam(':cognome', $cognome);
-            $stmt->bindParam(':email', $email);
-            $stmt->bindParam(':telefono', $telefono);
-            $stmt->bindParam(':username', $username);
-            $stmt->bindParam(':qualifica', $qualifica);
-            $stmt->bindParam(':idEspositore', $idEspositore, PDO::PARAM_INT);
-
-            if (!empty($password)) {
-                $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-                $stmt->bindParam(':password', $hashedPassword);
-            }
-
-            if (!empty($cvData)) {
-                $stmt->bindParam(':cv', $cvData, PDO::PARAM_LOB);
-            }
-
-            // Esegui l'aggiornamento
-            if ($stmt->execute()) {
+            // Aggiorna i dati dell'espositore
+            if (updateEspositoreDettagli($pdo, $idEspositore, $nome, $cognome, $email, $telefono, $username, $qualifica, $password, $cvData)) {
                 $successMessage = "Dati aggiornati con successo.";
 
                 // Rinomina il file del CV se esiste già e se lo username è stato cambiato
@@ -115,13 +79,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($espositore['Username'] !== $username && file_exists($cvOldName)) {
                         if (rename($cvOldName, $cvNewName)) {
                             $cvDataRenamed = file_get_contents($cvNewName);
-                            $sql = "UPDATE utente SET Curriculum = :cv WHERE Id_Utente = :idEspositore";
-                            $stmtUpdateCV = $pdo->prepare($sql);
-                            $stmtUpdateCV->bindParam(':cv', $cvDataRenamed, PDO::PARAM_LOB);
-                            $stmtUpdateCV->bindParam(':idEspositore', $idEspositore, PDO::PARAM_INT);
-                            $stmtUpdateCV->execute();
-
-                            $successMessage .= " Curriculum aggiornato dopo la modifica dello username.";
+                            if (updateEspositoreDettagli($pdo, $idEspositore, $nome, $cognome, $email, $telefono, $username, $qualifica, null, $cvDataRenamed)) {
+                                $successMessage .= " Curriculum aggiornato dopo la modifica dello username.";
+                            } else {
+                                $errorMessage .= " Errore durante l'aggiornamento del Curriculum.";
+                            }
                         } else {
                             $errorMessage .= " Impossibile rinominare il file del CV.";
                         }

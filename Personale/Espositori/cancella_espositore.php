@@ -111,14 +111,6 @@ $espositori = getEspositori($pdo);
 <?php
 include_once("../../template_footer.php");
 
-// Funzione per recuperare lo username dell'espositore
-function getUsername($pdo, $idEspositore) {
-    $sql = "SELECT username FROM utente WHERE Id_Utente = :idEspositore";
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':idEspositore', $idEspositore, PDO::PARAM_INT);
-    $stmt->execute();
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    return $row ? $row['username'] : null;
-}
+
 
 ?>

@@ -1,26 +1,7 @@
 <?php
 include_once ("../../config.php");
-//include_once ("../../queries.php");
+include_once ("../../queries.php");
 include_once ("../../template_header.php");
-
-function getEspositori($pdo) 
-{
-    $sql = "
-        SELECT u.Id_Utente AS id, 
-            u.Username AS username, 
-            u.Password AS password, 
-            u.Nome AS nome, 
-            u.Cognome AS cognome, 
-            u.Email AS email, 
-            u.Telefono AS telefono, 
-            u.Qualifica AS qualifica, 
-            u.Curriculum AS curriculum
-        FROM utente u
-        WHERE u.Ruolo = 'Espositore'";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
 
 $espositori = getEspositori($pdo);
 ?>

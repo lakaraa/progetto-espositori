@@ -1,15 +1,13 @@
 <?php
 include_once("../../config.php");
+include_once("../../queries.php");
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
 
-    $stmt = $pdo->prepare("SELECT Username FROM utente WHERE Id_Utente = :id AND Ruolo = 'Espositore'");
-    $stmt->execute(['id' => $id]);
-    $espositore = $stmt->fetch(PDO::FETCH_ASSOC);
+    $username = getUsername($pdo, $id);
 
-    if ($espositore && !empty($espositore['Username'])) {
-        $username = $espositore['Username'];
+    if ($username) {
         $curriculumPath = "../../uploads/cv_" . $username . ".pdf";
 
         if (file_exists($curriculumPath)) {
