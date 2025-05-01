@@ -3,30 +3,14 @@ include_once '../config.php';
 include_once '../session.php';
 include_once '../queries.php';
 
-// Verifica che l'utente sia loggato e sia un espositore
-if (!isset($_SESSION['id_utente']) || $_SESSION['ruolo'] !== 'Espositore') {
+// Verifica che l'utente sia loggato
+if (!isset($_SESSION['id_utente'])) {
     die('Accesso non autorizzato');
 }
 
-$userId = $_SESSION['id_utente'];
-
 try {
-    // Query per ottenere le candidature dell'espositore
-    $query = "SELECT c.*, m.Nome as NomeManifestazione, m.Data as Data_Manifestazione,
-              CASE 
-                WHEN c.Accettazione = 'Accettato' THEN 'Accettata'
-                WHEN c.Accettazione = 'Rifiutato' THEN 'Rifiutata'
-                ELSE 'In Attesa'
-              END as Stato
-              FROM Contributo c 
-              JOIN Esposizione e ON c.Id_Contributo = e.Id_Contributo
-              JOIN Manifestazione m ON e.Id_Manifestazione = m.Id_Manifestazione 
-              WHERE c.Id_Utente = :userId 
-              ORDER BY c.Data_Candidatura DESC";
-    
-    $stmt = $pdo->prepare($query);
-    $stmt->execute(['userId' => $userId]);
-    $candidature = $stmt->fetchAll();
+    // Ottieni le candidature dell'utente usando la funzione
+    $candidature = getCandidatureByUser($pdo, $_SESSION['id_utente']);
 
     if (empty($candidature)) {
         echo '<tr><td colspan="5" class="text-center">Nessuna candidatura trovata</td></tr>';
@@ -34,59 +18,103 @@ try {
         foreach ($candidature as $candidatura) {
             $statoClass = '';
             switch ($candidatura['Stato']) {
-                case 'Accettata':
-                    $statoClass = 'text-success';
+                case 'Accettato':
+                    $statoClass = 'text-success font-weight-bold';
                     break;
-                case 'Rifiutata':
-                    $statoClass = 'text-danger';
+                case 'Rifiutato':
+                    $statoClass = 'text-danger font-weight-bold';
                     break;
-                case 'In Attesa':
-                    $statoClass = 'text-warning';
+                case 'In Approvazione':
+                    $statoClass = 'text-warning font-weight-bold';
                     break;
             }
+            
+            // Gestione del testo lungo per titolo e sintesi
+            $titolo = htmlspecialchars($candidatura['Titolo']);
+            $titoloId = 'titolo-' . uniqid();
+            $titoloShort = strlen($titolo) > 10 ? substr($titolo, 0, 10) . '...' : $titolo;
+            $hasMoreTitolo = strlen($titolo) > 10;
+
+            $sintesi = htmlspecialchars($candidatura['Sintesi']);
+            $sintesiId = 'sintesi-' . uniqid();
+            $sintesiShort = strlen($sintesi) > 10 ? substr($sintesi, 0, 10) . '...' : $sintesi;
+            $hasMore = strlen($sintesi) > 10;
             
             echo '<tr>';
-            echo '<td>' . htmlspecialchars($candidatura['NomeManifestazione']) . '</td>';
-            echo '<td>' . date('d/m/Y', strtotime($candidatura['Data_Candidatura'])) . '</td>';
-            echo '<td class="' . $statoClass . '">' . htmlspecialchars($candidatura['Stato']) . '</td>';
-            echo '<td>' . htmlspecialchars($candidatura['Sintesi'] ?? '') . '</td>';
-            echo '<td>';
-            
-            // Aggiungi azioni in base allo stato
-            if ($candidatura['Stato'] === 'In Attesa') {
-                echo '<button class="btn btn-danger btn-sm" onclick="annullaCandidatura(' . $candidatura['Id_Contributo'] . ')">Annulla</button>';
-            } elseif ($candidatura['Stato'] === 'Accettata') {
-                echo '<a href="gestisci_contributo.php?id=' . $candidatura['Id_Contributo'] . '" class="btn btn-primary btn-sm">Gestisci</a>';
+            echo '<td>' . htmlspecialchars($candidatura['Nome_Manifestazione'] ?? 'Non assegnato') . '</td>';
+            echo '<td>' . ($candidatura['Data_Manifestazione'] ? date('d/m/Y', strtotime($candidatura['Data_Manifestazione'])) : 'N/A') . '</td>';
+            echo '<td class="titolo-cell">';
+            echo '<div class="titolo-content">';
+            echo '<span class="titolo-short" id="' . $titoloId . '">' . $titoloShort . '</span>';
+            if ($hasMoreTitolo) {
+                echo '<button class="btn btn-link btn-sm leggi-piu" onclick="toggleText(\'' . $titoloId . '\', \'' . addslashes($titolo) . '\')">Leggi di più</button>';
             }
-            
+            echo '</div>';
             echo '</td>';
+            echo '<td class="sintesi-cell">';
+            echo '<div class="sintesi-content">';
+            echo '<span class="sintesi-short" id="' . $sintesiId . '">' . $sintesiShort . '</span>';
+            if ($hasMore) {
+                echo '<button class="btn btn-link btn-sm leggi-piu" onclick="toggleText(\'' . $sintesiId . '\', \'' . addslashes($sintesi) . '\')">Leggi di più</button>';
+            }
+            echo '</div>';
+            echo '</td>';
+            echo '<td class="' . $statoClass . '">' . htmlspecialchars($candidatura['Stato']) . '</td>';
             echo '</tr>';
         }
     }
 } catch (PDOException $e) {
-    error_log('Errore nel recupero delle candidature: ' . $e->getMessage());
-    echo '<tr><td colspan="5" class="text-center text-danger">Errore nel caricamento delle candidature</td></tr>';
+    echo json_encode(['error' => 'Errore nel recupero delle candidature']);
 }
 ?>
 
+<style>
+.sintesi-cell, .titolo-cell {
+    max-width: 300px;
+    position: relative;
+}
+
+.sintesi-content, .titolo-content {
+    position: relative;
+}
+
+.leggi-piu {
+    color: rgb(74, 196, 207);
+    padding: 0;
+    margin-left: 5px;
+    font-size: 0.9em;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.leggi-piu:hover {
+    text-decoration: underline;
+    color: rgb(74, 196, 207);
+}
+
+.sintesi-expanded, .titolo-expanded {
+    white-space: normal;
+    word-wrap: break-word;
+}
+</style>
+
 <script>
-function annullaCandidatura(idContributo) {
-    if (confirm('Sei sicuro di voler annullare questa candidatura?')) {
-        $.ajax({
-            url: 'annulla_candidatura.php',
-            method: 'POST',
-            data: { id_contributo: idContributo },
-            success: function(response) {
-                if (response.success) {
-                    location.reload();
-                } else {
-                    alert('Errore durante l\'annullamento della candidatura');
-                }
-            },
-            error: function() {
-                alert('Errore durante l\'annullamento della candidatura');
-            }
-        });
+function toggleText(id, fullText) {
+    const element = document.getElementById(id);
+    const button = element.nextElementSibling;
+    
+    if (element.classList.contains('sintesi-expanded') || element.classList.contains('titolo-expanded')) {
+        // Collapse
+        element.textContent = fullText.substring(0, 10) + '...';
+        element.classList.remove('sintesi-expanded', 'titolo-expanded');
+        button.textContent = 'Leggi di più';
+    } else {
+        // Expand
+        element.textContent = fullText;
+        element.classList.add(id.startsWith('sintesi') ? 'sintesi-expanded' : 'titolo-expanded');
+        button.textContent = 'Mostra meno';
     }
 }
 </script> 

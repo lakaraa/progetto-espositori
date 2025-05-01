@@ -10,6 +10,11 @@ error_reporting(E_ALL);
 $userId = $_SESSION['id_utente']; 
 $nomeUtente = $_SESSION['nome'];  
 
+// Ottieni le statistiche delle candidature
+$candidatureInApprovazione = getCandidatureInApprovazioneCount($pdo, $_SESSION['id_utente']);
+$candidatureAccettate = getCandidatureAccettateCount($pdo, $_SESSION['id_utente']);
+$candidatureRifiutate = getCandidatureRifiutateCount($pdo, $_SESSION['id_utente']);
+
 ?>
 
 <!-- Breadcrumbs-->
@@ -28,6 +33,44 @@ $nomeUtente = $_SESSION['nome'];
         <h2 class="text-center mb-4">CIAO <?= htmlspecialchars($nomeUtente) ?></h2>
         <p class="text-center mb-5">Qui puoi visualizzare le tue candidature e i contributi accettati.</p>
         
+        <h3>Statistiche Candidature</h3>
+
+        <!-- Statistiche Candidature -->
+        <div class="row mb-5">
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card bg-warning-light">
+                            <div class="card-body text-center">
+                        <h5 class="card-title">In Approvazione</h5>
+                        <h2 class="card-text">
+                            <?= $candidatureInApprovazione ?>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success-light">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Accettate</h5>
+                        <h2 class="card-text">
+                            <?= $candidatureAccettate ?>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-danger-light">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Rifiutate</h5>
+                        <h2 class="card-text">
+                            <?= $candidatureRifiutate ?>
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Candidature -->
         <div class="row mb-5">
             <div class="col-md-12">
@@ -36,10 +79,10 @@ $nomeUtente = $_SESSION['nome'];
                     <thead>
                         <tr>                                 
                             <th>Manifestazione</th>
-                            <th>Data Candidatura</th>
+                            <th>Data Manifestazione</th>
+                            <th>Titolo</th>
+                            <th>Sintesi</th>
                             <th>Stato</th>
-                            <th>Note</th>
-                            <th>Azioni</th>
                         </tr>
                     </thead>
                     <tbody id="candidature">
@@ -58,8 +101,8 @@ $nomeUtente = $_SESSION['nome'];
                         <tr>                                 
                             <th>Manifestazione</th>
                             <th>Data Manifestazione</th>
-                            <th>Data Accettazione</th>
-                            <th>Tipo Contributo</th>
+                            <th>Titolo</th>
+                            <th>Sintesi</th>
                             <th>Stato</th>
                         </tr>
                     </thead>
@@ -138,6 +181,28 @@ include_once('../template_footer.php');
 ?>
 
 <style>
+.text-info {
+    color: #17a2b8 !important;
+}
+
+.card {
+    transition: transform 0.2s;
+    margin-bottom: 20px;
+    background-color: white;
+}
+
+.card-title, .card-text {
+    color: rgb(34, 45, 79);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.table th {
+    background-color: #f8f9fa;
+}
 .custom-table {
     font-family: Arial, Helvetica, sans-serif;
     border-collapse: collapse;
@@ -202,5 +267,17 @@ include_once('../template_footer.php');
 
 .text-info {
     color: #17a2b8 !important;
+}
+
+.bg-warning-light {
+    background-color: #fff3cd;
+}
+
+.bg-success-light {
+    background-color: #d4edda;
+}
+
+.bg-danger-light {
+    background-color: #f8d7da;
 }
 </style>
