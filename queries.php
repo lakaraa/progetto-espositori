@@ -10,7 +10,7 @@ function getManifestazioniTop6($pdo)
 //tutte le manifestazioni per la pagina manifestazioni
 function getManifestazioni($pdo) 
 {
-    $sql = "SELECT * FROM manifestazione"; 
+    $sql = "SELECT * FROM manifestazione ORDER BY Nome ASC"; 
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -99,7 +99,6 @@ function getContributiByManifestazione($pdo, $idManifestazione)
         
         return $contributi;
     } catch (PDOException $e) {
-        error_log("Errore in getContributiByManifestazione: " . $e->getMessage());
         return [];
     }
 }
@@ -199,22 +198,20 @@ function getAree($pdo)
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-function getAreeByManifestazione($pdo, $idManifestazione) 
-{
-    $sql = "
-        SELECT a.Id_Area AS id, 
-            a.Nome AS nome, 
-            m.Nome AS manifestazione, 
-            a.Descrizione AS descrizione, 
-            a.Capienza_Massima AS capienza_massima
-        FROM area a
-        INNER JOIN manifestazione m ON a.Id_Manifestazione = m.Id_Manifestazione
-        WHERE m.Id_Manifestazione = :idManifestazione
-    ";
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+function getAreeByManifestazione($pdo, $manifestazioneId) {
+    $sql = "SELECT area.Id_Area, area.Nome, area.Capienza_Massima
+            FROM manifestazione
+            JOIN area ON manifestazione.Id_Manifestazione = area.Id_Manifestazione
+            WHERE manifestazione.Id_Manifestazione = :manifestazione_id";
+    
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':manifestazione_id', $manifestazioneId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return [];
+    }
 }
 //Gestione Candidatura
 function addCandidatura($pdo, $idUtente, $immagine, $titolo, $sintesi) 
@@ -512,17 +509,21 @@ function updatePersonale($pdo, $idUtente, $username, $password, $nome, $cognome,
 //Gestione Prenoatazione
 function addPrenotazione($pdo, $idUtente, $idTurno) 
 {
-    // Verifica se c'è ancora spazio disponibile
-    if (!checkAreaCapacity($pdo, $idTurno)) {
+    try {
+        // Verifica se c'è ancora spazio disponibile
+        if (!checkAreaCapacity($pdo, $idTurno)) {
+            return false;
+        }
+
+        $sql = "INSERT INTO prenotazione (Id_Utente, Id_Turno) 
+                VALUES (:idUtente, :idTurno)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+        $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
+        return $stmt->execute();
+    } catch (PDOException $e) {
         return false;
     }
-
-    $sql = "INSERT INTO prenotazione (Id_Utente, Id_Turno) 
-            VALUES (:idUtente, :idTurno)";
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
-    $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
-    return $stmt->execute();
 }
 function deletePrenotazione($pdo, $idUtente, $idTurno) {
     $sql = "DELETE FROM prenotazione 
@@ -594,17 +595,23 @@ function getTurni($pdo) {
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-function getTurniByArea($pdo, $idArea) {
-    $stmt = $pdo->prepare("
-    SELECT t.Id_Turno, t.Data, t.Ora, a.Nome AS Nome_Area, m.Nome AS Nome_Manifestazione
-    FROM turno t
-    JOIN area a ON t.Id_Area = a.Id_Area
-    JOIN manifestazione m ON a.Id_Manifestazione = m.Id_Manifestazione
-    WHERE a.Id_Area = :idArea
-    ");
-    $stmt->bindParam(':idArea', $idArea, PDO::PARAM_INT);
-    $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+function getTurniByArea($pdo, $manifestazioneId, $areaId) {
+    $sql = "SELECT turno.Id_Turno, turno.Data, turno.Ora
+            FROM manifestazione
+            JOIN area ON manifestazione.Id_Manifestazione = area.Id_Manifestazione
+            JOIN turno ON turno.Id_Area = area.Id_Area
+            WHERE manifestazione.Id_Manifestazione = :manifestazione_id 
+            AND area.Id_Area = :area_id";
+    
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':manifestazione_id', $manifestazioneId, PDO::PARAM_INT);
+        $stmt->bindParam(':area_id', $areaId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return [];
+    }
 }
 function getTurniByManifestazione($pdo, $idManifestazione) {
     $stmt = $pdo->prepare("
@@ -627,13 +634,11 @@ function addPrenotazioneByPersonale($pdo, $idUtente, $idTurno) {
     $stmtCheck->execute();
 
     if ($stmtCheck->fetchColumn() > 0) {
-        error_log("Prenotazione già esistente per il visitatore e il turno selezionati.");
         return false; // Prenotazione già esistente
     }
 
     // Verifica se c'è ancora spazio disponibile
     if (!checkAreaCapacity($pdo, $idTurno)) {
-        error_log("Capienza massima raggiunta per questo turno.");
         return false;
     }
 
@@ -644,10 +649,8 @@ function addPrenotazioneByPersonale($pdo, $idUtente, $idTurno) {
     $stmtInsert->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
 
     if ($stmtInsert->execute()) {
-        error_log("Prenotazione inserita con successo.");
         return true;
     } else {
-        error_log("Errore durante l'inserimento della prenotazione.");
         return false;
     }
 }
@@ -979,24 +982,71 @@ function getUsernameById($pdo, $idUtente) {
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-function addContributo($pdo, $idUtente, $immagine, $titolo, $sintesi, $accettazione, $url) {
-    // Recupera username, nome e cognome dell'utente
-    $userInfo = getUsernameById($pdo, $idUtente);
-    
-    // Genera un nome file con username_nome_cognome
-    $fileExtension = pathinfo($immagine, PATHINFO_EXTENSION);
-    $newFilename = $userInfo['Username'] . '_' . $userInfo['Nome'] . '_' . $userInfo['Cognome'] . '.' . $fileExtension;
-    
-    $sql = "INSERT INTO Contributo (Id_Utente, Immagine, Titolo, Sintesi, Accettazione, URL) 
-            VALUES (:idUtente, :immagine, :titolo, :sintesi, :accettazione, :url)";
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
-    $stmt->bindParam(':immagine', $newFilename, PDO::PARAM_STR);
-    $stmt->bindParam(':titolo', $titolo, PDO::PARAM_STR);
-    $stmt->bindParam(':sintesi', $sintesi, PDO::PARAM_STR);
-    $stmt->bindParam(':accettazione', $accettazione, PDO::PARAM_STR);
-    $stmt->bindParam(':url', $url, PDO::PARAM_STR);
-    return $stmt->execute();
+function addContributo($pdo, $idUtente, $immagine, $titolo, $sintesi, $accettazione, $url, $idManifestazione) {
+    try {
+        // Verifica che l'utente esista
+        $userInfo = getUsernameById($pdo, $idUtente);
+        if (!$userInfo) {
+            throw new PDOException('Utente non trovato');
+        }
+
+        // Valida il valore di Accettazione
+        $validAccettazione = ['Rifiutato', 'Accettato', 'In Approvazione'];
+        if (!in_array($accettazione, $validAccettazione)) {
+            throw new PDOException('Valore non valido per Accettazione');
+        }
+
+        // Inserisci il contributo
+        $query = "INSERT INTO Contributo (Id_Utente, Immagine, Titolo, Sintesi, Accettazione, URL) 
+                 VALUES (:idUtente, :immagine, :titolo, :sintesi, :accettazione, :url)";
+        
+        $stmt = $pdo->prepare($query);
+        $result = $stmt->execute([
+            'idUtente' => $idUtente,
+            'immagine' => $immagine,
+            'titolo' => $titolo,
+            'sintesi' => $sintesi,
+            'accettazione' => $accettazione,
+            'url' => $url
+        ]);
+
+        if (!$result) {
+            throw new PDOException('Errore durante l\'inserimento del contributo');
+        }
+
+        // Ottieni l'ID del contributo appena inserito
+        $idContributo = $pdo->lastInsertId();
+        if (!$idContributo) {
+            throw new PDOException('Impossibile ottenere l\'ID del contributo inserito');
+        }
+
+        // Verifica che la manifestazione esista
+        $queryManifestazione = "SELECT Id_Manifestazione FROM Manifestazione WHERE Id_Manifestazione = :idManifestazione";
+        $stmtManifestazione = $pdo->prepare($queryManifestazione);
+        $stmtManifestazione->execute(['idManifestazione' => $idManifestazione]);
+        if (!$stmtManifestazione->fetch()) {
+            throw new PDOException('Manifestazione non trovata');
+        }
+
+        // Inserisci l'associazione nella tabella Esposizione
+        $queryEsposizione = "INSERT INTO Esposizione (Id_Manifestazione, Id_Contributo) 
+                           VALUES (:idManifestazione, :idContributo)";
+        
+        $stmtEsposizione = $pdo->prepare($queryEsposizione);
+        $resultEsposizione = $stmtEsposizione->execute([
+            'idManifestazione' => $idManifestazione,
+            'idContributo' => $idContributo
+        ]);
+
+        if (!$resultEsposizione) {
+            throw new PDOException('Errore durante l\'associazione con la manifestazione');
+        }
+
+        return $idContributo;
+
+    } catch (PDOException $e) {
+        throw $e;
+    }
 }
 
 function getCandidature($pdo) {
@@ -1039,5 +1089,192 @@ function aggiornaStatoCandidatura($pdo, $idContributo, $stato) {
     $stmt->bindParam(':stato', $stato, PDO::PARAM_STR);
     $stmt->bindParam(':idContributo', $idContributo, PDO::PARAM_INT);
     return $stmt->execute();
+}
+
+function getCandidatureByUser($pdo, $userId) {
+    try {
+        $query = "SELECT 
+            c.Titolo,
+            c.Sintesi,
+            c.Accettazione AS Stato,
+            c.URL,
+            m.Nome AS Nome_Manifestazione,
+            m.Data AS Data_Manifestazione
+        FROM contributo c
+        LEFT JOIN esposizione e ON c.Id_Contributo = e.Id_Contributo
+        LEFT JOIN manifestazione m ON e.Id_Manifestazione = m.Id_Manifestazione
+        WHERE c.Id_Utente = :userId AND c.Accettazione != 'Accettato'
+        ORDER BY c.Id_Contributo DESC";
+
+        $stmt = $pdo->prepare($query);
+        $stmt->execute(['userId' => $userId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return [];
+    }
+}
+
+function getManifestazioniDisponibili($pdo, $userId) {
+    try {
+        $query = "SELECT m.*, 
+                  (SELECT COUNT(*) FROM Esposizione e WHERE e.Id_Manifestazione = m.Id_Manifestazione) as ContributiAttuali,
+                  (SELECT COUNT(*) FROM Contributo c 
+                   JOIN Esposizione e ON c.Id_Contributo = e.Id_Contributo 
+                   WHERE e.Id_Manifestazione = m.Id_Manifestazione 
+                   AND c.Id_Utente = :userId) as HaContributo
+                  FROM Manifestazione m 
+                  WHERE m.Data >= CURDATE()
+                  ORDER BY m.Data ASC";
+        
+        $stmt = $pdo->prepare($query);
+        $stmt->execute(['userId' => $userId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return [];
+    }
+}
+
+function getContributiByUser($pdo, $userId) {
+    try {
+        $query = "SELECT 
+            c.Titolo,
+            c.Sintesi,
+            c.Accettazione AS Stato,
+            c.URL,
+            m.Nome AS Nome_Manifestazione,
+            m.Data AS Data_Manifestazione
+        FROM contributo c
+        LEFT JOIN esposizione e ON c.Id_Contributo = e.Id_Contributo
+        LEFT JOIN manifestazione m ON e.Id_Manifestazione = m.Id_Manifestazione
+        WHERE c.Id_Utente = :userId AND c.Accettazione = 'Accettato'
+        ORDER BY c.Id_Contributo DESC";
+
+        $stmt = $pdo->prepare($query);
+        $stmt->execute(['userId' => $userId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        return [];
+    }
+}
+
+function getCategorie($pdo) {
+    $query = "SELECT Id_Categoria, Nome, Descrizione FROM categoria ORDER BY Nome";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Query per le statistiche delle candidature nella dashboard espositore
+function getCandidatureInApprovazioneCount($pdo, $userId) {
+    $sql = "SELECT COUNT(*) FROM contributo c 
+            WHERE c.Id_Utente = :userId AND c.Accettazione = 'In Approvazione'";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchColumn();
+}
+
+function getCandidatureAccettateCount($pdo, $userId) {
+    $sql = "SELECT COUNT(*) FROM contributo c 
+            WHERE c.Id_Utente = :userId AND c.Accettazione = 'Accettato'";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchColumn();
+}
+
+function getCandidatureRifiutateCount($pdo, $userId) {
+    $sql = "SELECT COUNT(*) FROM contributo c 
+            WHERE c.Id_Utente = :userId AND c.Accettazione = 'Rifiutato'";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchColumn();
+}
+
+// Query per ottenere le manifestazioni disponibili
+function getManifestazioniDisponibili_dashboard_espositore($pdo, $userId) {
+    $sql = "SELECT m.*, 
+        (SELECT COUNT(*) FROM Esposizione e WHERE e.Id_Manifestazione = m.Id_Manifestazione) as ContributiAttuali,
+        (SELECT COUNT(*) FROM Contributo c 
+         JOIN Esposizione e ON c.Id_Contributo = e.Id_Contributo 
+         WHERE e.Id_Manifestazione = m.Id_Manifestazione 
+         AND c.Id_Utente = :userId) as HaContributo
+    FROM Manifestazione m 
+    WHERE m.Data >= CURDATE()
+    ORDER BY m.Data ASC";
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// Funzione per inserire una categoria nella tabella tipologia
+function addTipologia($pdo, $idContributo, $idCategoria) {
+    $sql = "INSERT INTO tipologia (Id_Contributo, Id_Categoria) VALUES (:idContributo, :idCategoria)";
+    $stmt = $pdo->prepare($sql);
+    return $stmt->execute([
+        'idContributo' => $idContributo,
+        'idCategoria' => $idCategoria
+    ]);
+}
+// Funzione per recuperare lo username dell'espositore
+function getUsername($pdo, $idEspositore) {
+    $sql = "SELECT username FROM utente WHERE Id_Utente = :idEspositore";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idEspositore', $idEspositore, PDO::PARAM_INT);
+    $stmt->execute();
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $row ? $row['username'] : null;
+}
+
+// Funzione per aggiornare i dati dell'espositore con gestione dinamica dei campi opzionali
+function updateEspositoreDettagli($pdo, $idEspositore, $nome, $cognome, $email, $telefono, $username, $qualifica, $password = null, $cvData = null) {
+    try {
+        // Costruisci query dinamica
+        $sql = "UPDATE utente 
+                SET Nome = :nome, 
+                    Cognome = :cognome, 
+                    Email = :email, 
+                    Telefono = :telefono, 
+                    Username = :username, 
+                    Qualifica = :qualifica";
+
+        if (!empty($password)) {
+            $sql .= ", Password = :password";
+        }
+
+        if (!empty($cvData)) {
+            $sql .= ", Curriculum = :cv";
+        }
+
+        $sql .= " WHERE Id_Utente = :idEspositore AND Ruolo = 'Espositore'";
+
+        $stmt = $pdo->prepare($sql);
+        
+        // Binding dei parametri obbligatori
+        $stmt->bindParam(':nome', $nome);
+        $stmt->bindParam(':cognome', $cognome);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':telefono', $telefono);
+        $stmt->bindParam(':username', $username);
+        $stmt->bindParam(':qualifica', $qualifica);
+        $stmt->bindParam(':idEspositore', $idEspositore, PDO::PARAM_INT);
+
+        // Binding dei parametri opzionali
+        if (!empty($password)) {
+            $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+            $stmt->bindParam(':password', $hashedPassword);
+        }
+
+        if (!empty($cvData)) {
+            $stmt->bindParam(':cv', $cvData, PDO::PARAM_LOB);
+        }
+
+        return $stmt->execute();
+    } catch (PDOException $e) {
+        throw $e;
+    }
 }
 ?>
