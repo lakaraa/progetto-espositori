@@ -1,7 +1,7 @@
 <!-- template_footer.php -->
 <footer class="section footer-classic bg-default">
             <div class="container">
-            <img src="../resources/images/motto.png" alt="About Us" width="20%"/>
+            <img src="/progetto-espositori/resources/images/motto.png" alt="About Us" width="20%"/>
                 <div class="row row-15">
                     <div class="col-sm-6">
                         
