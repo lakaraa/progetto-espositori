@@ -4,8 +4,8 @@ include_once("../../queries.php");
 include_once("../../session.php");
 
 // Recupera gli utenti per il menu a tendina
-$utenti = getUtenti($pdo); // Funzione per ottenere gli utenti dalla tabella Utente
-$manifestazioni = getManifestazioni($pdo); // Funzione per ottenere le manifestazioni dalla tabella Manifestazione
+$utenti = getUtenti($pdo);
+$manifestazioni = getManifestazioni($pdo);
 
 // Recupera le categorie disponibili
 try {
@@ -77,6 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Genera un nome file con nome_cognome_giorno-mese-anno
             $fileExtension = pathinfo($_FILES['Immagine']['name'], PATHINFO_EXTENSION);
             $data = date('d-m-Y');
+            $manifestazioneNome = getManifestazioneNome($pdo, $idManifestazione);
             $immagine = sprintf(
                 '%s_%s_%s_%s.%s',
                 $userInfo['Nome'],
@@ -99,47 +100,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // Inizia la transazione
-        $pdo->beginTransaction();
-
-        try {
-            // Inserisci il contributo
-            $idContributo = addContributo($pdo, $idUtente, $immagine, $titolo, $sintesi, $accettazione, $url, $idManifestazione);
-            
-            if (!$idContributo) {
-                throw new Exception('Errore durante l\'aggiunta della candidatura');
-            }
-
-            // Inserisci le categorie selezionate nella tabella tipologia
-            $queryTipologia = "INSERT INTO tipologia (Id_Contributo, Id_Categoria) VALUES (:idContributo, :idCategoria)";
-            $stmtTipologia = $pdo->prepare($queryTipologia);
-            
-            foreach ($categorieSelezionate as $idCategoria) {
-                $result = $stmtTipologia->execute([
-                    'idContributo' => $idContributo,
-                    'idCategoria' => $idCategoria
-                ]);
-                
-                if (!$result) {
-                    throw new Exception('Errore durante l\'inserimento della categoria');
-                }
-            }
-            
-            // Se tutto è andato bene, committa la transazione
-            $pdo->commit();
-            
-            echo json_encode([
-                'success' => true,
-                'message' => 'Candidatura effettuata con successo!'
-            ]);
-            
-        } catch (Exception $e) {
-            if ($pdo->inTransaction()) {
-                $pdo->rollBack();
-            }
-            throw $e;
-        }
+        // Inserisci la candidatura completa
+        $idContributo = addCandidaturaCompleta($pdo, $idUtente, $immagine, $titolo, $sintesi, $accettazione, $url, $idManifestazione, $categorieSelezionate);
+        
+        echo json_encode([
+            'success' => true,
+            'message' => 'Candidatura effettuata con successo!'
+        ]);
+        
     } catch (Exception $e) {
+        echo json_encode([
+            'success' => false,
+            'message' => $e->getMessage()
+        ]);
     }
     exit;
 }
@@ -227,7 +200,6 @@ include_once("../../template_header.php");
                 <div class="col-md-12">
                     <div class="form-wrap">
                         <label class="form-label">Categorie <p style="font-size: 0.85em; display: block; margin-top: 5px;">Seleziona una o più categorie</p> </label> <br>
-                        
                         
                         <div class="row">
                             <?php foreach ($categorie as $categoria): ?>
