@@ -383,7 +383,16 @@ function getEspositori($pdo)
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 function getEspositoreById($pdo, $id) {
-    $stmt = $pdo->prepare("SELECT * FROM utente WHERE Id_Utente = ? AND Ruolo = 'Espositore'");
+    $stmt = $pdo->prepare("SELECT 
+        Id_Utente as id,
+        Username as username,
+        Nome as nome,
+        Cognome as cognome,
+        Email as email,
+        Telefono as telefono,
+        Qualifica as qualifica,
+        Curriculum as curriculum
+        FROM utente WHERE Id_Utente = ? AND Ruolo = 'Espositore'");
     $stmt->execute([$id]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
@@ -1050,9 +1059,16 @@ function addContributo($pdo, $idUtente, $immagine, $titolo, $sintesi, $accettazi
 }
 
 function getCandidature($pdo) {
-    $sql = "SELECT c.Id_Contributo, u.Email, c.Titolo, c.Sintesi, c.Accettazione, c.Immagine, c.URL
+    $sql = "SELECT c.Id_Contributo, u.Email, c.Titolo, c.Sintesi, c.Accettazione, c.Immagine, c.URL,
+                   m.Nome as Manifestazione,
+                   GROUP_CONCAT(cat.Nome SEPARATOR ', ') as Categorie
             FROM Contributo c
-            JOIN Utente u ON c.Id_Utente = u.Id_Utente";
+            JOIN Utente u ON c.Id_Utente = u.Id_Utente
+            LEFT JOIN Esposizione e ON c.Id_Contributo = e.Id_Contributo
+            LEFT JOIN Manifestazione m ON e.Id_Manifestazione = m.Id_Manifestazione
+            LEFT JOIN Tipologia t ON c.Id_Contributo = t.Id_Contributo
+            LEFT JOIN Categoria cat ON t.Id_Categoria = cat.Id_Categoria
+            GROUP BY c.Id_Contributo, u.Email, c.Titolo, c.Sintesi, c.Accettazione, c.Immagine, c.URL, m.Nome";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -1276,5 +1292,171 @@ function updateEspositoreDettagli($pdo, $idEspositore, $nome, $cognome, $email, 
     } catch (PDOException $e) {
         throw $e;
     }
+}
+
+function getCandidaturaById($pdo, $idCandidatura) {
+    $sql = "SELECT c.*, u.Email 
+            FROM Contributo c
+            JOIN Utente u ON c.Id_Utente = u.Id_Utente
+            WHERE c.Id_Contributo = :idCandidatura";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idCandidatura', $idCandidatura, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+function updateCandidaturaDettagli($pdo, $idCandidatura, $titolo, $sintesi, $url, $accettazione, $immagine = null) {
+    try {
+        // Costruisci la query base
+        $sql = "UPDATE Contributo 
+                SET Titolo = :titolo, 
+                    Sintesi = :sintesi, 
+                    URL = :url, 
+                    Accettazione = :accettazione";
+        
+        // Aggiungi l'immagine alla query se presente
+        if ($immagine !== null) {
+            $sql .= ", Immagine = :immagine";
+        }
+        
+        $sql .= " WHERE Id_Contributo = :idCandidatura";
+        
+        $stmt = $pdo->prepare($sql);
+        
+        // Binding dei parametri base
+        $stmt->bindParam(':idCandidatura', $idCandidatura, PDO::PARAM_INT);
+        $stmt->bindParam(':titolo', $titolo, PDO::PARAM_STR);
+        $stmt->bindParam(':sintesi', $sintesi, PDO::PARAM_STR);
+        $stmt->bindParam(':url', $url, PDO::PARAM_STR);
+        $stmt->bindParam(':accettazione', $accettazione, PDO::PARAM_STR);
+        
+        // Binding dell'immagine se presente
+        if ($immagine !== null) {
+            $stmt->bindParam(':immagine', $immagine, PDO::PARAM_STR);
+        }
+        
+        return $stmt->execute();
+    } catch (PDOException $e) {
+        throw $e;
+    }
+}
+
+function getManifestazioneNome($pdo, $idManifestazione) {
+    $sql = "SELECT Nome FROM Manifestazione WHERE Id_Manifestazione = :idManifestazione";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $result ? $result['Nome'] : null;
+}
+
+function addCandidaturaCompleta($pdo, $idUtente, $immagine, $titolo, $sintesi, $accettazione, $url, $idManifestazione, $categorieSelezionate) {
+    try {
+        $pdo->beginTransaction();
+
+        // Inserisci il contributo
+        $idContributo = addContributo($pdo, $idUtente, $immagine, $titolo, $sintesi, $accettazione, $url, $idManifestazione);
+        
+        if (!$idContributo) {
+            throw new Exception('Errore durante l\'aggiunta della candidatura');
+        }
+
+        // Inserisci le categorie selezionate
+        foreach ($categorieSelezionate as $idCategoria) {
+            if (!addTipologia($pdo, $idContributo, $idCategoria)) {
+                throw new Exception('Errore durante l\'inserimento della categoria');
+            }
+        }
+        
+        $pdo->commit();
+        return $idContributo;
+        
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $e;
+    }
+}
+
+function getCandidaturaCompleta($pdo, $idCandidatura) {
+    $sql = "SELECT c.*, u.Email, m.Id_Manifestazione, m.Nome as Nome_Manifestazione, 
+            GROUP_CONCAT(t.Id_Categoria) as Categorie, c.Immagine
+            FROM Contributo c
+            JOIN Utente u ON c.Id_Utente = u.Id_Utente
+            JOIN Esposizione e ON c.Id_Contributo = e.Id_Contributo
+            JOIN Manifestazione m ON e.Id_Manifestazione = m.Id_Manifestazione
+            LEFT JOIN Tipologia t ON c.Id_Contributo = t.Id_Contributo
+            WHERE c.Id_Contributo = :idCandidatura
+            GROUP BY c.Id_Contributo, c.Immagine, c.Titolo, c.Sintesi, c.URL, c.Accettazione, m.Id_Manifestazione, u.Email, m.Nome, t.Id_Categoria";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idCandidatura', $idCandidatura, PDO::PARAM_INT);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($result) {
+        $result['Categorie'] = $result['Categorie'] ? explode(',', $result['Categorie']) : [];
+    }
+    
+    return $result;
+}
+
+function updateCandidaturaCompleta($pdo, $idCandidatura, $titolo, $sintesi, $url, $accettazione, $idManifestazione, $categorieSelezionate, $immagine = null) {
+    try {
+        $pdo->beginTransaction();
+
+        // Aggiorna i dettagli base della candidatura
+        $result = updateCandidaturaDettagli($pdo, $idCandidatura, $titolo, $sintesi, $url, $accettazione, $immagine);
+        if (!$result) {
+            throw new Exception('Errore nell\'aggiornamento dei dettagli della candidatura');
+        }
+
+        // Aggiorna la manifestazione
+        $sqlManifestazione = "UPDATE Esposizione 
+                             SET Id_Manifestazione = :idManifestazione 
+                             WHERE Id_Contributo = :idCandidatura";
+        $stmtManifestazione = $pdo->prepare($sqlManifestazione);
+        $resultManifestazione = $stmtManifestazione->execute([
+            'idManifestazione' => $idManifestazione,
+            'idCandidatura' => $idCandidatura
+        ]);
+        
+        if (!$resultManifestazione) {
+            throw new Exception('Errore nell\'aggiornamento della manifestazione');
+        }
+
+        // Aggiorna le categorie
+        // Prima elimina tutte le categorie esistenti
+        $sqlDeleteCategorie = "DELETE FROM Tipologia WHERE Id_Contributo = :idCandidatura";
+        $stmtDeleteCategorie = $pdo->prepare($sqlDeleteCategorie);
+        $stmtDeleteCategorie->execute(['idCandidatura' => $idCandidatura]);
+
+        // Poi inserisci le nuove categorie
+        foreach ($categorieSelezionate as $idCategoria) {
+            if (!addTipologia($pdo, $idCandidatura, $idCategoria)) {
+                throw new Exception('Errore nell\'aggiornamento delle categorie');
+            }
+        }
+
+        $pdo->commit();
+        return true;
+
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $e;
+    }
+}
+
+function getCandidaturaCategorie($pdo, $idCandidatura) {
+    $sql = "SELECT c.Id_Categoria, c.Nome, c.Descrizione
+            FROM Categoria c
+            JOIN Tipologia t ON c.Id_Categoria = t.Id_Categoria
+            WHERE t.Id_Contributo = :idCandidatura";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idCandidatura', $idCandidatura, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 ?>
