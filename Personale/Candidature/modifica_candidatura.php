@@ -5,6 +5,7 @@ include_once("../../template_header.php");
 
 // Recupera le candidature utilizzando la funzione definita in queries.php
 $candidature = getCandidature($pdo);
+
 ?>
 
 <!-- Breadcrumbs-->
@@ -31,8 +32,10 @@ $candidature = getCandidature($pdo);
                     <tr>
                         <th>Utente</th>
                         <th>Immagine</th>
+                        <th>Manifestazione</th>
                         <th>Titolo</th>
                         <th>Sintesi</th>
+                        <th>Categorie</th>
                         <th>Accettazione</th>
                         <th>URL</th>
                         <th></th>
@@ -45,13 +48,54 @@ $candidature = getCandidature($pdo);
                                 <td><?php echo htmlspecialchars($candidatura['Email']); ?></td>
                                 <td>
                                     <?php if (!empty($candidatura['Immagine'])): ?>
-                                        <img src="../../uploads/<?php echo htmlspecialchars($candidatura['Immagine']); ?>" alt="Immagine" style="width: 50px; height: auto; cursor: pointer;" onclick="showImageModal('../../uploads/<?php echo htmlspecialchars($candidatura['Immagine']); ?>')">
+                                        <img src="../../uploads/img/<?php echo htmlspecialchars($candidatura['Immagine']); ?>" alt="Immagine" style="width: 50px; height: auto; cursor: pointer;" onclick="showImageModal('../../uploads/img/<?php echo htmlspecialchars($candidatura['Immagine']); ?>')">
                                     <?php else: ?>
                                         Nessuna immagine
                                     <?php endif; ?>
                                 </td>
-                                <td><?php echo htmlspecialchars($candidatura['Titolo']); ?></td>
-                                <td><?php echo htmlspecialchars($candidatura['Sintesi']); ?></td>
+                                <td><?php echo htmlspecialchars($candidatura['Manifestazione']); ?></td>
+                                <td class="titolo-cell">
+                                    <?php
+                                    $titolo = htmlspecialchars($candidatura['Titolo']);
+                                    $titoloId = 'titolo-' . uniqid();
+                                    $titoloShort = strlen($titolo) > 10 ? substr($titolo, 0, 10) . '...' : $titolo;
+                                    $hasMoreTitolo = strlen($titolo) > 10;
+                                    ?>
+                                    <div class="titolo-content">
+                                        <span class="titolo-short" id="<?php echo $titoloId; ?>"><?php echo $titoloShort; ?></span>
+                                        <?php if ($hasMoreTitolo): ?>
+                                            <button class="btn btn-link btn-sm leggi-piu" onclick="toggleText('<?php echo $titoloId; ?>', '<?php echo addslashes($titolo); ?>')">Leggi di più</button>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                                <td class="sintesi-cell">
+                                    <?php
+                                    $sintesi = htmlspecialchars($candidatura['Sintesi']);
+                                    $sintesiId = 'sintesi-' . uniqid();
+                                    $sintesiShort = strlen($sintesi) > 10 ? substr($sintesi, 0, 10) . '...' : $sintesi;
+                                    $hasMore = strlen($sintesi) > 10;
+                                    ?>
+                                    <div class="sintesi-content">
+                                        <span class="sintesi-short" id="<?php echo $sintesiId; ?>"><?php echo $sintesiShort; ?></span>
+                                        <?php if ($hasMore): ?>
+                                            <button class="btn btn-link btn-sm leggi-piu" onclick="toggleText('<?php echo $sintesiId; ?>', '<?php echo addslashes($sintesi); ?>')">Leggi di più</button>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                                <td class="categorie-cell">
+                                    <?php
+                                    $categorie = htmlspecialchars($candidatura['Categorie']);
+                                    $categorieId = 'categorie-' . uniqid();
+                                    $categorieShort = strlen($categorie) > 10 ? substr($categorie, 0, 10) . '...' : $categorie;
+                                    $hasMoreCategorie = strlen($categorie) > 10;
+                                    ?>
+                                    <div class="categorie-content">
+                                        <span class="categorie-short" id="<?php echo $categorieId; ?>"><?php echo $categorieShort; ?></span>
+                                        <?php if ($hasMoreCategorie): ?>
+                                            <button class="btn btn-link btn-sm leggi-piu" onclick="toggleText('<?php echo $categorieId; ?>', '<?php echo addslashes($categorie); ?>')">Leggi di più</button>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
                                 <td><?php echo htmlspecialchars($candidatura['Accettazione']); ?></td>
                                 <td>
                                     <?php if (!empty($candidatura['URL'])): ?>
@@ -99,7 +143,61 @@ $candidature = getCandidature($pdo);
         const modal = document.getElementById('imageModal');
         modal.style.display = 'none';
     }
+
+    // Funzione per gestire il testo espandibile
+    function toggleText(id, fullText) {
+        const element = document.getElementById(id);
+        const button = element.nextElementSibling;
+        
+        if (element.classList.contains('sintesi-expanded') || 
+            element.classList.contains('titolo-expanded') || 
+            element.classList.contains('categorie-expanded')) {
+            // Collapse
+            element.textContent = fullText.substring(0, 10) + '...';
+            element.classList.remove('sintesi-expanded', 'titolo-expanded', 'categorie-expanded');
+            button.textContent = 'Leggi di più';
+        } else {
+            // Expand
+            element.textContent = fullText;
+            element.classList.add(id.startsWith('sintesi') ? 'sintesi-expanded' : 
+                                id.startsWith('titolo') ? 'titolo-expanded' : 
+                                'categorie-expanded');
+            button.textContent = 'Mostra meno';
+        }
+    }
 </script>
+
+<style>
+.sintesi-cell, .titolo-cell, .categorie-cell {
+    max-width: 300px;
+    position: relative;
+}
+
+.sintesi-content, .titolo-content, .categorie-content {
+    position: relative;
+}
+
+.leggi-piu {
+    color: rgb(74, 196, 207);
+    padding: 0;
+    margin-left: 5px;
+    font-size: 0.9em;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.leggi-piu:hover {
+    text-decoration: underline;
+    color: rgb(74, 196, 207);
+}
+
+.sintesi-expanded, .titolo-expanded, .categorie-expanded {
+    white-space: normal;
+    word-wrap: break-word;
+}
+</style>
 
 <?php
 include_once("../../template_footer.php");
