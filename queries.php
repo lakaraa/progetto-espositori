@@ -1459,4 +1459,65 @@ function getCandidaturaCategorie($pdo, $idCandidatura) {
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+//gestione categoria
+function addCategoria($pdo, $nome, $descrizione)
+{
+    try {
+        $sql = "INSERT INTO categoria (Nome, Descrizione) VALUES (:nome, :descrizione)";
+        $stmt = $pdo->prepare($sql);
+        
+        $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
+        $stmt->bindParam(':descrizione', $descrizione, PDO::PARAM_STR);
+        
+        return $stmt->execute();
+    } catch (PDOException $e) {
+        // Log dell'errore (opzionale)
+        error_log("Errore durante l'aggiunta della categoria: " . $e->getMessage());
+        return false;
+    }
+}
+
+function getCategoriaById($pdo, $id) 
+{
+    try {
+        $sql = "SELECT Id_Categoria, Nome, Descrizione FROM categoria WHERE Id_Categoria = :id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Errore durante il recupero della categoria: " . $e->getMessage());
+        return false;
+    }
+}
+function updateCategoria($pdo, $id, $nome, $descrizione)
+{
+    try {
+        $sql = "UPDATE categoria SET Nome = :nome, Descrizione = :descrizione WHERE Id_Categoria = :id";
+        $stmt = $pdo->prepare($sql);
+        
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->bindParam(':nome', $nome, PDO::PARAM_STR);
+        $stmt->bindParam(':descrizione', $descrizione, PDO::PARAM_STR);
+        
+        return $stmt->execute();
+    } catch (PDOException $e) {
+        error_log("Errore durante l'aggiornamento della categoria: " . $e->getMessage());
+        return false;
+    }
+}
+
+function deleteCategoria($pdo, $id)
+{
+    try {
+        $sql = "DELETE FROM categoria WHERE Id_Categoria = :id";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        return $stmt->execute();
+    } catch (PDOException $e) {
+        error_log("Errore durante la cancellazione della categoria: " . $e->getMessage());
+        return false;
+    }
+}
 ?>
