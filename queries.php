@@ -354,15 +354,25 @@ function updateEspositore($pdo, $idUtente, $username, $password, $nome, $cognome
     return $stmt->execute();
 }
 function emailExists($pdo, $email) {
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM utente WHERE Email = ?");
-    $stmt->execute([$email]);
-    return $stmt->fetchColumn() > 0;
+    try {
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM utente WHERE Email = ?");
+        $stmt->execute([$email]);
+        return $stmt->fetchColumn() > 0;
+    } catch (PDOException $e) {
+        error_log("Errore nella verifica email: " . $e->getMessage());
+        return false;
+    }
 }
 
 function usernameExists($pdo, $username) {
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM utente WHERE Username = ?");
-    $stmt->execute([$username]);
-    return $stmt->fetchColumn() > 0;
+    try {
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM utente WHERE Username = ?");
+        $stmt->execute([$username]);
+        return $stmt->fetchColumn() > 0;
+    } catch (PDOException $e) {
+        error_log("Errore nella verifica username: " . $e->getMessage());
+        return false;
+    }
 }
 function getEspositori($pdo) 
 {
