@@ -60,14 +60,17 @@ include_once '../template_header.php';
                                 <input class="form-input" id="registration-phone" type="text" name="phone" required>
                             </div>
                         </div>
-                        <div class="col-md-12">
+                        <div class="col-md-12 d-flex justify-content-center">
                             <button class="button button-primary" type="submit">Registrati</button>
                         </div>
                     </div>
                 </form>
-                <div class="text-center">
-                    <p>Hai già un account? <a href="login.php">Accedi</a></p>
-                    <p>Sei un espositore? <a href="registrazione_espositore.php">Registrati come espositore</a></p>
+                <div class="col-md-12">
+                    <div class="text-center">
+                        <br>
+                        <p>Hai già un account? <a href="login.php"> Sì</a></p>
+                        Non hai un account? <a href="registrazione_espositore.php">Registrati come espositore</a>
+                    </div>
                 </div>
             </div>
         </div>

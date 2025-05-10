@@ -76,13 +76,17 @@ include_once '../template_header.php';
                                 <input class="form-input" id="registration-cv" type="file" name="cv" accept=".pdf" required>
                             </div>
                         </div>
-                        <div class="col-md-12">
+                        <div class="col-md-12 d-flex justify-content-center">
                             <button class="button button-primary" type="submit">Registrati</button>
                         </div>
                     </div>
                 </form>
-                <div class="text-center">
-                    <p>Hai già un account? <a href="login.php"> Sì</a></p>
+                <div class="col-md-12">
+                    <div class="text-center">
+                        <br>
+                        <p>Hai già un account? <a href="login.php"> Sì</a></p>
+                        Non hai un account? <a href="registrazione_visitatore.php">Registrati come visitatore</a>
+                    </div>
                 </div>
             </div>
         </div>
