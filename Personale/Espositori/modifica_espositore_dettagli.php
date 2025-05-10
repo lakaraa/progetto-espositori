@@ -55,7 +55,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error_log("Gestione upload CV iniziata");
             $cvTmpPath = $_FILES['CV']['tmp_name'];
             $cvName = "cv_" . $username . ".pdf";
-            $cvUploadPath = "../../uploads/" . $cvName;
+            $cvUploadPath = "../../uploads/cv/" . $cvName;
+
+            // Verifica che il file sia un PDF
+            if ($_FILES['CV']['type'] !== 'application/pdf') {
+                throw new Exception("Il curriculum deve essere un file PDF.");
+            }
+
+            // Verifica la dimensione del file (5MB)
+            if ($_FILES['CV']['size'] > 5 * 1024 * 1024) {
+                throw new Exception("Il file è troppo grande. La dimensione massima consentita è 5 MB.");
+            }
 
             error_log("Percorso file temporaneo: " . $cvTmpPath);
             error_log("Nome file finale: " . $cvName);
@@ -75,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // Se esiste un CV precedente, eliminarlo
-            $oldCvPath = "../../uploads/cv_" . $espositore['username'] . ".pdf";
+            $oldCvPath = "../../uploads/cv/cv_" . $espositore['username'] . ".pdf";
             if (file_exists($oldCvPath)) {
                 error_log("Eliminazione CV precedente: " . $oldCvPath);
                 if (!unlink($oldCvPath)) {
@@ -121,8 +131,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Rinomina il file del CV se esiste già e se lo username è stato cambiato
         if ($espositore['username'] !== $username) {
-            $cvOldName = "../../uploads/cv_" . $espositore['username'] . ".pdf";
-            $cvNewName = "../../uploads/cv_" . $username . ".pdf";
+            $cvOldName = "../../uploads/cv/cv_" . $espositore['username'] . ".pdf";
+            $cvNewName = "../../uploads/cv/cv_" . $username . ".pdf";
 
             if (file_exists($cvOldName)) {
                 if (!rename($cvOldName, $cvNewName)) {
@@ -209,43 +219,82 @@ include_once '../../template_header.php';
                     </div>
                 </div>
                 <div class="col-md-12">
-                    <div class="form-wrap" style="margin-bottom: 20px;">
-                        <label class="form-label" for="espositore-cv" style="display: block; margin-bottom: 5px; font-weight: bold;">Curriculum Vitae</label> <br>
-                        <input class="form-input" id="espositore-cv" type="file" name="CV" accept=".pdf,.doc,.docx" onchange="previewCV(this)">
-                        <div class="row" id="cv-container-row">
+                    <div class="form-group">
+                        <div class="file-upload-wrapper">
+                            <input class="file-upload-input" id="espositore-cv" type="file" name="CV" accept=".pdf" onchange="previewCV(this)">
+                            <div class="file-upload-meta">
+                                <label class="form-label" for="espositore-cv" style="display: block; margin-bottom: 10px; font-weight: bold; color: #333;">Curriculum Vitae</label>
+                                <span class="file-upload-text">Trascina il file qui o clicca per selezionare</span>
+                                <span class="file-upload-hint">Formato accettato: PDF (max 5MB)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="row cv-display-area" id="cv-container-row">
                             <div class="col-md-12" id="current-cv-col">
-                                <div class="cv-container">
-                                    <?php if (!empty($espositore['curriculum'])): ?>
-                                        <div class="current-cv">
-                                            <a href="../../uploads/cv_<?php echo htmlspecialchars($espositore['username']); ?>.pdf" 
-                                               target="_blank" 
-                                               rel="noopener noreferrer"
-                                               class="button button-primary">
-                                                Visualizza CV attuale
-                                            </a>
-                                            <p class="text-muted">CV attuale</p>
-                                        </div>
-                                    <?php else: ?>
-                                        <p class="text-muted">Nessun CV caricato</p>
-                                    <?php endif; ?>
+                                <div class="cv-card">
+                                    <div class="cv-card-header">
+                                        <i class="fas fa-file-alt cv-icon"></i>
+                                        <h4>CV Attuale</h4>
+                                    </div>
+                                    <div class="cv-card-body">
+                                        <?php if (!empty($espositore['curriculum'])): ?>
+                                            <div class="cv-action-buttons">
+                                                <a href="#" 
+                                                   onclick="previewNewCV('../../uploads/cv/cv_<?php echo htmlspecialchars($espositore['username']); ?>.pdf'); return false;"
+                                                   class="btn btn-view">
+                                                    <i class="fas fa-eye"></i> Visualizza
+                                                </a>
+                                                <a href="#" 
+                                                   onclick="downloadCV('<?php echo htmlspecialchars($espositore['username']); ?>'); return false;"
+                                                   class="btn btn-download">
+                                                    <i class="fas fa-download"></i> Scarica
+                                                </a>
+                                            </div>
+                                            <div class="cv-info">
+                                                <p><i class="fas fa-file-pdf"></i> <?php echo "cv_".htmlspecialchars($espositore['username']).".pdf"; ?></p>
+                                                <p class="text-muted">Ultimo aggiornamento: <?php echo date("d/m/Y H:i", filemtime("../../uploads/cv/cv_".htmlspecialchars($espositore['username']).".pdf")); ?></p>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="no-cv">
+                                                <i class="fas fa-exclamation-circle"></i>
+                                                <p>Nessun CV caricato</p>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-6" id="new-cv-col" style="display: none;">
-                                <div id="cv-preview">
-                                    <div class="current-cv">
-                                        <a href="#" id="preview-cv-link" target="_blank" rel="noopener noreferrer" class="button button-primary">
-                                            Visualizza nuovo CV
-                                        </a>
-                                        <p class="text-muted">Anteprima nuovo CV</p>
+                            
+                            <div class="col-md-12" id="new-cv-col" style="display: none;">
+                                <div class="cv-card">
+                                    <div class="cv-card-header">
+                                        <i class="fas fa-file-upload cv-icon"></i>
+                                        <h4>Nuovo CV</h4>
+                                    </div>
+                                    <div class="cv-card-body" id="cv-preview">
+                                        <div class="cv-preview-content">
+                                            <i class="fas fa-file-pdf preview-icon"></i>
+                                            <p id="new-cv-filename"></p>
+                                            <div class="preview-actions">
+                                                <a href="#" 
+                                                   onclick="previewNewCV(this.getAttribute('data-url')); return false;" 
+                                                   id="preview-cv-link" 
+                                                   class="btn btn-view">
+                                                    <i class="fas fa-eye"></i> Anteprima
+                                                </a>
+                                                <button type="button" class="btn btn-remove" onclick="clearCVSelection()">
+                                                    <i class="fas fa-times"></i> Rimuovi
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-12 text-center">
-                <button class="button button-primary button-lg" type="submit">Modifica</button>
+                <div class="col-md-12 text-center">
+                    <button class="button button-primary button-lg" type="submit">Modifica</button>
+                </div>
             </div>
         </form>
     </div>
@@ -274,7 +323,9 @@ $(document).ready(function() {
                     // Aggiorna il link del CV attuale
                     var username = formData.get('username');
                     var currentCvLink = $('.current-cv a');
-                    currentCvLink.attr('href', '../../uploads/cv_' + username + '.pdf');
+                    currentCvLink.attr('href', '../../uploads/cv/cv_' + username + '.pdf');
+                    currentCvLink.attr('target', '_blank');
+                    currentCvLink.attr('rel', 'noopener noreferrer');
                     
                     // Nascondi l'anteprima del nuovo CV e ripristina il layout
                     $('#new-cv-col').hide();
@@ -297,94 +348,322 @@ $(document).ready(function() {
     });
 });
 
+function previewNewCV(url) {
+    const filename = url.split('/').pop();
+    
+    // Mostra l'icona di caricamento
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    `;
+    loadingOverlay.innerHTML = `
+        <div style="text-align: center;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2em; color: #4ac4cf;"></i>
+            <p style="margin-top: 10px; color: #333;">Caricamento PDF in corso...</p>
+        </div>
+    `;
+    document.body.appendChild(loadingOverlay);
+
+    // Verifica se il file esiste prima di aprirlo
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('File non trovato o non accessibile');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            if (blob.type !== 'application/pdf') {
+                throw new Error('Il file non è un PDF valido');
+            }
+            const newWindow = window.open(url, '_blank');
+            if (newWindow) {
+                newWindow.document.title = filename;
+            }
+        })
+        .catch(error => {
+            alert('Errore durante l\'apertura del PDF: ' + error.message);
+        })
+        .finally(() => {
+            // Rimuovi l'overlay di caricamento
+            document.body.removeChild(loadingOverlay);
+        });
+}
+
 function previewCV(input) {
     const previewContainer = document.getElementById('cv-preview');
     const previewLink = document.getElementById('preview-cv-link');
+    const filenameDisplay = document.getElementById('new-cv-filename');
     const currentCvCol = document.getElementById('current-cv-col');
     const newCvCol = document.getElementById('new-cv-col');
     
     if (input.files && input.files[0]) {
         const file = input.files[0];
         const fileURL = URL.createObjectURL(file);
-        previewLink.href = fileURL;
-        previewContainer.style.display = 'block';
+        
+        // Mostra il nome del file
+        filenameDisplay.textContent = file.name;
+        
+        // Imposta il link per l'anteprima
+        previewLink.setAttribute('data-url', fileURL);
+        
+        // Mostra la colonna del nuovo CV e imposta entrambe le colonne a col-md-6
         newCvCol.style.display = 'block';
         currentCvCol.classList.remove('col-md-12');
         currentCvCol.classList.add('col-md-6');
+        newCvCol.classList.remove('col-md-12');
+        newCvCol.classList.add('col-md-6');
     } else {
-        previewContainer.style.display = 'none';
         newCvCol.style.display = 'none';
         currentCvCol.classList.remove('col-md-6');
         currentCvCol.classList.add('col-md-12');
     }
 }
+
+function clearCVSelection() {
+    const fileInput = document.getElementById('espositore-cv');
+    fileInput.value = '';
+    
+    // Nascondi la preview e ripristina il CV attuale a col-md-12
+    document.getElementById('new-cv-col').style.display = 'none';
+    document.getElementById('current-cv-col').classList.remove('col-md-6');
+    document.getElementById('current-cv-col').classList.add('col-md-12');
+}
+
+function downloadCV(username) {
+    fetch('download_cv.php?username=' + encodeURIComponent(username))
+        .then(response => response.blob())
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'cv_' + username + '.pdf';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        })
+        .catch(error => {
+            console.error('Errore durante il download:', error);
+            alert('Errore durante il download del file.');
+        });
+}
+
+// Aggiungi tooltip ai pulsanti di visualizzazione CV
+document.addEventListener('DOMContentLoaded', function() {
+    const cvButtons = document.querySelectorAll('[onclick*="previewNewCV"]');
+    cvButtons.forEach(button => {
+        const url = button.getAttribute('onclick').match(/'([^']+)'/)[1];
+        const filename = url.split('/').pop();
+        button.title = `Visualizza ${filename}`;
+    });
+});
 </script>
 
 <style>
-/* Container per il CV */
-.cv-container {
+/* File Upload Styling */
+.file-upload-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+    border: 2px dashed #4ac4cf;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    background-color: #f8f9fa;
+}
+
+.file-upload-wrapper:hover {
+    border-color: #3aa8b2;
+    background-color: #f0f8f9;
+}
+
+.file-upload-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.file-upload-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.file-upload-text {
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+}
+
+.file-upload-hint {
+    font-size: 13px;
+    color: #6c757d;
+}
+
+/* CV Card Styling */
+.cv-display-area {
+    margin-top: 20px;
+}
+
+.cv-card {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    height: 100%;
+    border: 1px solid #e0e0e0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cv-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.cv-card-header {
+    background-color: #4ac4cf;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cv-card-header h4 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.cv-icon {
+    font-size: 20px;
+}
+
+.cv-card-body {
+    padding: 20px;
+    background-color: white;
+    height: calc(100% - 53px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.cv-action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    justify-content: center;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.btn-view {
+    background-color: #4ac4cf;
+    color: white;
+    border: 1px solid #3aa8b2;
+}
+
+.btn-view:hover {
+    background-color: #3aa8b2;
+    color: white;
+}
+
+.btn-download {
+    background-color: white;
+    color: #4ac4cf;
+    border: 1px solid #4ac4cf;
+}
+
+.btn-download:hover {
+    background-color: #f0f8f9;
+}
+
+.btn-preview {
+    background-color: #28a745;
+    color: white;
+    border: 1px solid #218838;
+}
+
+.btn-preview:hover {
+    background-color: #218838;
+    color: white;
+}
+
+.btn-remove {
+    background-color: #dc3545;
+    color: white;
+    border: 1px solid #c82333;
+    cursor: pointer;
+}
+
+.btn-remove:hover {
+    background-color: #c82333;
+    color: white;
+}
+
+.cv-info {
+    text-align: center;
+}
+
+.cv-info p {
+    margin: 5px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.no-cv {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    margin-top: 10px;
-    width: 100%;
-    height: 100%;
+    color: #6c757d;
+    padding: 20px 0;
 }
 
-/* Stile per il CV corrente */
-.current-cv {
-    border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 5px;
-    background-color: white;
-    text-align: center;
-    width: 100%;
-    height: 100%;
+.no-cv i {
+    font-size: 24px;
+    color: #6c757d;
+}
+
+.cv-preview-content {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    transition: all 0.3s ease;
-    min-height: 100px;
+    gap: 10px;
 }
 
-/* Stile per il pulsante di visualizzazione CV */
-.button-primary {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #4ac4cf;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-    margin-bottom: 10px;
+.preview-icon {
+    font-size: 40px;
+    color: #4ac4cf;
 }
 
-.button-primary:hover {
-    background-color: #3aa8b2;
-    color: white;
-    text-decoration: none;
-}
-
-.text-muted {
-    color: #6c757d;
-    margin: 0;
-}
-
-#cv-container-row {
+.preview-actions {
     display: flex;
-    align-items: stretch;
-}
-
-#current-cv-col, #new-cv-col {
-    display: flex;
-    align-items: stretch;
-}
-
-#cv-preview {
-    width: 100%;
-    height: 100%;
+    gap: 10px;
+    margin-top: 15px;
 }
 </style>
 

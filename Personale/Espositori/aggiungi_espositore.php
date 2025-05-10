@@ -98,7 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Gestione del caricamento del file
-    $upload_dir = '../../uploads/';
+    $upload_dir = '../../uploads/cv/';
     if (!is_dir($upload_dir)) {
         mkdir($upload_dir, 0777, true);
     }
@@ -126,6 +126,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
         exit;
     } catch (PDOException $e) {
+        // Se c'è un errore nel database, elimina il file caricato
+        if (file_exists($cv_path)) {
+            unlink($cv_path);
+        }
         echo json_encode([
             'success' => false,
             'message' => 'Errore di connessione al database: ' . $e->getMessage()
@@ -205,11 +209,43 @@ include_once("../../template_header.php");
                     </div>
                 </div>
                 <div class="col-md-12">
-                    <div class="form-wrap">
-                        <label class="form-label" for="registration-cv">Curriculum Vitae (PDF)<small style="color: rgb(74, 196, 207);">* Il file deve essere in formato PDF e non deve superare i 16 MB.</small></label>
-                        <br><br>
-                        <input class="form-input" id="registration-cv" type="file" name="cv" accept=".pdf">
+                    <div class="form-group">
+                        <div class="file-upload-wrapper">
+                            <input class="file-upload-input" id="registration-cv" type="file" name="cv" accept=".pdf" onchange="previewCV(this)">
+                            <div class="file-upload-meta">
+                                <label class="form-label" for="registration-cv" style="display: block; margin-bottom: 10px; font-weight: bold; color: #333;">Curriculum Vitae</label>
+                                <span class="file-upload-text">Trascina il file qui o clicca per selezionare</span>
+                                <span class="file-upload-hint">Formato accettato: PDF (max 16MB)</span>
+                            </div>
+                        </div>
                         
+                        <div class="row cv-display-area" id="cv-container-row">
+                            <div class="col-md-12" id="new-cv-col" style="display: none;">
+                                <div class="cv-card">
+                                    <div class="cv-card-header">
+                                        <i class="fas fa-file-upload cv-icon"></i>
+                                        <h4>Nuovo CV</h4>
+                                    </div>
+                                    <div class="cv-card-body" id="cv-preview">
+                                        <div class="cv-preview-content">
+                                            <i class="fas fa-file-pdf preview-icon"></i>
+                                            <p id="new-cv-filename"></p>
+                                            <div class="preview-actions">
+                                                <a href="#" 
+                                                   onclick="previewNewCV(this.getAttribute('data-url')); return false;" 
+                                                   id="preview-cv-link" 
+                                                   class="btn btn-view">
+                                                    <i class="fas fa-eye"></i> Anteprima
+                                                </a>
+                                                <button type="button" class="btn btn-remove" onclick="clearCVSelection()">
+                                                    <i class="fas fa-times"></i> Rimuovi
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-12">
@@ -220,8 +256,191 @@ include_once("../../template_header.php");
     </div>
 </section>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<style>
+/* File Upload Styling */
+.file-upload-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+    border: 2px dashed #4ac4cf;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    background-color: #f8f9fa;
+}
+
+.file-upload-wrapper:hover {
+    border-color: #3aa8b2;
+    background-color: #f0f8f9;
+}
+
+.file-upload-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.file-upload-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.file-upload-text {
+    font-size: 16px;
+    color: #333;
+    font-weight: 500;
+}
+
+.file-upload-hint {
+    font-size: 13px;
+    color: #6c757d;
+}
+
+/* CV Card Styling */
+.cv-display-area {
+    margin-top: 20px;
+}
+
+.cv-card {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    height: 100%;
+    border: 1px solid #e0e0e0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cv-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.cv-card-header {
+    background-color: #4ac4cf;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cv-card-header h4 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.cv-icon {
+    font-size: 20px;
+}
+
+.cv-card-body {
+    padding: 20px;
+    background-color: white;
+    height: calc(100% - 53px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.preview-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    justify-content: center;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.btn-view {
+    background-color: #4ac4cf;
+    color: white;
+    border: 1px solid #3aa8b2;
+}
+
+.btn-view:hover {
+    background-color: #3aa8b2;
+    color: white;
+}
+
+.btn-remove {
+    background-color: #dc3545;
+    color: white;
+    border: 1px solid #c82333;
+    cursor: pointer;
+}
+
+.btn-remove:hover {
+    background-color: #c82333;
+    color: white;
+}
+
+.cv-preview-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.preview-icon {
+    font-size: 40px;
+    color: #4ac4cf;
+}
+</style>
+
 <script>
+function previewNewCV(url) {
+    const filename = url.split('/').pop();
+    const newWindow = window.open(url, '_blank');
+    if (newWindow) {
+        newWindow.document.title = filename;
+    }
+}
+
+function previewCV(input) {
+    const previewContainer = document.getElementById('cv-preview');
+    const previewLink = document.getElementById('preview-cv-link');
+    const filenameDisplay = document.getElementById('new-cv-filename');
+    const newCvCol = document.getElementById('new-cv-col');
+    
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const fileURL = URL.createObjectURL(file);
+        
+        // Mostra il nome del file
+        filenameDisplay.textContent = file.name;
+        
+        // Imposta il link per l'anteprima
+        previewLink.setAttribute('data-url', fileURL);
+        
+        // Mostra la colonna del nuovo CV
+        newCvCol.style.display = 'block';
+    } else {
+        newCvCol.style.display = 'none';
+    }
+}
+
+function clearCVSelection() {
+    const fileInput = document.getElementById('registration-cv');
+    fileInput.value = '';
+    
+    // Nascondi la preview
+    document.getElementById('new-cv-col').style.display = 'none';
+}
+
 $(function () {
     $('.form-aggiungi-espositore').on('submit', function (e) {
         e.preventDefault();
@@ -235,7 +454,7 @@ $(function () {
             processData: false,
             contentType: false,
             success: function (response) {
-                console.log("RISPOSTA RAW:", response); // Stampa la risposta grezza
+                console.log("RISPOSTA RAW:", response);
                 try {
                     const data = typeof response === "string" ? JSON.parse(response) : response;
                     const message = data.message || "Messaggio non disponibile.";
@@ -247,7 +466,7 @@ $(function () {
 
                     if (isSuccess) {
                         $('.form-aggiungi-espositore')[0].reset();
-                        //location.reload(); // Ricarica la pagina 
+                        clearCVSelection();
                     }
                 } catch (e) {
                     console.error("Errore JSON.parse:", e);

@@ -1,6 +1,7 @@
 <?php
 include_once("../../config.php");
 include_once("../../queries.php");
+include_once("../../template_header.php");
 
 if (isset($_GET['id'])) {
     $id = $_GET['id'];
@@ -8,7 +9,7 @@ if (isset($_GET['id'])) {
     $username = getUsername($pdo, $id);
 
     if ($username) {
-        $curriculumPath = "../../uploads/cv_" . $username . ".pdf";
+        $curriculumPath = "../../uploads/cv/cv_" . $username . ".pdf";
 
         if (file_exists($curriculumPath)) {
             header('Content-Type: application/pdf');
@@ -24,4 +25,7 @@ if (isset($_GET['id'])) {
 } else {
     echo "ID mancante.";
 }
+?>
+<?php
+include_once("../../template_footer.php");
 ?>

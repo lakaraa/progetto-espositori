@@ -54,8 +54,8 @@ $espositori = getEspositori($pdo);
                                 </td>
                                 <td>
                                     <a class="button button-danger button-sm"
-                                        href="visualizza_cv.php?id=<?php echo urlencode($espositore['id']); ?>"
-                                        target="_blank">
+                                        href="#"
+                                        onclick="previewNewCV('../../uploads/cv/cv_<?php echo htmlspecialchars($espositore['username']); ?>.pdf'); return false;">
                                         Visualizza CV
                                     </a>
                                 </td>
@@ -71,6 +71,70 @@ $espositori = getEspositori($pdo);
         </div>
     </div>
 </section>
+
+<script>
+function previewNewCV(url) {
+    const filename = url.split('/').pop();
+    
+    // Mostra l'icona di caricamento
+    const loadingOverlay = document.createElement('div');
+    loadingOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    `;
+    loadingOverlay.innerHTML = `
+        <div style="text-align: center;">
+            <i class="fas fa-spinner fa-spin" style="font-size: 2em; color: #4ac4cf;"></i>
+            <p style="margin-top: 10px; color: #333;">Caricamento PDF in corso...</p>
+        </div>
+    `;
+    document.body.appendChild(loadingOverlay);
+
+    // Verifica se il file esiste prima di aprirlo
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('File non trovato o non accessibile');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            if (blob.type !== 'application/pdf') {
+                throw new Error('Il file non è un PDF valido');
+            }
+            const newWindow = window.open(url, '_blank');
+            if (newWindow) {
+                newWindow.document.title = filename;
+            }
+        })
+        .catch(error => {
+            alert('Errore durante l\'apertura del PDF: ' + error.message);
+        })
+        .finally(() => {
+            // Rimuovi l'overlay di caricamento
+            document.body.removeChild(loadingOverlay);
+        });
+}
+
+// Aggiungi tooltip ai pulsanti di visualizzazione CV
+document.addEventListener('DOMContentLoaded', function() {
+    const cvButtons = document.querySelectorAll('[onclick*="previewNewCV"]');
+    cvButtons.forEach(button => {
+        const url = button.getAttribute('onclick').match(/'([^']+)'/)[1];
+        const filename = url.split('/').pop();
+        button.title = `Visualizza ${filename}`;
+    });
+});
+</script>
+
 <?php
 include_once ("../../template_footer.php");
 ?>
