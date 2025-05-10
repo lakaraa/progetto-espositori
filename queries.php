@@ -1530,4 +1530,13 @@ function deleteCategoria($pdo, $id)
         return false;
     }
 }
+
+function getContributiTotaliCount($pdo, $userId) {
+    $sql = "SELECT COUNT(*) as total FROM contributo WHERE Id_Utente = :userId";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_INT);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $result['total'] ?? 0;
+}
 ?>
