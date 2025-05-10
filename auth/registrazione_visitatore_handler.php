@@ -7,59 +7,75 @@ include_once '../config.php';
 include_once '../session.php';
 include_once '../queries.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Recupera e pulisce i dati del form
-    $username = trim($_POST['username']);
-    $password = trim($_POST['password']);
-    $first_name = trim($_POST['first_name']);
-    $last_name = trim($_POST['last_name']);
-    $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
-    $phone = trim($_POST['phone']);
+header('Content-Type: application/json');
+ob_clean();
 
-    // Validazione dei campi obbligatori
+try {
+    // Verifica che la richiesta sia POST
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        throw new Exception('Metodo non consentito');
+    }
+
+    // Recupera e sanitizza i dati dal form
+    $username = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $first_name = trim($_POST['first_name'] ?? '');
+    $last_name = trim($_POST['last_name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+
+    // Validazione campi obbligatori
     if (empty($username) || empty($password) || empty($first_name) || empty($last_name) || empty($email) || empty($phone)) {
-        $_SESSION['error'] = 'Tutti i campi sono obbligatori.';
-        header('Location: ../pages/registrazione_visitatore.php');
-        exit;
+        throw new Exception('Tutti i campi sono obbligatori');
     }
 
     // Validazione email
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $_SESSION['error'] = 'Inserisci un indirizzo email valido.';
-        header('Location: ../pages/registrazione_visitatore.php');
-        exit;
+        throw new Exception('Formato email non valido');
     }
 
-    // Verifica se l'username esiste già
+    // Validazione username (solo lettere, numeri e underscore)
+    if (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) {
+        throw new Exception('Username non valido. Usa solo lettere, numeri e underscore');
+    }
+
+    // Validazione password (minimo 8 caratteri)
+    if (strlen($password) < 8) {
+        throw new Exception('La password deve essere di almeno 8 caratteri');
+    }
+
+    // Validazione telefono (solo numeri e spazi)
+    if (!preg_match('/^[0-9\s]+$/', $phone)) {
+        throw new Exception('Il numero di telefono può contenere solo numeri e spazi');
+    }
+
+    // Verifica se username o email esistono già
     if (usernameExists($pdo, $username)) {
-        $_SESSION['error'] = 'Username già in uso. Scegline un altro.';
-        header('Location: ../pages/registrazione_visitatore.php');
-        exit;
+        throw new Exception('Username già in uso');
     }
-
-    // Verifica se l'email esiste già
     if (emailExists($pdo, $email)) {
-        $_SESSION['error'] = 'Email già registrata. Usa un\'altra email o accedi.';
-        header('Location: ../pages/registrazione_visitatore.php');
-        exit;
+        throw new Exception('Email già registrata');
     }
 
     // Hash della password
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
-    // Inserimento nel database tramite la funzione specifica per visitatori
-    if (addVisitatore($pdo, $username, $hashed_password, $first_name, $last_name, $email, $phone)) {
-        $_SESSION['success'] = 'Registrazione completata con successo! Ora puoi accedere.';
-        header('Location: ../pages/login.php');
-        exit;
-    } else {
-        $_SESSION['error'] = 'Errore durante la registrazione. Riprova più tardi.';
-        header('Location: ../pages/registrazione_visitatore.php');
-        exit;
+    // Inserimento nel database
+    if (!addVisitatore($pdo, $username, $hashed_password, $first_name, $last_name, $email, $phone)) {
+        throw new Exception('Errore durante la registrazione');
     }
-} else {
-    // Se qualcuno prova ad accedere direttamente a questo handler senza POST
-    $_SESSION['error'] = 'Metodo di richiesta non valido.';
-    header('Location: ../pages/registrazione_visitatore.php');
-    exit;
+
+    // Risposta di successo
+    echo json_encode([
+        'success' => true,
+        'message' => 'Registrazione completata con successo'
+    ]);
+
+} catch (Exception $e) {
+    // Risposta di errore
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ]);
 }
