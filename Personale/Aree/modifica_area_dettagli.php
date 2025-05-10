@@ -57,14 +57,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="col-md-6">
           <div class="form-wrap">
             <label class="form-label" for="area-manifestazione">Manifestazione</label>
-            <select class="form-input" id="area-manifestazione" name="manifestazione">
-              <?php foreach (getManifestazioni($pdo) as $manifestazione): ?>
-                <option value="<?php echo $manifestazione['Id_Manifestazione']; ?>" 
-                  <?php echo $manifestazione['Id_Manifestazione'] == $area['id_manifestazione'] ? 'selected' : ''; ?> style="color: black; background-color: white;">
-                  <?php echo htmlspecialchars($manifestazione['Nome']); ?>
+            <select class="form-input" id="area-manifestazione" name="manifestazione" disabled>
+              <?php 
+                $currentManifestazione = getManifestazioneById($pdo, $area['id_manifestazione']);
+                if ($currentManifestazione): 
+              ?>
+                <option value="<?php echo $currentManifestazione['Id_Manifestazione']; ?>" selected style="color: black; background-color: white;">
+                  <?php echo htmlspecialchars($currentManifestazione['Nome']); ?>
                 </option>
-              <?php endforeach; ?>
+              <?php endif; ?>
             </select>
+            <input type="hidden" name="manifestazione" value="<?php echo $area['id_manifestazione']; ?>">
           </div>
         </div>
         <div class="col-md-6">
@@ -76,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="col-md-6">
           <div class="form-wrap">
             <label class="form-label" for="area-capienza">Capienza Massima</label>
-            <input class="form-input" id="area-capienza" type="number" name="capienza" value="<?php echo htmlspecialchars($area['capienza_massima']); ?>">
+            <input class="form-input" id="area-capienza" type="number" name="capienza" style="color: white;"  value="<?php echo htmlspecialchars($area['capienza_massima']); ?>">
           </div>
         </div>
         <div class="col-12">
@@ -86,7 +89,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </div>
         </div>
       </div>
-      <button class="button button-primary button-lg" type="submit">Modifica</button>
+      <div class="text-center">
+        <button class="button button-primary button-lg" type="submit">Modifica</button>
+      </div>
     </form>
   </div>
 </section>

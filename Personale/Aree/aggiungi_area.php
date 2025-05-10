@@ -88,7 +88,7 @@ $manifestazioni = getManifestazioni($pdo);
                 <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="area-capienza">Capienza Massima</label>
-                        <input class="form-input" id="area-capienza" type="number" name="capienza">
+                        <input class="form-input" id="area-capienza" type="number" name="capienza" style="color: white;">
                     </div>
                 </div>
                 <div class="col-12">
