@@ -27,7 +27,6 @@ $categorie = getCategorie($pdo);
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Nome</th>
                         <th>Descrizione</th>
                         <th></th>
@@ -37,7 +36,6 @@ $categorie = getCategorie($pdo);
                     <?php if (!empty($categorie)): ?>
                         <?php foreach ($categorie as $categoria): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($categoria['Id_Categoria']); ?></td>
                                 <td><?php echo htmlspecialchars($categoria['Nome']); ?></td>
                                 <td><?php echo htmlspecialchars($categoria['Descrizione']); ?></td>
                                 <td>
