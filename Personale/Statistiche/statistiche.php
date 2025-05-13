@@ -70,7 +70,6 @@ include_once("../../template_header.php");
     </div>
     <ul class="breadcrumbs-custom-path">
         <li><a href="../dashboard_personale.php">Dashboard</a></li>
-        <li><a href="gestisci_aree.php">Gestione Aree</a></li>
         <li class="active">Statistiche Partecipanti</li>
     </ul>
 </section>
