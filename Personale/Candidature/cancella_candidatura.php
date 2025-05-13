@@ -95,15 +95,18 @@ include_once("../../template_header.php");
         <div id="form-message"></div>
 
         <!-- Tabella delle candidature -->
-        <div class="table-responsive">
+        <div class="table-responsive" style="min-width: 1200px;">
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Utente</th>
+                        <th>Immagine</th>
+                        <th>Manifestazione</th>
                         <th>Titolo</th>
                         <th>Sintesi</th>
+                        <th>Categorie</th>
                         <th>Accettazione</th>
+                        <th>URL</th>
                         <th>Azioni</th>
                     </tr>
                 </thead>
@@ -111,22 +114,76 @@ include_once("../../template_header.php");
                     <?php if (!empty($candidature)): ?>
                         <?php foreach ($candidature as $candidatura): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($candidatura['Id_Contributo']); ?></td>
-                                <td><?php echo htmlspecialchars($candidatura['Nome_Utente']); ?></td>
-                                <td><?php echo htmlspecialchars($candidatura['Titolo']); ?></td>
-                                <td><?php echo htmlspecialchars($candidatura['Sintesi']); ?></td>
+                                <td><?php echo htmlspecialchars($candidatura['Email']); ?></td>
+                                <td>
+                                    <?php if (!empty($candidatura['Immagine'])): ?>
+                                        <img src="../../uploads/img/<?php echo htmlspecialchars($candidatura['Immagine']); ?>" alt="Immagine" style="width: 50px; height: auto; cursor: pointer;" onclick="showImageModal('../../uploads/img/<?php echo htmlspecialchars($candidatura['Immagine']); ?>')">
+                                    <?php else: ?>
+                                        Nessuna immagine
+                                    <?php endif; ?>
+                                </td>
+                                <td><?php echo htmlspecialchars($candidatura['Manifestazione']); ?></td>
+                                <td class="titolo-cell">
+                                    <?php
+                                    $titolo = htmlspecialchars($candidatura['Titolo']);
+                                    $titoloId = 'titolo-' . uniqid();
+                                    $titoloShort = strlen($titolo) > 10 ? substr($titolo, 0, 10) . '...' : $titolo;
+                                    $hasMoreTitolo = strlen($titolo) > 10;
+                                    ?>
+                                    <div class="titolo-content">
+                                        <span class="titolo-short" id="<?php echo $titoloId; ?>"><?php echo $titoloShort; ?></span>
+                                        <?php if ($hasMoreTitolo): ?>
+                                            <button class="btn btn-link btn-sm leggi-piu" onclick="toggleText('<?php echo $titoloId; ?>', '<?php echo addslashes($titolo); ?>')">Leggi di più</button>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                                <td class="sintesi-cell">
+                                    <?php
+                                    $sintesi = htmlspecialchars($candidatura['Sintesi']);
+                                    $sintesiId = 'sintesi-' . uniqid();
+                                    $sintesiShort = strlen($sintesi) > 10 ? substr($sintesi, 0, 10) . '...' : $sintesi;
+                                    $hasMore = strlen($sintesi) > 10;
+                                    ?>
+                                    <div class="sintesi-content">
+                                        <span class="sintesi-short" id="<?php echo $sintesiId; ?>"><?php echo $sintesiShort; ?></span>
+                                        <?php if ($hasMore): ?>
+                                            <button class="btn btn-link btn-sm leggi-piu" onclick="toggleText('<?php echo $sintesiId; ?>', '<?php echo addslashes($sintesi); ?>')">Leggi di più</button>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
+                                <td class="categorie-cell">
+                                    <?php
+                                    $categorie = htmlspecialchars($candidatura['Categorie']);
+                                    $categorieId = 'categorie-' . uniqid();
+                                    $categorieShort = strlen($categorie) > 10 ? substr($categorie, 0, 10) . '...' : $categorie;
+                                    $hasMoreCategorie = strlen($categorie) > 10;
+                                    ?>
+                                    <div class="categorie-content">
+                                        <span class="categorie-short" id="<?php echo $categorieId; ?>"><?php echo $categorieShort; ?></span>
+                                        <?php if ($hasMoreCategorie): ?>
+                                            <button class="btn btn-link btn-sm leggi-piu" onclick="toggleText('<?php echo $categorieId; ?>', '<?php echo addslashes($categorie); ?>')">Leggi di più</button>
+                                        <?php endif; ?>
+                                    </div>
+                                </td>
                                 <td><?php echo htmlspecialchars($candidatura['Accettazione']); ?></td>
                                 <td>
-                                <button class="button-custom" 
-                                        data-id="<?php echo htmlspecialchars($candidatura['Id_Contributo']); ?>">
-                                    Cancella
-                                </button>
+                                    <?php if (!empty($candidatura['URL'])): ?>
+                                        <a href="<?php echo htmlspecialchars($candidatura['URL']); ?>" target="_blank">Visita</a>
+                                    <?php else: ?>
+                                        Nessun URL
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <button class="button-custom" 
+                                            data-id="<?php echo htmlspecialchars($candidatura['Id_Contributo']); ?>">
+                                        Cancella
+                                    </button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6">Nessuna candidatura trovata.</td>
+                            <td colspan="9">Nessuna candidatura trovata.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -135,12 +192,90 @@ include_once("../../template_header.php");
     </div>
 </section>
 
+<!-- Modal per visualizzare l'immagine -->
+<div id="imageModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.8); z-index: 1000; justify-content: center; align-items: center;">
+    <span style="position: absolute; top: 20px; right: 30px; font-size: 30px; color: white; cursor: pointer;" onclick="closeImageModal()">&times;</span>
+    <img id="modalImage" src="" alt="Immagine" style="max-width: 90%; max-height: 90%; margin: auto; display: block;">
+</div>
+
+<script>
+    // Funzione per mostrare la finestra modale con l'immagine
+    function showImageModal(imageSrc) {
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        modalImage.src = imageSrc;
+        modal.style.display = 'flex';
+    }
+
+    // Funzione per chiudere la finestra modale
+    function closeImageModal() {
+        const modal = document.getElementById('imageModal');
+        modal.style.display = 'none';
+    }
+
+    // Funzione per gestire il testo espandibile
+    function toggleText(id, fullText) {
+        const element = document.getElementById(id);
+        const button = element.nextElementSibling;
+        
+        if (element.classList.contains('sintesi-expanded') || 
+            element.classList.contains('titolo-expanded') || 
+            element.classList.contains('categorie-expanded')) {
+            // Collapse
+            element.textContent = fullText.substring(0, 10) + '...';
+            element.classList.remove('sintesi-expanded', 'titolo-expanded', 'categorie-expanded');
+            button.textContent = 'Leggi di più';
+        } else {
+            // Expand
+            element.textContent = fullText;
+            element.classList.add(id.startsWith('sintesi') ? 'sintesi-expanded' : 
+                                id.startsWith('titolo') ? 'titolo-expanded' : 
+                                'categorie-expanded');
+            button.textContent = 'Mostra meno';
+        }
+    }
+</script>
+
+<style>
+.sintesi-cell, .titolo-cell, .categorie-cell {
+    max-width: 300px;
+    position: relative;
+}
+
+.sintesi-content, .titolo-content, .categorie-content {
+    position: relative;
+}
+
+.leggi-piu {
+    color: rgb(74, 196, 207);
+    padding: 0;
+    margin-left: 5px;
+    font-size: 0.9em;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.leggi-piu:hover {
+    text-decoration: underline;
+    color: rgb(74, 196, 207);
+}
+
+.sintesi-expanded, .titolo-expanded, .categorie-expanded {
+    white-space: normal;
+    word-wrap: break-word;
+}
+</style>
+
 <!-- Script AJAX -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(function () {
     $('.button-custom').on('click', function () {
-        const idContributo = $(this).data('id');
+        const button = $(this);
+        const idContributo = button.data('id');
+        const row = button.closest('tr');
 
         if (confirm('Sei sicuro di voler eliminare questa candidatura?')) {
             $.ajax({
@@ -159,7 +294,13 @@ $(function () {
                         );
 
                         if (isSuccess) {
-                            location.reload(); // Ricarica la pagina per aggiornare la tabella
+                            // Rimuovi la riga dalla tabella con un'animazione
+                            row.fadeOut(400, function() {
+                                $(this).remove();
+                                    if ($('tbody tr').length === 0) {
+                                    $('tbody').html('<tr><td colspan="9">Nessuna candidatura trovata.</td></tr>');
+                                }
+                            });
                         }
                     } catch (e) {
                         console.error("Errore JSON.parse:", e, response);
