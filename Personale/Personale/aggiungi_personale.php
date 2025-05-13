@@ -33,6 +33,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
+        // Verifica se l'username esiste già
+        if (usernameExists($pdo, $username)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Username già in uso. Scegli un altro username.'
+            ]);
+            exit;
+        }
+
+        // Verifica se l'email esiste già
+        if (emailExists($pdo, $email)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Email già in uso. Scegli un\'altra email.'
+            ]);
+            exit;
+        }
+
         // Aggiungi il personale alla tabella utente
         $result = addPersonale($pdo, $username, $password, $nome, $cognome, $email, $telefono);
         echo json_encode([
@@ -111,14 +129,6 @@ include_once("../../template_header.php");
                         <input class="form-input" id="personale-telefono" type="text" name="telefono">
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-wrap">
-                        <label class="form-label" for="personale-ruolo">Ruolo</label>
-                        <select class="form-input" id="personale-ruolo" name="ruolo">
-                            <option value="Personale">Personale</option>
-                        </select>
-                    </div>
-                </div>
             </div>
             <button class="button button-primary button-lg" type="submit">Aggiungi</button>
         </form>
@@ -137,18 +147,23 @@ $(function () {
             method: 'POST',
             data: $(this).serialize(),
             success: function (response) {
-                console.log("RISPOSTA RAW:", response); // Log della risposta
                 try {
                     const data = typeof response === "string" ? JSON.parse(response) : response;
                     const message = data.message || "Messaggio non disponibile.";
                     const isSuccess = data.success === true;
 
                     $('#form-message').html(
-                        `<p style="color: ${isSuccess ? 'green' : 'red'};">${message}</p>`
+                        `<p style="color: ${isSuccess ? 'rgb(74, 196, 207)' : 'red'};">${message}</p>`
                     );
 
                     if (isSuccess) {
                         $('.form-aggiungi-personale')[0].reset();
+                        // Rimuovi il messaggio dopo 3 secondi
+                        setTimeout(() => {
+                            $('#form-message').fadeOut(400, function() {
+                                $(this).empty().show();
+                            });
+                        }, 3000);
                     }
                 } catch (e) {
                     console.error("Errore JSON.parse:", e, response);

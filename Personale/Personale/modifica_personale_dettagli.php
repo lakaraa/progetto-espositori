@@ -37,9 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-echo "<pre>";
-var_dump($_POST);
-echo "</pre>";
 
 
 ?>
@@ -65,7 +62,7 @@ echo "</pre>";
 
     <!-- Mostra i messaggi di errore o successo -->
     <?php if (!empty($successMessage)): ?>
-        <p style="color: green;"><?php echo htmlspecialchars($successMessage); ?></p>
+        <p style="color: rgb(74, 196, 207);"><?php echo htmlspecialchars($successMessage); ?></p>
     <?php endif; ?>
     <?php if (!empty($errorMessage)): ?>
         <p style="color: red;"><?php echo htmlspecialchars($errorMessage); ?></p>
@@ -110,7 +107,9 @@ echo "</pre>";
           </div>
         </div>
       </div>
-      <button class="button button-primary button-lg" type="submit">Modifica</button>
+      <div class="col-md-12 text-center">
+        <button class="button button-primary button-lg" type="submit">Modifica</button>
+      </div>
     </form>
   </div>
 </section>

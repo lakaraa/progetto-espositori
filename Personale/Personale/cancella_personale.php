@@ -1,24 +1,29 @@
 <?php
 include_once '../../config.php';
 include_once '../../queries.php';
-include_once '../../template_header.php';
 
 // Gestione della cancellazione tramite POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id']) && is_numeric($_POST['id'])) {
-    $idPersonale = intval($_POST['id']);
+    header('Content-Type: application/json');
+    ob_clean(); // Pulisce il buffer di output
+    $idUtente = intval($_POST['id']);
     try {
         // Cancella il personale dal database
-        if (deletePersonale($pdo, $idPersonale)) {
-            $successMessage = "Personale cancellato con successo.";
+        if (deletePersonale($pdo, $idUtente)) {
+            echo json_encode(['success' => true, 'message' => 'Personale cancellato con successo.']);
         } else {
-            $errorMessage = "Errore durante la cancellazione del personale.";
+            echo json_encode(['success' => false, 'message' => 'Errore durante la cancellazione del personale.']);
         }
     } catch (PDOException $e) {
-        $errorMessage = "Errore di connessione al database: " . $e->getMessage();
+        echo json_encode(['success' => false, 'message' => 'Errore di connessione al database: ' . $e->getMessage()]);
     }
+    exit;
 }
 
-// Recupera tutte le informazioni del personale dal database
+// Solo se non è una richiesta POST, includi il template
+include_once '../../template_header.php';
+
+// Recupera tutto il personale dal database
 $personale = getPersonale($pdo);
 ?>
 
@@ -39,43 +44,36 @@ $personale = getPersonale($pdo);
     <div class="container">
         <h2>Cancella Personale</h2>
         <p>Seleziona un membro del personale dalla lista sottostante per cancellarlo.</p>
-        <br>
 
         <!-- Messaggi di successo o errore -->
-        <?php if (!empty($successMessage)): ?>
-            <p style="color: green;"><?php echo htmlspecialchars($successMessage); ?></p>
-        <?php endif; ?>
-        <?php if (!empty($errorMessage)): ?>
-            <p style="color: red;"><?php echo htmlspecialchars($errorMessage); ?></p>
-        <?php endif; ?>
+        <div id="form-message"></div>
 
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
                     <tr>
+                        <th>Username</th>
                         <th>Nome</th>
                         <th>Cognome</th>
                         <th>Email</th>
                         <th>Telefono</th>
-                        <th>Ruolo</th>
                         <th></th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="personaleTableBody">
                     <?php if (!empty($personale)): ?>
-                        <?php foreach ($personale as $membro): ?>
+                        <?php foreach ($personale as $p): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($membro['Nome']); ?></td>
-                                <td><?php echo htmlspecialchars($membro['Cognome']); ?></td>
-                                <td><?php echo htmlspecialchars($membro['Email']); ?></td>
-                                <td><?php echo htmlspecialchars($membro['Telefono']); ?></td>
-                                <td><?php echo htmlspecialchars($membro['Ruolo']); ?></td>
+                                <td><?php echo htmlspecialchars($p['Username']); ?></td>
+                                <td><?php echo htmlspecialchars($p['Nome']); ?></td>
+                                <td><?php echo htmlspecialchars($p['Cognome']); ?></td>
+                                <td><?php echo htmlspecialchars($p['Email']); ?></td>
+                                <td><?php echo htmlspecialchars($p['Telefono']); ?></td>
                                 <td>
-                                    <!-- Modulo per la cancellazione -->
-                                    <form method="post" action="cancella_personale.php" onsubmit="return confirm('Sei sicuro di voler cancellare questo membro del personale?');">
-                                        <input type="hidden" name="id" value="<?php echo htmlspecialchars($membro['Id_Utente']); ?>">
-                                        <button type="submit" class="button button-primary button-sm">Cancella</button>
-                                    </form>
+                                    <button type="button" class="button button-primary button-sm btn-delete" 
+                                            data-id="<?php echo htmlspecialchars($p['Id_Utente']); ?>">
+                                        Cancella
+                                    </button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -89,6 +87,60 @@ $personale = getPersonale($pdo);
         </div>
     </div>
 </section>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(function() {
+    $('.btn-delete').on('click', function() {
+        const id = $(this).data('id');
+        const row = $(this).closest('tr');
+        
+        if (confirm('Sei sicuro di voler cancellare questo membro del personale?')) {
+            $.ajax({
+                url: '',
+                method: 'POST',
+                data: { id: id },
+                success: function(response) {
+                    try {
+                        const data = typeof response === "string" ? JSON.parse(response) : response;
+                        
+                        if (data.success) {
+                            // Rimuovi la riga dalla tabella con un'animazione fadeOut
+                            row.fadeOut(400, function() {
+                                $(this).remove();
+                                // Se non ci sono più righe, mostra il messaggio "Nessun membro del personale trovato"
+                                if ($('#personaleTableBody tr').length === 0) {
+                                    $('#personaleTableBody').html('<tr><td colspan="6">Nessun membro del personale trovato.</td></tr>');
+                                }
+                            });
+                        }
+                        
+                        // Mostra il messaggio di successo/errore
+                        $('#form-message').html(
+                            `<p style="color: ${data.success ? 'rgb(74, 196, 207)' : 'red'};">${data.message}</p>`
+                        );
+                        
+                        // Rimuovi il messaggio dopo 3 secondi
+                        setTimeout(() => {
+                            $('#form-message').fadeOut(400, function() {
+                                $(this).empty().show();
+                            });
+                        }, 3000);
+                        
+                    } catch (e) {
+                        console.error("Errore nel parsing della risposta:", e);
+                        $('#form-message').html('<p style="color: red;">Errore nel caricamento dei dati.</p>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Errore AJAX:", status, error);
+                    $('#form-message').html('<p style="color: red;">Errore di comunicazione con il server.</p>');
+                }
+            });
+        }
+    });
+});
+</script>
 
 <?php 
 include_once '../../template_footer.php';
