@@ -614,22 +614,40 @@ function getTurni($pdo) {
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-function getTurniByArea($pdo, $manifestazioneId, $areaId) {
-    $sql = "SELECT turno.Id_Turno, turno.Data, turno.Ora
-            FROM manifestazione
-            JOIN area ON manifestazione.Id_Manifestazione = area.Id_Manifestazione
-            JOIN turno ON turno.Id_Area = area.Id_Area
-            WHERE manifestazione.Id_Manifestazione = :manifestazione_id 
-            AND area.Id_Area = :area_id";
-    
-    try {
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':manifestazione_id', $manifestazioneId, PDO::PARAM_INT);
-        $stmt->bindParam(':area_id', $areaId, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
-        return [];
+function getTurniByArea($pdo, $areaId, $manifestazioneId = null) {
+    if ($manifestazioneId === null) {
+        // Se viene passato solo l'Id_Area
+        $sql = "SELECT t.Id_Turno, t.Data, t.Ora
+                FROM turno t
+                JOIN area a ON t.Id_Area = a.Id_Area
+                WHERE a.Id_Area = :area_id";
+        
+        try {
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':area_id', $areaId, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return [];
+        }
+    } else {
+        // Se vengono passati entrambi i parametri
+        $sql = "SELECT t.Id_Turno, t.Data, t.Ora
+                FROM turno t
+                JOIN area a ON t.Id_Area = a.Id_Area
+                JOIN manifestazione m ON a.Id_Manifestazione = m.Id_Manifestazione
+                WHERE m.Id_Manifestazione = :manifestazione_id 
+                AND a.Id_Area = :area_id";
+        
+        try {
+            $stmt = $pdo->prepare($sql);
+            $stmt->bindParam(':manifestazione_id', $manifestazioneId, PDO::PARAM_INT);
+            $stmt->bindParam(':area_id', $areaId, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return [];
+        }
     }
 }
 function getTurniByManifestazione($pdo, $idManifestazione) {

@@ -2,10 +2,11 @@
 include_once '../../config.php';
 include_once '../../queries.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['manifestazione_id']) && isset($_POST['area_id'])) {
-    $manifestazioneId = $_POST['manifestazione_id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['area_id'])) {
     $areaId = $_POST['area_id'];
-    $turni = getTurniByArea($pdo, $manifestazioneId, $areaId);
+    $manifestazioneId = isset($_POST['manifestazione_id']) ? $_POST['manifestazione_id'] : null;
+    
+    $turni = getTurniByArea($pdo, $areaId, $manifestazioneId);
 
     if ($turni) {            
         echo '<option value="" style="color: black; background-color: white;">Seleziona un turno</option>';

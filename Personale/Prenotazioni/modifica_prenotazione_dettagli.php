@@ -2,7 +2,6 @@
 include_once("../../config.php");
 include_once("../../session.php");
 include_once("../../queries.php");
-include_once("../../template_header.php");
 
 // Recupera gli id dell'utente e del turno
 $Id_Utente = isset($_GET['Id_Utente']) ? intval($_GET['Id_Utente']) : 0;
@@ -12,7 +11,8 @@ $Id_Turno = isset($_GET['Id_Turno']) ? intval($_GET['Id_Turno']) : 0;
 $prenotazione = getPrenotazioneById($pdo, $Id_Utente, $Id_Turno);
 
 if (!$prenotazione) {
-    echo "<p style='color: red;'>Prenotazione non trovata.</p>";
+    $_SESSION['error'] = "Prenotazione non trovata.";
+    header("Location: modifica_prenotazione.php");
     exit;
 }
 
@@ -23,30 +23,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $newIdTurno = isset($_POST['Id_Turno']) ? intval($_POST['Id_Turno']) : 0;
     $originalIdTurno = isset($_POST['original_Id_Turno']) ? intval($_POST['original_Id_Turno']) : 0;
     
-    if ($newIdTurno === 0 || $originalIdTurno === 0) {
-        echo "<script>document.getElementById('form-message').innerHTML = '<p style=\"color: red;\">Dati mancanti per l\'aggiornamento.</p>';</script>";
-    } elseif ($newIdTurno === $originalIdTurno) {
-        echo "<script>document.getElementById('form-message').innerHTML = '<p style=\"color: orange;\">Nessuna modifica da salvare.</p>';</script>";
-    } else {
+    // Se è una richiesta AJAX
+    if(!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+        header('Content-Type: application/json');
+        
+        if ($newIdTurno === 0 || $originalIdTurno === 0) {
+            echo json_encode(['success' => false, 'error' => 'Dati mancanti per l\'aggiornamento.']);
+            exit;
+        }
+        
+        if ($newIdTurno === $originalIdTurno) {
+            echo json_encode(['success' => false, 'error' => 'Nessuna modifica da salvare.']);
+            exit;
+        }
+        
         try {
             // Controlla se esiste già una prenotazione con gli stessi dati
             $existingPrenotazione = checkExistingPrenotazione($pdo, $Id_Utente, $newIdTurno);
             if ($existingPrenotazione) {
-                echo "<script>setTimeout(function() { document.getElementById('form-message').innerHTML = '<p style=\"color: red;\">Esiste già una prenotazione per questo utente nel turno selezionato.</p>'; }, 100);</script>";
+                echo json_encode(['success' => false, 'error' => 'Esiste già una prenotazione per questo utente nel turno selezionato.']);
+                exit;
+            }
+            
+            $result = updatePrenotazione($pdo, $Id_Utente, $originalIdTurno, $newIdTurno);
+            if ($result) {
+                echo json_encode(['success' => true]);
+                exit;
             } else {
-                $result = updatePrenotazione($pdo, $Id_Utente, $originalIdTurno, $newIdTurno);
-                if ($result) { 
-                    echo '<script>window.location.href = "modifica_prenotazione.php?Id_Utente='.$Id_Utente.'&Id_Turno='.$newIdTurno.'&success=1";</script>';
-                    exit;
-                } else {
-                    echo "<script>document.getElementById('form-message').innerHTML = '<p style=\"color: red;\">Errore durante l\'aggiornamento della prenotazione.</p>';</script>";
-                }
+                echo json_encode(['success' => false, 'error' => 'Errore durante l\'aggiornamento della prenotazione.']);
+                exit;
             }
         } catch (PDOException $e) {
-            echo "<script>document.getElementById('form-message').innerHTML = '<p style=\"color: red;\">Errore database: " . $e->getMessage() . "</p>';</script>";
+            echo json_encode(['success' => false, 'error' => 'Errore database: ' . $e->getMessage()]);
+            exit;
         }
     }
 }
+include_once("../../template_header.php");
+
 ?>
 
 <!-- Breadcrumbs-->
@@ -65,14 +79,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!-- Main Content-->
 <section class="section section-lg bg-default text-center">
     <div class="container">
-
         <h2>Modifica Dettagli Prenotazione</h2>
         <p>Compila il modulo sottostante per modificare i dettagli della prenotazione.</p>
         
-        <!-- Output del messaggio -->
-        <div id="form-message"></div>
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert alert-danger"><?php echo $_SESSION['error']; unset($_SESSION['error']); ?></div>
+        <?php endif; ?>
+        
+        <?php if (isset($_SESSION['warning'])): ?>
+            <div class="alert alert-warning"><?php echo $_SESSION['warning']; unset($_SESSION['warning']); ?></div>
+        <?php endif; ?>
+        
+        <?php if (isset($_SESSION['success'])): ?>
+            <div class="alert alert-success"><?php echo $_SESSION['success']; unset($_SESSION['success']); ?></div>
+        <?php endif; ?>
 
-        <form class="rd-form rd-mailform" method="post" action="">
+        <form class="rd-form rd-mailform" method="post" action="" id="modificaPrenotazioneForm">
             <input type="hidden" name="Id_Utente" value="<?php echo $Id_Utente; ?>">
             <input type="hidden" name="original_Id_Turno" value="<?php echo $Id_Turno; ?>">
             
@@ -80,29 +102,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="col-md-12">
                     <div class="form-wrap">
                         <input class="form-input" id="prenotazione-nome-cognome" type="text" name="NomeCognome" 
-                                value="<?php echo htmlspecialchars($prenotazione['Nome_Visitatore'] . ' ' . $prenotazione['Cognome_Visitatore']); ?>" readonly 
-                                title="Modificabile solo dalla pagina Gestione Visitatori">
-                        <label class="form-label" for="prenotazione-nome-cognome">Nome e Cognome (Modificabile solo da Gestione Visitatori)</label>
+                               value="<?php echo htmlspecialchars($prenotazione['Nome_Visitatore'] . ' ' . $prenotazione['Cognome_Visitatore']); ?>" 
+                               readonly>
+                        <label class="form-label" for="prenotazione-nome-cognome">Nome e Cognome</label>
                     </div>
                 </div>
 
-                <!-- Seleziona Manifestazione -->
                 <div class="col-md-12">
-                    <select class="form-input" id="manifestazione" name="manifestazione">
-                        <option value="">Seleziona Manifestazione</option>
-                        <?php foreach ($manifestazioni as $manifestazione): ?>
-                            <option value="<?php echo htmlspecialchars($manifestazione['Id_Manifestazione']); ?>"
-                                <?php echo ($prenotazione['Id_Manifestazione'] == $manifestazione['Id_Manifestazione']) ? 'selected' : ''; ?>
-                                style="color: black; background-color: white;">
-                                <?php echo htmlspecialchars($manifestazione['Nome']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                    <div class="form-wrap">
+                        <input class="form-input" id="prenotazione-manifestazione" type="text" name="manifestazione" 
+                               value="<?php echo htmlspecialchars($prenotazione['Nome_Manifestazione']); ?>" 
+                               readonly>
+                        <label class="form-label" for="prenotazione-manifestazione">Manifestazione</label>
+                    </div>
                 </div>
 
                 <!-- Seleziona Area -->
                 <div class="col-md-6">
-                    <select class="form-input" id="area" name="area">
+                    <select class="form-input" id="area" name="Id_Area">
                         <option value="">Seleziona Area</option>
                         <!-- Le aree verranno caricate dinamicamente via AJAX -->
                     </select>
@@ -130,25 +147,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </section>
 
-<!-- Script per caricare le aree e i turni dinamicamente -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {
-    // Carica le aree iniziali per la manifestazione selezionata
-    caricaAree($('#manifestazione').val(), <?php echo $prenotazione['Id_Area'] ?? 'null'; ?>);
-
-    // Gestione cambio manifestazione
-    $('#manifestazione').change(function() {
-        caricaAree($(this).val());
-    });
+    // Carica le aree iniziali per la manifestazione esistente
+    caricaAree(<?php echo $prenotazione['Id_Manifestazione']; ?>, <?php echo $prenotazione['Id_Area'] ?? 'null'; ?>, <?php echo $prenotazione['Id_Turno'] ?? 'null'; ?>);
 
     // Gestione cambio area
     $('#area').change(function() {
-        caricaTurni($(this).val(), $('#manifestazione').val(), <?php echo $prenotazione['Id_Turno'] ?? 'null'; ?>);
+        var selectedArea = $(this).val();
+        if (selectedArea) {
+            caricaTurni(selectedArea, <?php echo $prenotazione['Id_Manifestazione']; ?>, <?php echo $prenotazione['Id_Turno'] ?? 'null'; ?>);
+        } else {
+            $('#turno').html('<option value="">Seleziona prima un\'area</option>');
+        }
     });
 
     // Funzione per caricare le aree
-    function caricaAree(idManifestazione, idAreaSelezionata = null) {
+    function caricaAree(idManifestazione, idAreaSelezionata = null, idTurnoSelezionato = null) {
         if (idManifestazione) {
             $.ajax({
                 url: 'get_aree.php',
@@ -159,10 +175,14 @@ $(document).ready(function() {
                     if (idAreaSelezionata) {
                         $('#area').val(idAreaSelezionata).trigger('change');
                     }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Errore nel caricamento delle aree:", error);
+                    $('#area').html('<option value="">Errore nel caricamento delle aree</option>');
                 }
             });
         } else {
-            $('#area').html('<option value="">Seleziona prima una manifestazione</option>');
+            $('#area').html('<option value="">Errore nel caricamento delle aree</option>');
             $('#turno').html('<option value="">Seleziona prima un\'area</option>');
         }
     }
@@ -174,7 +194,6 @@ $(document).ready(function() {
                 url: 'get_turni.php',
                 type: 'POST',
                 data: { 
-                    manifestazione_id: idManifestazione,
                     area_id: idArea 
                 },
                 success: function(data) {
@@ -182,26 +201,59 @@ $(document).ready(function() {
                     if (idTurnoSelezionato) {
                         $('#turno').val(idTurnoSelezionato);
                     }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Errore nel caricamento dei turni:", error);
+                    $('#turno').html('<option value="">Errore nel caricamento dei turni</option>');
                 }
             });
         } else {
             $('#turno').html('<option value="">Seleziona prima un\'area</option>');
         }
     }
-});
 
-// Aggiungi questo al tuo script JavaScript
-$('form').submit(function(e) {
-    var currentTurno = <?php echo $Id_Turno; ?>;
-    var selectedTurno = $('#turno').val();
-    
-    if (currentTurno == selectedTurno) {
-        alert('Nessuna modifica da salvare');
+    // Gestione submit del form
+    $('#modificaPrenotazioneForm').on('submit', function(e) {
         e.preventDefault();
-        return false;
-    }
-    
-    // Potresti aggiungere qui una chiamata AJAX per verificare se la prenotazione esiste già
+        
+        var currentTurno = <?php echo $Id_Turno; ?>;
+        var selectedTurno = $('#turno').val();
+        var selectedArea = $('#area').val();
+        
+        if (!selectedArea) {
+            alert('Seleziona un\'area');
+            return false;
+        }
+        
+        if (!selectedTurno) {
+            alert('Seleziona un turno');
+            return false;
+        }
+        
+        if (currentTurno == selectedTurno) {
+            alert('Nessuna modifica da salvare');
+            return false;
+        }
+
+        // Invia il form tramite AJAX
+        $.ajax({
+            url: $(this).attr('action'),
+            type: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    window.location.href = 'modifica_prenotazione.php?Id_Utente=<?php echo $Id_Utente; ?>&Id_Turno=' + selectedTurno;
+                } else {
+                    alert(response.error || 'Errore durante il salvataggio');
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Errore:', xhr.responseText);
+                alert('Errore durante il salvataggio. Riprova più tardi.');
+            }
+        });
+    });
 });
 </script>
 

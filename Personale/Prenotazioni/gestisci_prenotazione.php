@@ -1,6 +1,5 @@
 <?php
 include_once '../../config.php';
-
 include_once '../../template_header.php';
 ?>
 <!-- Breadcrumbs-->
@@ -14,23 +13,125 @@ include_once '../../template_header.php';
     </ul>
 </section>
 <!-- Main Content-->
-<section class="section section-lg bg-default text-center">
+<section class="section section-lg bg-default">
     <div class="container">
-        <h2>Gestione Prenotazioni</h2>
-        <p>Effettua prenotazioni per i visitatori, cancella o modifica le prenotazioni esistenti.</p>
-        <div class="row row-50">
-            <div class="col-md-4">
-                <a class="button button-primary button-lg" href="../Prenotazioni/effettua_prenotazione.php">Effettua Prenotazione</a>
+        <div class="text-center">
+            <h2 class="heading-decoration"><span class="text-primary">Gestione</span> Prenotazioni</h2>
+            <p class="subtitle">Effettua, modifica o cancella le prenotazioni dei visitatori</p>
+        </div>
+        
+        <div class="row row-30 row-md-50 justify-content-center mt-5">
+            <!-- Effettua Prenotazione -->
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="dashboard-card">
+                    <a class="dashboard-card-link" href="../Prenotazioni/effettua_prenotazione.php">
+                        <div class="dashboard-card-icon">
+                            <span class="icon-lg mdi mdi-calendar-plus"></span>
+                        </div>
+                        <h5 class="dashboard-card-title">Effettua</h5>
+                        <p class="dashboard-card-text">Crea nuova prenotazione</p>
+                    </a>
+                </div>
             </div>
-            <div class="col-md-4">
-                <a class="button button-primary button-lg" href="modifica_prenotazione.php">Modifica Prenotazione</a>
+            
+            <!-- Modifica Prenotazione -->
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="dashboard-card">
+                    <a class="dashboard-card-link" href="modifica_prenotazione.php">
+                        <div class="dashboard-card-icon">
+                            <span class="icon-lg mdi mdi-calendar-edit"></span>
+                        </div>
+                        <h5 class="dashboard-card-title">Modifica</h5>
+                        <p class="dashboard-card-text">Gestisci prenotazioni</p>
+                    </a>
+                </div>
             </div>
-            <div class="col-md-4">
-                <a class="button button-primary button-lg" href="../Prenotazioni/cancella_prenotazione.php">Cancella Prenotazione</a>
+            
+            <!-- Cancella Prenotazione -->
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="dashboard-card">
+                    <a class="dashboard-card-link" href="../Prenotazioni/cancella_prenotazione.php">
+                        <div class="dashboard-card-icon">
+                            <span class="icon-lg mdi mdi-calendar-remove"></span>
+                        </div>
+                        <h5 class="dashboard-card-title">Cancella</h5>
+                        <p class="dashboard-card-text">Elimina prenotazioni</p>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 </section>
+
+<style>
+.dashboard-card {
+    background: white;
+    border-radius: 10px;
+    padding: 25px 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.dashboard-card-link {
+    color: inherit;
+    text-decoration: none;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-card-icon {
+    font-size: 2.5rem;
+    color: #4e66f8;
+    margin-bottom: 15px;
+}
+
+.dashboard-card-title {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #2a2a2a;
+}
+
+.dashboard-card-text {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0;
+}
+
+.heading-decoration {
+    position: relative;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+
+.heading-decoration:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(to right, #4e66f8, #6f42c1);
+}
+
+.subtitle {
+    color: #6c757d;
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+</style>
 <?php
 include_once '../../template_footer.php';
 ?>
