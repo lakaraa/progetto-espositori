@@ -1085,10 +1085,57 @@ function getCandidature($pdo) {
 }
 
 function deleteContributo($pdo, $idContributo) {
-    $sql = "DELETE FROM Contributo WHERE Id_Contributo = :idContributo";
-    $stmt = $pdo->prepare($sql);
-    $stmt->bindParam(':idContributo', $idContributo, PDO::PARAM_INT);
-    return $stmt->execute();
+    try {
+        // Prima recupera il nome dell'immagine
+        $stmt = $pdo->prepare("SELECT Immagine FROM Contributo WHERE Id_Contributo = ?");
+        $stmt->execute([$idContributo]);
+        $contributo = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // Inizia la transazione
+        $pdo->beginTransaction();
+
+        // Elimina le relazioni con le categorie dalla tabella Tipologia
+        $stmt = $pdo->prepare("DELETE FROM Tipologia WHERE Id_Contributo = ?");
+        $stmt->execute([$idContributo]);
+
+        // Elimina le relazioni con le manifestazioni
+        $stmt = $pdo->prepare("DELETE FROM Esposizione WHERE Id_Contributo = ?");
+        $stmt->execute([$idContributo]);
+
+        // Elimina il contributo
+        $stmt = $pdo->prepare("DELETE FROM Contributo WHERE Id_Contributo = ?");
+        $stmt->execute([$idContributo]);
+
+        // Commit della transazione
+        $pdo->commit();
+
+        // Se c'era un'immagine associata, eliminala
+        if ($contributo && !empty($contributo['Immagine'])) {
+            // Usa un percorso relativo alla root del progetto
+            $imagePath = $_SERVER['DOCUMENT_ROOT'] . '/progetto-espositori/uploads/img/' . $contributo['Immagine'];
+            
+            error_log("Tentativo di eliminazione immagine. Percorso: " . $imagePath);
+            
+            if (file_exists($imagePath)) {
+                if (!unlink($imagePath)) {
+                    error_log("Errore durante l'eliminazione del file. Errore PHP: " . error_get_last()['message']);
+                } else {
+                    error_log("File eliminato con successo");
+                }
+            } else {
+                error_log("File non trovato al percorso: " . $imagePath);
+            }
+        }
+
+        return true;
+    } catch (PDOException $e) {
+        // Rollback in caso di errore
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log("Errore durante l'eliminazione del contributo: " . $e->getMessage());
+        throw $e;
+    }
 }
 
 function getCandidatureInApprovazione($pdo, $manifestazione) {
@@ -1659,5 +1706,21 @@ function getEspositoreContributi($pdo, $idEspositore) {
     $stmt->bindParam(':idEspositore', $idEspositore, PDO::PARAM_INT);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function getUserInfo($pdo, $idCandidatura) {
+    try {
+        $stmt = $pdo->prepare("
+            SELECT u.Nome, u.Cognome 
+            FROM Utente u 
+            INNER JOIN Contributo c ON u.Id_Utente = c.Id_Utente 
+            WHERE c.Id_Contributo = :idCandidatura
+        ");
+        $stmt->execute(['idCandidatura' => $idCandidatura]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        error_log("Errore nel recupero delle informazioni utente: " . $e->getMessage());
+        return false;
+    }
 }
 ?>
