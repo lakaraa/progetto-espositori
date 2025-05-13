@@ -394,14 +394,14 @@ function getEspositori($pdo)
 }
 function getEspositoreById($pdo, $id) {
     $stmt = $pdo->prepare("SELECT 
-        Id_Utente as id,
-        Username as username,
-        Nome as nome,
-        Cognome as cognome,
-        Email as email,
-        Telefono as telefono,
-        Qualifica as qualifica,
-        Curriculum as curriculum
+        Id_Utente,
+        Username,
+        Nome,
+        Cognome,
+        Email,
+        Telefono,
+        Qualifica,
+        Curriculum
         FROM utente WHERE Id_Utente = ? AND Ruolo = 'Espositore'");
     $stmt->execute([$id]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -1538,5 +1538,126 @@ function getContributiTotaliCount($pdo, $userId) {
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     return $result['total'] ?? 0;
+}
+
+/**
+ * Recupera l'elenco degli espositori ordinato per cognome e nome
+ */
+function getElencoEspositori($pdo) {
+    $query = "SELECT u.Id_Utente as id, 
+                     u.Nome as nome, 
+                     u.Cognome as cognome, 
+                     u.Email as email, 
+                     u.Telefono as telefono,
+                     u.Qualifica as qualifica,
+                     GROUP_CONCAT(DISTINCT CONCAT(a.Nome, ' (', m.Nome, ')') SEPARATOR ', ') as aree_assegnate,
+                     COUNT(DISTINCT c.Id_Contributo) as num_contributi
+              FROM utente u
+              LEFT JOIN contributo c ON u.Id_Utente = c.Id_Utente
+              LEFT JOIN esposizione e ON c.Id_Contributo = e.Id_Contributo
+              LEFT JOIN manifestazione m ON e.Id_Manifestazione = m.Id_Manifestazione
+              LEFT JOIN area a ON m.Id_Manifestazione = a.Id_Manifestazione
+              WHERE u.Ruolo = 'Espositore'
+              GROUP BY u.Id_Utente, u.Nome, u.Cognome, u.Email, u.Telefono, u.Qualifica
+              ORDER BY u.Cognome ASC, u.Nome ASC";
+    
+    $stmt = $pdo->prepare($query);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/**
+ * Recupera le esposizioni per una specifica categoria
+ */
+function getEsposizioniByCategoria($pdo, $categoria_id) {
+    if (!$categoria_id) {
+        return [];
+    }
+    
+    $sql = "SELECT c.Id_Contributo as id, c.Titolo as titolo, c.Immagine as immagine, 
+                   u.Nome as nome, u.Cognome as cognome, 
+                   a.Nome as area
+            FROM contributo c
+            JOIN utente u ON c.Id_Utente = u.Id_Utente
+            LEFT JOIN area a ON u.Id_Area = a.Id_Area
+            JOIN tipologia t ON c.Id_Contributo = t.Id_Contributo
+            WHERE t.Id_Categoria = :categoria_id
+            ORDER BY c.Titolo ASC";
+            
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':categoria_id', $categoria_id, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/**
+ * Recupera tutte le categorie per le esposizioni
+ */
+function getCategorieEsposizioni($pdo) {
+    $sql = "SELECT Id_Categoria as id, Nome as nome 
+            FROM categoria 
+            ORDER BY Nome ASC";
+            
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/**
+ * Recupera la classifica delle categorie per numero di espositori
+ */
+function getClassificaCategorie($pdo) {
+    $sql = "SELECT c.Id_Categoria as id, c.Nome as nome, 
+                   COUNT(DISTINCT t.Id_Contributo) as numero_espositori,
+                   (COUNT(DISTINCT t.Id_Contributo) * 100.0 / 
+                    (SELECT COUNT(DISTINCT Id_Contributo) FROM tipologia)) as percentuale
+            FROM categoria c
+            LEFT JOIN tipologia t ON c.Id_Categoria = t.Id_Categoria
+            GROUP BY c.Id_Categoria, c.Nome
+            ORDER BY numero_espositori DESC";
+            
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function getEspositoreDettagliato($pdo, $id) {
+    $sql = "SELECT 
+        u.Id_Utente,
+        u.Username,
+        u.Nome,
+        u.Cognome,
+        u.Email,
+        u.Telefono,
+        u.Qualifica,
+        u.Curriculum,
+        GROUP_CONCAT(DISTINCT c.Titolo) as Contributi,
+        GROUP_CONCAT(DISTINCT cat.Nome) as Categorie
+    FROM utente u
+    LEFT JOIN contributo c ON u.Id_Utente = c.Id_Utente
+    LEFT JOIN tipologia t ON c.Id_Contributo = t.Id_Contributo
+    LEFT JOIN categoria cat ON t.Id_Categoria = cat.Id_Categoria
+    WHERE u.Id_Utente = ? AND u.Ruolo = 'Espositore'
+    GROUP BY u.Id_Utente, u.Username, u.Nome, u.Cognome, u.Email, u.Telefono, u.Qualifica, u.Curriculum";
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+function getEspositoreContributi($pdo, $idEspositore) {
+    $sql = "SELECT 
+        c.Titolo as Contributo,
+        GROUP_CONCAT(DISTINCT cat.Nome) as Categorie
+    FROM contributo c
+    LEFT JOIN tipologia t ON c.Id_Contributo = t.Id_Contributo
+    LEFT JOIN categoria cat ON t.Id_Categoria = cat.Id_Categoria
+    WHERE c.Id_Utente = :idEspositore
+    GROUP BY c.Id_Contributo, c.Titolo";
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idEspositore', $idEspositore, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 ?>
