@@ -26,7 +26,7 @@ $candidature = getCandidature($pdo);
         <h2>Modifica Candidatura</h2>
         <p>Seleziona una candidatura dalla lista sottostante per modificarla.</p>
         <br>
-        <div class="table-responsive">
+        <div class="table-responsive" style="min-width: 1200px;">
             <table class="table table-striped">
                 <thead>
                     <tr>
