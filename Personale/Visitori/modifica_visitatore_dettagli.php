@@ -95,7 +95,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </div>
         </div>
       </div>
-      <button class="button button-primary button-lg" type="submit">Salva Modifiche</button>
+      <div class="col-md-12 text-center"> 
+        <button class="button button-primary button-lg" type="submit">Salva Modifiche</button>
+      </div>
     </form>
   </div>
 </section>

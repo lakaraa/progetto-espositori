@@ -1,24 +1,27 @@
 <?php
 include_once '../../config.php';
 include_once '../../queries.php';
-include_once '../../template_header.php';
 
 // Gestione della cancellazione tramite POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id']) && is_numeric($_POST['id'])) {
+    header('Content-Type: application/json');
+    ob_clean(); // Pulisce il buffer di output
     $idVisitatore = intval($_POST['id']);
     try {
         // Cancella il visitatore dal database
         if (deleteVisitatore($pdo, $idVisitatore)) {
-            $successMessage = "Visitatore cancellato con successo.";
-            $successStyle = "color: rgb(74, 196, 207);";
+            echo json_encode(['success' => true, 'message' => 'Visitatore cancellato con successo.']);
         } else {
-            $errorMessage = "Errore durante la cancellazione del visitatore.";
-            $errorStyle = "color: red;";
+            echo json_encode(['success' => false, 'message' => 'Errore durante la cancellazione del visitatore.']);
         }
     } catch (PDOException $e) {
-        $errorMessage = "Errore di connessione al database: " . $e->getMessage();
+        echo json_encode(['success' => false, 'message' => 'Errore di connessione al database: ' . $e->getMessage()]);
     }
+    exit;
 }
+
+// Solo se non è una richiesta POST, includi il template
+include_once '../../template_header.php';
 
 // Recupera tutti i visitatori dal database
 $visitatori = getVisitatori($pdo);
@@ -31,7 +34,7 @@ $visitatori = getVisitatori($pdo);
     </div>
     <ul class="breadcrumbs-custom-path">
         <li><a href="../dashboard_personale.php">Dashboard</a></li>
-        <li><a href="/progetto-espositori/Personale/Visitori/gestisci_visitatore.php">Gestione Visitatori</a></li>
+        <li><a href="gestisci_visitatore.php">Gestione Visitatori</a></li>
         <li class="active">Cancella Visitatore</li>
     </ul>
 </section>
@@ -43,12 +46,7 @@ $visitatori = getVisitatori($pdo);
         <p>Seleziona un visitatore dalla lista sottostante per cancellarlo.</p>
 
         <!-- Messaggi di successo o errore -->
-        <?php if (!empty($successMessage)): ?>
-            <p style="<?php echo $successStyle; ?>"><?php echo htmlspecialchars($successMessage); ?></p>
-        <?php endif; ?>
-        <?php if (!empty($errorMessage)): ?>
-            <p style="<?php echo $errorStyle; ?>"><?php echo htmlspecialchars($errorMessage); ?></p>
-        <?php endif; ?>
+        <div id="form-message"></div>
 
         <div class="table-responsive">
             <table class="table table-striped">
@@ -62,7 +60,7 @@ $visitatori = getVisitatori($pdo);
                         <th></th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="visitatoriTableBody">
                     <?php if (!empty($visitatori)): ?>
                         <?php foreach ($visitatori as $visitatore): ?>
                             <tr>
@@ -72,11 +70,10 @@ $visitatori = getVisitatori($pdo);
                                 <td><?php echo htmlspecialchars($visitatore['Email']); ?></td>
                                 <td><?php echo htmlspecialchars($visitatore['Telefono']); ?></td>
                                 <td>
-                                    <!-- Modulo per la cancellazione -->
-                                    <form method="post" action="cancella_visitatore.php" onsubmit="return confirm('Sei sicuro di voler cancellare questo visitatore?');">
-                                        <input type="hidden" name="id" value="<?php echo htmlspecialchars($visitatore['Id_Utente']); ?>">
-                                        <button type="submit" class="button button-primary button-sm">Cancella</button>
-                                    </form>
+                                    <button type="button" class="button button-primary button-sm btn-delete" 
+                                            data-id="<?php echo htmlspecialchars($visitatore['Id_Utente']); ?>">
+                                        Cancella
+                                    </button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -90,6 +87,60 @@ $visitatori = getVisitatori($pdo);
         </div>
     </div>
 </section>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(function() {
+    $('.btn-delete').on('click', function() {
+        const id = $(this).data('id');
+        const row = $(this).closest('tr');
+        
+        if (confirm('Sei sicuro di voler cancellare questo visitatore?')) {
+            $.ajax({
+                url: '',
+                method: 'POST',
+                data: { id: id },
+                success: function(response) {
+                    try {
+                        const data = typeof response === "string" ? JSON.parse(response) : response;
+                        
+                        if (data.success) {
+                            // Rimuovi la riga dalla tabella con un'animazione fadeOut
+                            row.fadeOut(400, function() {
+                                $(this).remove();
+                                // Se non ci sono più righe, mostra il messaggio "Nessun visitatore trovato"
+                                if ($('#visitatoriTableBody tr').length === 0) {
+                                    $('#visitatoriTableBody').html('<tr><td colspan="6">Nessun visitatore trovato.</td></tr>');
+                                }
+                            });
+                        }
+                        
+                        // Mostra il messaggio di successo/errore
+                        $('#form-message').html(
+                            `<p style="color: ${data.success ? 'rgb(74, 196, 207)' : 'red'};">${data.message}</p>`
+                        );
+                        
+                        // Rimuovi il messaggio dopo 3 secondi
+                        setTimeout(() => {
+                            $('#form-message').fadeOut(400, function() {
+                                $(this).empty().show();
+                            });
+                        }, 3000);
+                        
+                    } catch (e) {
+                        console.error("Errore nel parsing della risposta:", e);
+                        $('#form-message').html('<p style="color: red;">Errore nel caricamento dei dati.</p>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Errore AJAX:", status, error);
+                    $('#form-message').html('<p style="color: red;">Errore di comunicazione con il server.</p>');
+                }
+            });
+        }
+    });
+});
+</script>
 
 <?php 
 include_once '../../template_footer.php';

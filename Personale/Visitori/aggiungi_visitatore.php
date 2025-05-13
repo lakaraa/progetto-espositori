@@ -24,13 +24,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
+        // Verifica se l'username esiste già
+        if (usernameExists($pdo, $username)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Username già in uso. Scegli un altro username.'
+            ]);
+            exit;
+        }
+
+        // Verifica se l'email esiste già
+        if (emailExists($pdo, $email)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Email già in uso. Scegli un\'altra email.'
+            ]);
+            exit;
+        }
+
         // Hash della password prima di salvarla
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
         
         $result = addVisitatore($pdo, $username, $passwordHash, $nome, $cognome, $email, $telefono);
         echo json_encode([
             'success' => $result,
-            'message' => $result ? 'Visitatore creato con successo!' : 'Errore durante l\'aggiunta del visitatore.'
+            'message' => $result ? 'Visitatore aggiunto con successo!' : 'Errore durante l\'aggiunta del visitatore.'
         ]);
         exit;
     } catch (PDOException $e) {
@@ -53,7 +71,7 @@ include_once("../../template_header.php");
     </div>
     <ul class="breadcrumbs-custom-path">
         <li><a href="../dashboard_personale.php">Dashboard</a></li>
-        <li><a href="/progetto-espositori/Personale/Visitori/gestisci_visitatori.php">Gestione Visitatori</a></li>
+        <li><a href="gestisci_visitatore.php">Gestione Visitatori</a></li>
         <li class="active">Aggiungi Visitatore</li>
     </ul>
 </section>
@@ -122,7 +140,6 @@ $(function () {
             method: 'POST',
             data: $(this).serialize(),
             success: function (response) {
-                console.log("RISPOSTA RAW:", response);
                 try {
                     const data = typeof response === "string" ? JSON.parse(response) : response;
                     const message = data.message || "Messaggio non disponibile.";
@@ -134,13 +151,20 @@ $(function () {
 
                     if (isSuccess) {
                         $('.form-crea-visitatore')[0].reset();
+                        // Rimuovi il messaggio dopo 3 secondi
+                        setTimeout(() => {
+                            $('#form-message').fadeOut(400, function() {
+                                $(this).empty().show();
+                            });
+                        }, 3000);
                     }
                 } catch (e) {
                     console.error("Errore JSON.parse:", e);
                     $('#form-message').html('<p style="color: red;">Risposta non valida dal server.</p>');
                 }
             },
-            error: function () {
+            error: function (xhr, status, error) {
+                console.error("Errore AJAX:", status, error);
                 $('#form-message').html('<p style="color: red;">Errore di comunicazione con il server.</p>');
             }
         });
