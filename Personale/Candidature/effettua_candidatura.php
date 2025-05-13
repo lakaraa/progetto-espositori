@@ -173,27 +173,37 @@ include_once("../../template_header.php");
                         <label class="form-label" for="titolo">Titolo</label>
                         <input class="form-input" id="titolo" type="text" name="Titolo" required>
                     </div>
-                </div>
-
-                <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="url">URL</label>
                         <input class="form-input" id="url" type="url" name="URL">
                     </div>
-                </div>
-                
-                <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="sintesi">Sintesi</label>
                         <textarea class="form-input" id="sintesi" name="Sintesi" required></textarea>
                     </div>
                 </div>
-                
                 <div class="col-md-6">
                     <div class="form-wrap">
-                        <label class="form-label" for="immagine">Immagine</label>
-                        <br>
-                        <input class="form-input" id="immagine" type="file" name="Immagine" accept="image/*">
+                        <label class="form-label" for="immagine">Immagine Principale</label>
+                        <div class="image-upload-container">
+                            <!-- Anteprima immagine -->
+                            <div class="image-preview" id="imagePreview">
+                                <img src="" alt="Anteprima immagine" class="image-preview__image" style="display: none;">
+                                <div class="image-preview__default-text">Nessuna immagine selezionata</div>
+                            </div>
+                            
+                            <!-- Input file personalizzato -->
+                            <label for="immagine" class="custom-file-upload">
+                                <i class="fa fa-cloud-upload"></i> Seleziona Immagine
+                            </label>
+                            <input id="immagine" type="file" name="Immagine" accept=".jpg,.jpeg,.png" style="display: none;">
+                            
+                            <!-- Requisiti immagine -->
+                            <div class="image-requirements">
+                                <small>Formati accettati: JPG, JPEG, PNG</small><br>
+                                <small>Dimensione massima: 5MB</small>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -299,6 +309,38 @@ function toggleCategory(element, categoryId) {
         });
     }
 }
+
+document.getElementById('immagine').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    // Verifica il tipo di file
+    const validTypes = ['image/jpeg', 'image/png'];
+    if (!validTypes.includes(file.type)) {
+        alert('Per favore seleziona solo file JPG o PNG');
+        this.value = '';
+        return;
+    }
+    
+    const preview = document.getElementById('imagePreview');
+    const previewImage = preview.querySelector('.image-preview__image');
+    const previewDefaultText = preview.querySelector('.image-preview__default-text');
+    
+    if (file.size > 5 * 1024 * 1024) {
+        alert('L\'immagine è troppo grande! Dimensione massima consentita: 5MB');
+        this.value = '';
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        previewImage.src = e.target.result;
+        previewImage.style.display = 'block';
+        previewDefaultText.style.display = 'none';
+        preview.style.borderColor = '#4ac4cf';
+    }
+    reader.readAsDataURL(file);
+});
 </script>
 
 <?php
@@ -358,5 +400,66 @@ include_once("../../template_footer.php");
     .col-md-4 {
         display: flex;
         flex-direction: column;
+    }
+     /* Stile per il caricamento immagine */
+     .image-upload-container {
+        margin-top: 10px;
+        text-align: center;
+    }
+    
+    .image-preview {
+        width: 100%;
+        height: 200px;
+        border: 2px dashed #ddd;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+        background-color: #f9f9f9;
+        transition: all 0.3s ease;
+    }
+    
+    .image-preview:hover {
+        border-color: #4ac4cf;
+    }
+    
+    .image-preview__image {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        display: none;
+    }
+    
+    .image-preview__default-text {
+        color: #888;
+        font-size: 0.9em;
+    }
+    
+    .custom-file-upload {
+        display: inline-block;
+        padding: 10px 20px;
+        background-color: #4ac4cf;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 10px;
+    }
+    
+    .custom-file-upload:hover {
+        background-color: #3aa8b3;
+    }
+    
+    .custom-file-upload i {
+        margin-right: 8px;
+    }
+    
+    .image-requirements {
+        color: #666;
+        font-size: 0.8em;
+        margin-top: 5px;
     }
 </style>
