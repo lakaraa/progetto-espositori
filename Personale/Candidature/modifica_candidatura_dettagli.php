@@ -2,6 +2,12 @@
 include_once '../../config.php';
 include_once '../../queries.php';
 
+// Abilita la segnalazione degli errori
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('log_errors', 1);
+ini_set('error_log', '../../logs/php_errors.log');
+
 $successMessage = '';
 $errorMessage = '';
 
@@ -42,12 +48,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Gestione immagine se presente
         if (isset($_FILES['Immagine']) && $_FILES['Immagine']['error'] === UPLOAD_ERR_OK) {
             error_log('Inizio gestione immagine');
+            error_log('Dettagli file caricato: ' . print_r($_FILES['Immagine'], true));
             
             // Verifica il tipo di file
-            $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
             $fileType = $_FILES['Immagine']['type'];
             if (!in_array($fileType, $allowedTypes)) {
-                throw new Exception('Tipo di file non supportato. Usa JPG, PNG o GIF.');
+                throw new Exception('Tipo di file non supportato. Usa JPG o PNG.');
             }
 
             $immagineTmpPath = $_FILES['Immagine']['tmp_name'];
@@ -59,13 +66,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error_log('Estensione file: ' . $fileExtension);
             
             // Recupera le informazioni dell'utente dalla candidatura
-            $userInfo = getUserInfo($pdo, $candidatura['Id_Utente']);
+            $userInfo = getUserInfo($pdo, $idCandidatura);
             if (!$userInfo) {
                 throw new Exception('Informazioni utente non trovate.');
             }
             error_log('Info utente: ' . print_r($userInfo, true));
             
-            $manifestazioneInfo = getManifestazione($pdo, $idManifestazione);
+            $manifestazioneInfo = getManifestazioneById($pdo, $idManifestazione);
             if (!$manifestazioneInfo) {
                 throw new Exception('Informazioni manifestazione non trovate.');
             }
@@ -86,61 +93,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             error_log('Nome file generato: ' . $immagineName);
             
-            $immagineUploadPath = "../../uploads/img/" . $immagineName;
-            error_log('Percorso upload: ' . $immagineUploadPath);
-
-            // Crea cartella uploads se non esiste
-            if (!is_dir('../../uploads/img/')) {
-                error_log('Creazione cartella uploads');
-                if (!mkdir('../../uploads/img/', 0777, true)) {
-                    throw new Exception('Impossibile creare la cartella uploads.');
+            // Verifica e crea la directory di upload se necessario
+            $uploadDir = "../../uploads/img/";
+            if (!file_exists($uploadDir)) {
+                error_log('Creazione directory upload: ' . $uploadDir);
+                if (!mkdir($uploadDir, 0777, true)) {
+                    throw new Exception('Impossibile creare la directory di upload.');
                 }
             }
 
-            // Verifica i permessi della cartella
-            if (!is_writable('../../uploads/img/')) {
-                throw new Exception('La cartella uploads non è scrivibile.');
+            // Verifica i permessi della directory
+            if (!is_writable($uploadDir)) {
+                error_log('Directory non scrivibile: ' . $uploadDir);
+                chmod($uploadDir, 0777);
+                if (!is_writable($uploadDir)) {
+                    throw new Exception('La directory di upload non è scrivibile.');
+                }
             }
 
-            // Se esiste un'immagine precedente, eliminarla solo se non è usata da altre candidature
+            $immagineUploadPath = $uploadDir . $immagineName;
+            error_log('Percorso upload: ' . $immagineUploadPath);
+
+            // Se esiste un'immagine precedente, eliminarla
             if (!empty($candidatura['Immagine'])) {
-                $oldImagePath = "../../uploads/img/" . $candidatura['Immagine'];
+                $oldImagePath = $uploadDir . $candidatura['Immagine'];
                 error_log('Controllo immagine precedente: ' . $oldImagePath);
                 
-                // Verifica se l'immagine è usata da altre candidature
-                $stmt = $pdo->prepare("SELECT COUNT(*) FROM candidature WHERE Immagine = ? AND Id_Candidatura != ?");
-                $stmt->execute([$candidatura['Immagine'], $idCandidatura]);
-                $imageUsageCount = $stmt->fetchColumn();
-                
-                error_log('Numero di altre candidature che usano questa immagine: ' . $imageUsageCount);
-                
-                // Elimina l'immagine solo se non è usata da altre candidature
-                if ($imageUsageCount == 0 && file_exists($oldImagePath) && is_writable($oldImagePath)) {
+                if (file_exists($oldImagePath)) {
+                    error_log('Tentativo eliminazione immagine vecchia');
+                    if (!is_writable($oldImagePath)) {
+                        error_log('Immagine vecchia non è scrivibile');
+                        chmod($oldImagePath, 0666);
+                    }
                     if (!unlink($oldImagePath)) {
                         error_log('Impossibile eliminare l\'immagine vecchia: ' . $oldImagePath);
+                        $error = error_get_last();
+                        error_log('Errore eliminazione: ' . print_r($error, true));
+                        throw new Exception('Errore nell\'eliminazione dell\'immagine precedente: ' . ($error['message'] ?? 'Errore sconosciuto'));
                     } else {
                         error_log('Immagine vecchia eliminata con successo');
                     }
                 } else {
-                    error_log('Immagine non eliminata perché usata da altre candidature o non accessibile');
+                    error_log('Immagine vecchia non trovata nel percorso: ' . $oldImagePath);
                 }
-            }
-
-            // Verifica se il file di destinazione esiste già
-            if (file_exists($immagineUploadPath)) {
-                // Aggiungi un timestamp al nome del file per renderlo unico
-                $timestamp = time();
-                $immagineName = sprintf(
-                    '%s_%s_%s_%s_%s.%s',
-                    $userInfo['Nome'],
-                    $userInfo['Cognome'],
-                    $manifestazioneNome,
-                    $data,
-                    $timestamp,
-                    $fileExtension
-                );
-                $immagineUploadPath = "../../uploads/img/" . $immagineName;
-                error_log('Nome file aggiornato per evitare conflitti: ' . $immagineName);
             }
 
             // Salva il file
@@ -148,7 +143,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!move_uploaded_file($immagineTmpPath, $immagineUploadPath)) {
                 $uploadError = error_get_last();
                 error_log('Errore nel salvataggio del file: ' . print_r($uploadError, true));
-                throw new Exception('Errore nel salvataggio dell\'immagine. Verifica i permessi della cartella.');
+                throw new Exception('Errore nel salvataggio dell\'immagine: ' . ($uploadError['message'] ?? 'Errore sconosciuto'));
+            }
+            
+            // Verifica che il file sia stato effettivamente salvato
+            if (!file_exists($immagineUploadPath)) {
+                error_log('File non trovato dopo il salvataggio');
+                throw new Exception('Errore: il file non è stato salvato correttamente');
             }
             
             $immagine = $immagineName;
@@ -215,7 +216,7 @@ $categorieAttuali = array_column($candidaturaCategorie, 'Id_Categoria');
     <ul class="breadcrumbs-custom-path">
         <li><a href="../dashboard_personale.php">Dashboard</a></li>
         <li><a href="gestisci_candidature.php">Gestione Candidature</a></li>
-        <li><a href="modifica_candidatura.php">Modifica Candidatur2</a></li>
+        <li><a href="modifica_candidatura.php">Modifica Candidatura</a></li>
         <li class="active">Modifica Dettagli Candidatura</li>
     </ul>
 </section>
@@ -237,7 +238,7 @@ $categorieAttuali = array_column($candidaturaCategorie, 'Id_Categoria');
 
                     <div class="form-wrap" style="margin-bottom: 20px;">
                         <label class="form-label" for="candidatura-manifestazione" style="display: block; margin-bottom: 5px; font-weight: bold;">Manifestazione</label> <br>
-                        <select class="form-input" id="candidatura-manifestazione" name="Id_Manifestazione" required>
+                        <select class="form-input" id="candidatura-manifestazione" name="Id_Manifestazione" required disabled style="cursor: not-allowed;">
                             <?php foreach ($manifestazioni as $manifestazione): ?>
                                 <option value="<?php echo htmlspecialchars($manifestazione['Id_Manifestazione']); ?>" style="color: black;" 
                                         <?php echo $manifestazione['Id_Manifestazione'] == $candidatura['Id_Manifestazione'] ? 'selected' : ''; ?>>
@@ -245,6 +246,7 @@ $categorieAttuali = array_column($candidaturaCategorie, 'Id_Categoria');
                                 </option>
                             <?php endforeach; ?>
                         </select>
+                        <input type="hidden" name="Id_Manifestazione" value="<?php echo htmlspecialchars($candidatura['Id_Manifestazione']); ?>">
                     </div>
 
                     <div class="form-wrap" style="margin-bottom: 20px;">
@@ -268,7 +270,7 @@ $categorieAttuali = array_column($candidaturaCategorie, 'Id_Categoria');
 
                     <div class="form-wrap" style="margin-bottom: 20px;">
                         <label class="form-label" for="candidatura-immagine" style="display: block; margin-bottom: 5px; font-weight: bold;">Immagine</label> <br>   
-                        <input class="form-input" id="candidatura-immagine" type="file" name="Immagine" accept="image/*" onchange="previewImage(this)">
+                        <input class="form-input" id="candidatura-immagine" type="file" name="Immagine" accept="image/jpeg,image/png,image/jpg" onchange="previewImage(this)">
                         <div class="image-container">
                             <?php if (!empty($candidatura['Immagine'])): ?>
                                 <div class="current-image">
@@ -344,13 +346,32 @@ $(function () {
         
         var formData = new FormData(this);
         
+        // Verifica se è stata selezionata una nuova immagine
+        var fileInput = document.getElementById('candidatura-immagine');
+        if (fileInput.files.length > 0) {
+            var file = fileInput.files[0];
+            // Verifica il tipo di file
+            if (!file.type.match('image/jpeg') && !file.type.match('image/jpg') && !file.type.match('image/png')) {
+                $('#form-message').html('<p style="color: red;">Formato immagine non supportato. Usa JPG o PNG.</p>');
+                return false;
+            }
+            // Verifica la dimensione del file (max 5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                $('#form-message').html('<p style="color: red;">L\'immagine non può superare i 5MB.</p>');
+                return false;
+            }
+        }
+        
         // Debug: mostra i dati che stiamo inviando
         for (var pair of formData.entries()) {
-            console.log(pair[0] + ': ' + pair[1]);
+            console.log(pair[0] + ': ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
         }
         
         // Mostra un messaggio di caricamento
         $('#form-message').html('<p style="color: #4ac4cf;">Elaborazione in corso...</p>');
+        
+        // Disabilita il pulsante di submit durante l'upload
+        $('button[type="submit"]').prop('disabled', true);
         
         $.ajax({
             url: window.location.href,
@@ -358,6 +379,7 @@ $(function () {
             data: formData,
             processData: false,
             contentType: false,
+            timeout: 30000, // 30 secondi di timeout
             success: function (response) {
                 console.log('Risposta server:', response);
                 
@@ -369,22 +391,51 @@ $(function () {
                     console.error('Errore parsing JSON:', e);
                     console.log('Risposta ricevuta:', response);
                     $('#form-message').html('<p style="color: red;">Errore nella risposta del server. Riprova più tardi.</p>');
+                    $('button[type="submit"]').prop('disabled', false);
                     return;
                 }
                 
                 if (data.success) {
                     $('#form-message').html(`<p style="color: #4ac4cf;">${data.message}</p>`);
                     setTimeout(function() { 
-                        window.location.href = window.location.href; 
+                        window.location.href = 'modifica_candidatura.php'; 
                     }, 1000);
                 } else {
                     $('#form-message').html(`<p style="color: red;">${data.message || 'Errore durante l\'aggiornamento'}</p>`);
+                    $('button[type="submit"]').prop('disabled', false);
                 }
             },
             error: function (xhr, status, error) {
                 console.error('Errore AJAX:', status, error);
                 console.log('Risposta server:', xhr.responseText);
-                $('#form-message').html('<p style="color: red;">Errore di comunicazione con il server. Riprova più tardi.</p>');
+                
+                let errorMessage = 'Errore di comunicazione con il server. ';
+                if (xhr.status === 500) {
+                    errorMessage += 'Errore interno del server. ';
+                    // Log dell'errore completo
+                    console.error('Dettagli errore:', {
+                        status: xhr.status,
+                        statusText: xhr.statusText,
+                        responseText: xhr.responseText,
+                        error: error
+                    });
+                } else if (xhr.status === 404) {
+                    errorMessage += 'Risorsa non trovata. ';
+                } else if (status === 'timeout') {
+                    errorMessage += 'Timeout della richiesta. ';
+                }
+                
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.message) {
+                        errorMessage += response.message;
+                    }
+                } catch (e) {
+                    errorMessage += 'Riprova più tardi.';
+                }
+                
+                $('#form-message').html(`<p style="color: red;">${errorMessage}</p>`);
+                $('button[type="submit"]').prop('disabled', false);
             }
         });
     });
@@ -431,6 +482,17 @@ function closeImageModal() {
 </script>
 
 <style>
+/* Stili per gli input con autofill */
+
+
+.form-input:-webkit-autofill,
+.form-input:-webkit-autofill:hover,
+.form-input:-webkit-autofill:focus,
+.form-input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: #000 !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
 
 /* Container per le immagini */
 .image-container {
