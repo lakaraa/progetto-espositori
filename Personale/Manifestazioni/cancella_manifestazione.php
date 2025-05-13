@@ -1,22 +1,27 @@
 <?php
 include_once '../../config.php';
 include_once '../../queries.php';
-include_once '../../template_header.php';
 
 // Gestione della cancellazione tramite POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id']) && is_numeric($_POST['id'])) {
+    header('Content-Type: application/json');
+    ob_clean(); // Pulisce il buffer di output
     $idManifestazione = intval($_POST['id']);
     try {
-        // Cancella l'area dal database
+        // Cancella la manifestazione dal database
         if (deleteManifestazione($pdo, $idManifestazione)) {
-            $successMessage = "Manifestazione cancellata con successo.";
+            echo json_encode(['success' => true, 'message' => 'Manifestazione cancellata con successo.']);
         } else {
-            $errorMessage = "Errore durante la cancellazione della manifestazione.";
+            echo json_encode(['success' => false, 'message' => 'Errore durante la cancellazione della manifestazione.']);
         }
     } catch (PDOException $e) {
-        $errorMessage = "Errore di connessione al database: " . $e->getMessage();
+        echo json_encode(['success' => false, 'message' => 'Errore di connessione al database: ' . $e->getMessage()]);
     }
+    exit;
 }
+
+// Solo se non è una richiesta POST, includi il template
+include_once '../../template_header.php';
 
 // Recupera tutte le manifestazioni dal database
 $manifestazioni = getManifestazioni($pdo);
@@ -42,12 +47,7 @@ $manifestazioni = getManifestazioni($pdo);
         <br>
 
         <!-- Messaggi di successo o errore -->
-        <?php if (!empty($successMessage)): ?>
-            <p style="color: green;"><?php echo htmlspecialchars($successMessage); ?></p>
-        <?php endif; ?>
-        <?php if (!empty($errorMessage)): ?>
-            <p style="color: red;"><?php echo htmlspecialchars($errorMessage); ?></p>
-        <?php endif; ?>
+        <div id="form-message"></div>
 
         <div class="table-responsive">
             <table class="table table-striped">
@@ -60,7 +60,7 @@ $manifestazioni = getManifestazioni($pdo);
                         <th></th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="manifestazioniTableBody">
                     <?php if (!empty($manifestazioni)): ?>
                         <?php foreach ($manifestazioni as $manifestazione): ?>
                             <tr>
@@ -69,11 +69,10 @@ $manifestazioni = getManifestazioni($pdo);
                                 <td><?php echo htmlspecialchars($manifestazione['Data']); ?></td>
                                 <td><?php echo htmlspecialchars($manifestazione['Durata']); ?></td>
                                 <td>
-                                    <!-- Modulo per la cancellazione -->
-                                    <form method="post" action="cancella_manifestazione.php" onsubmit="return confirm('Sei sicuro di voler cancellare questa manifestazione?');">
-                                        <input type="hidden" name="id" value="<?php echo htmlspecialchars($manifestazione['Id_Manifestazione']); ?>">
-                                        <button type="submit" class="button button-primary button-sm">Cancella</button>
-                                    </form>
+                                    <button type="button" class="button button-primary button-sm btn-delete" 
+                                            data-id="<?php echo htmlspecialchars($manifestazione['Id_Manifestazione']); ?>">
+                                        Cancella
+                                    </button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -87,6 +86,60 @@ $manifestazioni = getManifestazioni($pdo);
         </div>
     </div>
 </section>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(function() {
+    $('.btn-delete').on('click', function() {
+        const id = $(this).data('id');
+        const row = $(this).closest('tr');
+        
+        if (confirm('Sei sicuro di voler cancellare questa manifestazione?')) {
+            $.ajax({
+                url: '',
+                method: 'POST',
+                data: { id: id },
+                success: function(response) {
+                    try {
+                        const data = typeof response === "string" ? JSON.parse(response) : response;
+                        
+                        if (data.success) {
+                            // Rimuovi la riga dalla tabella con un'animazione fadeOut
+                            row.fadeOut(400, function() {
+                                $(this).remove();
+                                // Se non ci sono più righe, mostra il messaggio "Nessuna manifestazione trovata"
+                                if ($('#manifestazioniTableBody tr').length === 0) {
+                                    $('#manifestazioniTableBody').html('<tr><td colspan="5">Nessuna manifestazione trovata.</td></tr>');
+                                }
+                            });
+                        }
+                        
+                        // Mostra il messaggio di successo/errore
+                        $('#form-message').html(
+                            `<p style="color: ${data.success ? 'rgb(74, 196, 207)' : 'red'};">${data.message}</p>`
+                        );
+                        
+                        // Rimuovi il messaggio dopo 3 secondi
+                        setTimeout(() => {
+                            $('#form-message').fadeOut(400, function() {
+                                $(this).empty().show();
+                            });
+                        }, 3000);
+                        
+                    } catch (e) {
+                        console.error("Errore nel parsing della risposta:", e);
+                        $('#form-message').html('<p style="color: red;">Errore nel caricamento dei dati.</p>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Errore AJAX:", status, error);
+                    $('#form-message').html('<p style="color: red;">Errore di comunicazione con il server.</p>');
+                }
+            });
+        }
+    });
+});
+</script>
 
 <?php 
 include_once '../../template_footer.php';

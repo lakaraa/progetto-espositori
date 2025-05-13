@@ -13,7 +13,7 @@ $manifestazioni = getManifestazioni($pdo);
     </div>
     <ul class="breadcrumbs-custom-path">
         <li><a href="../dashboard_personale.php">Dashboard</a></li>
-        <li><a href="gestisci_manifestazioni.php">Gestione Manifestazioni</a></li>
+        <li><a href="gestisci_manifestazione.php">Gestione Manifestazioni</a></li>
         <li class="active">Modifica Manifestazione</li>
     </ul>
 </section>

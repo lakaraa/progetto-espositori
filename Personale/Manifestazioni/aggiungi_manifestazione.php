@@ -49,6 +49,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 include_once("../../template_header.php");
 ?>
 
+<style>
+/* Stile per il calendario */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
+input[type="date"]::-webkit-datetime-edit {
+    color: white;
+}
+
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+    color: white;
+}
+
+input[type="date"]::-webkit-datetime-edit-text {
+    color: white;
+}
+
+input[type="date"]::-webkit-datetime-edit-year-field {
+    color: white;
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field {
+    color: white;
+}
+
+input[type="date"]::-webkit-datetime-edit-day-field {
+    color: white;
+}
+</style>
 
 <!-- Breadcrumbs-->
 <section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/bg-breadcrumbs-07-1920x480.jpg);">
@@ -87,14 +118,14 @@ include_once("../../template_header.php");
                 </div>
                 <div class="col-md-6">
                     <div class="form-wrap">
-                        <label class="form-label" for="manifestazione-durata">Durata</label>
+                        <label class="form-label" for="manifestazione-durata">Durata (gg)</label> <br>
                         <input class="form-input" id="manifestazione-durata" type="text" name="Durata">
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="form-wrap">
-                        <label class="form-label" for="manifestazione-data">Data</label>
-                        <input class="form-input" id="manifestazione-data" type="date" name="Data">
+                    <div class="form-wrap" style="color: white;">
+                        <label class="form-label" for="manifestazione-data">Data</label> <br>
+                        <input class="form-input" id="manifestazione-data" type="date" name="Data" style="color: white; background-color: transparent;">
                     </div>
                 </div>
                 <div class="col-12">
@@ -128,7 +159,7 @@ $(function () {
                     const isSuccess = data.success === true;
 
                     $('#form-message').html(
-                        `<p style="color: ${isSuccess ? 'green' : 'red'};">${message}</p>`
+                        `<p style="color: ${isSuccess ? 'rgb(74, 196, 207)' : 'red'};">${message}</p>`
                     );
 
                     if (isSuccess) {
