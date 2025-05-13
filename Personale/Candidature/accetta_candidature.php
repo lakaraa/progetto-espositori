@@ -102,9 +102,9 @@ include_once("../../template_header.php");
         <p>Filtra le candidature per manifestazione e aggiorna il loro stato.</p>
 
         <!-- Barra di ricerca -->
-        <form method="get" action="">
+        <form method="get" action="" id="searchForm">
             <div class="form-wrap">
-                <input class="form-input" type="text" name="manifestazione" placeholder="Cerca per manifestazione" value="<?php echo htmlspecialchars($manifestazione); ?>">
+                <input class="form-input" type="text" name="manifestazione" id="searchInput" placeholder="Cerca per manifestazione" value="<?php echo htmlspecialchars($manifestazione); ?>">
                 <button class="button button-primary" type="submit">Cerca</button>
             </div>
         </form>
@@ -127,7 +127,7 @@ include_once("../../template_header.php");
                         <th>Azioni</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="candidatureTableBody">
                     <?php if (!empty($candidature)): ?>
                         <?php foreach ($candidature as $candidatura): ?>
                             <tr>
@@ -157,41 +157,103 @@ include_once("../../template_header.php");
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(function () {
-    $('.btn-azione').on('click', function () {
-        const idContributo = $(this).data('id');
-        const azione = $(this).data('azione');
-
-        if (confirm(`Sei sicuro di voler ${azione.toLowerCase()} questa candidatura?`)) {
-            $.ajax({
-                url: '', // stessa pagina
-                method: 'POST',
-                data: { Id_Contributo: idContributo, Azione: azione },
-                success: function (response) {
-                    console.log("RISPOSTA RAW:", response); // Log della risposta
-                    try {
-                        const data = typeof response === "string" ? JSON.parse(response) : response;
-                        const message = data.message || "Messaggio non disponibile.";
-                        const isSuccess = data.success === true;
-
-                        $('#form-message').html(
-                            `<p style="color: ${isSuccess ? 'green' : 'red'};">${message}</p>`
-                        );
-
-                        if (isSuccess) {
-                            location.reload(); // Ricarica la pagina per aggiornare la tabella
-                        }
-                    } catch (e) {
-                        console.error("Errore JSON.parse:", e, response);
-                        $('#form-message').html('<p style="color: red;">Risposta non valida dal server.</p>');
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.error("Errore AJAX:", status, error, xhr.responseText);
-                    $('#form-message').html('<p style="color: red;">Errore di comunicazione con il server.</p>');
+    // Gestione della ricerca
+    $('#searchForm').on('submit', function(e) {
+        e.preventDefault();
+        const manifestazione = $('#searchInput').val();
+        
+        $.ajax({
+            url: 'search_candidature.php',
+            method: 'GET',
+            data: { manifestazione: manifestazione },
+            success: function(response) {
+                try {
+                    const data = typeof response === "string" ? JSON.parse(response) : response;
+                    updateTable(data);
+                } catch (e) {
+                    console.error("Errore nel parsing della risposta:", e);
+                    $('#form-message').html('<p style="color: rgb(74, 196, 207);">Errore nel caricamento dei dati.</p>');
                 }
-            });
-        }
+            },
+            error: function(xhr, status, error) {
+                console.error("Errore AJAX:", status, error);
+                $('#form-message').html('<p style="color: rgb(74, 196, 207);">Errore di comunicazione con il server.</p>');
+            }
+        });
     });
+
+    // Funzione per aggiornare la tabella
+    function updateTable(candidature) {
+        const tbody = $('#candidatureTableBody');
+        tbody.empty();
+
+        if (candidature.length === 0) {
+            tbody.html('<tr><td colspan="6">Nessuna candidatura trovata.</td></tr>');
+            return;
+        }
+
+        candidature.forEach(function(candidatura) {
+            const row = `
+                <tr>
+                    <td>${candidatura.Id_Contributo}</td>
+                    <td>${candidatura.Nome_Utente}</td>
+                    <td>${candidatura.Manifestazione}</td>
+                    <td>${candidatura.Titolo}</td>
+                    <td>${candidatura.Sintesi}</td>
+                    <td>
+                        <button class="button-accept btn-azione" data-id="${candidatura.Id_Contributo}" data-azione="Accettato">Accetta</button>
+                        <button class="button-reject btn-azione" data-id="${candidatura.Id_Contributo}" data-azione="Rifiutato">Rifiuta</button>
+                    </td>
+                </tr>
+            `;
+            tbody.append(row);
+        });
+
+        // Reattach event handlers to new buttons
+        attachActionHandlers();
+    }
+
+    // Funzione per gestire le azioni (accetta/rifiuta)
+    function attachActionHandlers() {
+        $('.btn-azione').off('click').on('click', function () {
+            const idContributo = $(this).data('id');
+            const azione = $(this).data('azione');
+
+            if (confirm(`Sei sicuro di voler ${azione.toLowerCase()} questa candidatura?`)) {
+                $.ajax({
+                    url: '',
+                    method: 'POST',
+                    data: { Id_Contributo: idContributo, Azione: azione },
+                    success: function (response) {
+                        try {
+                            const data = typeof response === "string" ? JSON.parse(response) : response;
+                            const message = data.message || "Messaggio non disponibile.";
+                            const isSuccess = data.success === true;
+
+                            $('#form-message').html(
+                                `<p style="color: ${isSuccess ? 'green' : 'red'};">${message}</p>`
+                            );
+
+                            if (isSuccess) {
+                                // Ricarica i dati della tabella invece di ricaricare la pagina
+                                $('#searchForm').trigger('submit');
+                            }
+                        } catch (e) {
+                            console.error("Errore JSON.parse:", e, response);
+                            $('#form-message').html('<p style="color: red;">Risposta non valida dal server.</p>');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Errore AJAX:", status, error, xhr.responseText);
+                        $('#form-message').html('<p style="color: red;">Errore di comunicazione con il server.</p>');
+                    }
+                });
+            }
+        });
+    }
+
+    // Attach initial handlers
+    attachActionHandlers();
 });
 </script>
 
