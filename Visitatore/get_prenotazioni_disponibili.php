@@ -1,6 +1,7 @@
 <?php
 include_once '../config.php';  
 include_once '../queries.php';  
+include_once '../session.php';      
 
 $prenotazioni = getPrenotazioniDisponibili($pdo);  
 
@@ -18,3 +19,4 @@ if (count($prenotazioni) > 0) {
     echo "<tr><td colspan='5' class='text-center'>Nessuna prenotazione disponibile al momento.</td></tr>";
 }
 ?>
+
