@@ -25,7 +25,7 @@ if (!$espositore) {
     
 
     <!-- Breadcrumbs -->
-    <section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(images/bg-breadcrumbs-05-1920x480.jpg);">
+    <section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/sfondo.jpg);">
         <div class="container">
             <h2 class="breadcrumbs-custom-title"><?php echo htmlspecialchars($espositore['Nome'] . ' ' . htmlspecialchars($espositore['Cognome'])); ?></h2>
         </div>
@@ -127,7 +127,7 @@ if (!$espositore) {
                                     <i class="fas fa-file-alt me-2"></i>  Curriculum
                                 </h5>
                                 <div class="text-center">
-                                    <a href="../uploads/cv/<?php echo htmlspecialchars($espositore['Curriculum']); ?>" 
+                                    <a href="../cv/<?php echo htmlspecialchars($espositore['Curriculum']); ?>" 
                                         class="btn btn-download" 
                                         target="_blank">
                                         <i class="fas fa-eye me-2"></i>  Visualizza Curriculum
