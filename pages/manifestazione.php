@@ -1,5 +1,4 @@
 <?php
-
 include_once('../config.php'); 
 include_once('../queries.php'); 
 include_once('../template_header.php');
@@ -10,10 +9,8 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 // Recupera dati della manifestazione
 $manifestazione = getManifestazioneById($pdo, $id);
 
-//Recupera gli espositori legati alla manifestazione
+// Recupera gli espositori legati alla manifestazione
 $espositori = getEspositoriByManifestazioneTop4($pdo, $id);
-
-
 ?>
 
 <?php if ($manifestazione): ?>
@@ -30,51 +27,181 @@ $espositori = getEspositoriByManifestazioneTop4($pdo, $id);
     </section>
 
     <!-- Dettagli Manifestazione -->
-    <section class="section section-lg bg-default text-left">
+    <section class="section section-lg bg-default">
         <div class="container">
-            <h3 class="text-center mb-4"><?php echo htmlspecialchars($manifestazione['Nome']); ?></h3>
-            <div class="text-center mb-4">
-                <img src="/progetto-espositori/resources/images/event-placeholder.png" alt="Immagine Manifestazione" class="img-fluid" style="max-height: 300px;">
-            </div>
-
-            <h5><strong>Descrizione</strong></h5>
-            <p><?php echo htmlspecialchars($manifestazione['Descrizione']); ?></p>
-
-            <div class="row text-center mt-4 mb-4">
-                <div class="col-md-4">
-                    <h6><strong>Luogo</strong></h6>
-                    <p><?php echo htmlspecialchars($manifestazione['Luogo']); ?></p>
+            <div class="dashboard-detail-card">
+                <div class="text-center mb-5">
+                    <h3 class="heading-decoration"><span class="text-primary"><?php echo htmlspecialchars($manifestazione['Nome']); ?></span></h3>
                 </div>
-                <div class="col-md-4">
-                    <h6><strong>Data</strong></h6>
-                    <p><?php echo date('d/m/Y', strtotime($manifestazione['Data'])); ?></p>
-                </div>
-                <div class="col-md-4">
-                    <h6><strong>Durata</strong></h6>
-                    <p><?php echo htmlspecialchars($manifestazione['Durata']); ?> giorni</p>
-                </div>
-            </div>
 
-            <h5 class="text-center mb-3"><strong>Tra gli espositori:</strong></h5>
-            <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
-                <?php foreach ($espositori as $e): ?>
-                    <button class="btn btn-outline-dark rounded-pill px-4" onclick="location.href='espositore.php?id=<?php echo urlencode($e['Id_Utente']); ?>'">
-                        <?php echo htmlspecialchars($e['Nome'] . ' ' . $e['Cognome']); ?>
-                    </button>
-                <?php endforeach; ?>
-            </div>
-            <div class="text-center mt-4">
-                <a href="contributions.php?manifestazione_id=<?php echo $id; ?>" class="btn btn-primary">
-                    Vedi tutti i contributi →
-                </a>
+                <div class="detail-section mb-5">
+                    <h5 class="detail-title">Descrizione</h5>
+                    <div class="detail-content">
+                        <p style="color: black;"><?php echo htmlspecialchars($manifestazione['Descrizione']); ?></p>
+                    </div>
+                </div>
+
+                <div class="row detail-info-boxes mb-5">
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-icon">
+                                <span class="mdi mdi-map-marker"></span>
+                            </div>
+                            <h6 style="color: #4e66f8;">Luogo</h6>
+                            <p style="color: black;"><?php echo htmlspecialchars($manifestazione['Luogo']); ?></p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-icon">
+                                <span class="mdi mdi-calendar"></span>
+                            </div>
+                            <h6 style="color: #4e66f8;">Data</h6>
+                            <p style="color: black;"><?php echo date('d/m/Y', strtotime($manifestazione['Data'])); ?></p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <div class="info-icon">
+                                <span class="mdi mdi-clock"></span>
+                            </div>
+                            <h6 style="color: #4e66f8;">Durata</h6>
+                            <p style="color: black;"><?php echo htmlspecialchars($manifestazione['Durata']); ?> giorni</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h5 class="detail-title text-center">Espositori partecipanti</h5>
+                    <div class="expositors-tags">
+                        <?php foreach ($espositori as $e): ?>
+                            <a href="espositore.php?id=<?php echo urlencode($e['Id_Utente']); ?>" class="tag-link" style="color: black;">
+                                <?php echo htmlspecialchars($e['Nome'] . ' ' . $e['Cognome']); ?>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5">
+                    <a href="javascript:history.back()" class="button button-primary mt-3">
+                        Torna indietro
+                        <span class="mdi mdi-arrow-left"></span>
+                    </a>
+                    <br>
+                    <a href="contributions.php?manifestazione_id=<?php echo $id; ?>" class="button button-primary button-lg">
+                        Vedi tutti i contributi
+                        <span class="mdi mdi-arrow-right"></span>
+                    </a>
+                    
+                </div>
             </div>
         </div>
     </section>
 
 <?php else: ?>
     <div class="container text-center mt-5">
-        <h4>Manifestazione non trovata.</h4>
+        <div class="dashboard-card">
+            <h4>Manifestazione non trovata</h4>
+            <a href="manifestazioni.php" class="button button-primary mt-3">
+                Torna alle manifestazioni
+                <span class="mdi mdi-arrow-left"></span>
+            </a>
+        </div>
     </div>
 <?php endif; ?>
+
+<style>
+.dashboard-detail-card {
+    background: white;
+    border-radius: 10px;
+    padding: 40px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    margin-top: 30px;
+}
+
+.heading-decoration {
+    position: relative;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+
+.heading-decoration:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(to right, #4e66f8, #6f42c1);
+}
+
+.detail-title {
+    color: #4e66f8;
+    margin-bottom: 15px;
+    font-weight: 600;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 8px;
+}
+
+.detail-content {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.info-box {
+    text-align: center;
+    padding: 20px;
+    height: 100%;
+    background: #f9f9f9;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.info-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.info-icon {
+    font-size: 2rem;
+    color: #4e66f8;
+    margin-bottom: 10px;
+}
+
+.expositors-tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.tag-link {
+    display: inline-block;
+    padding: 8px 20px;
+    background: #f0f0f0;
+    color: #333;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.tag-link:hover {
+    background: #4e66f8;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.button-primary {
+    padding: 12px 30px;
+}
+
+.button-primary .mdi {
+    margin-left: 8px;
+    vertical-align: middle;
+}
+</style>
 
 <?php include_once('../template_footer.php'); ?>
