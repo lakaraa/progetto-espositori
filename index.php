@@ -6,7 +6,7 @@ $manifestazioni = getManifestazioniTop6($pdo);
 ?>
 
 <!-- Breadcrumbs-->
-<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(images/bg-breadcrumbs-07-1920x480.jpg);">
+<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(images/sfondo.jpg);">
     <div class="container">
         <h2 class="breadcrumbs-custom-title">Manifestazioni</h2>
     </div>
@@ -26,6 +26,7 @@ $manifestazioni = getManifestazioniTop6($pdo);
                 <div class="col-md-6 col-lg-4">
                     <!-- Card Modern-->
                     <article class="card-modern">
+
                         <div class="card-modern-body">
                             <h4 class="card-modern-title"><a href="pages/manifestazione.php?id=<?php echo $row['Id_Manifestazione']; ?>"><?php echo htmlspecialchars($row['Nome']); ?></a></h4>
                             <p class="card-modern-text"><?php echo htmlspecialchars($row['Descrizione'] ?? 'Descrizione non disponibile'); ?></p>
