@@ -33,7 +33,7 @@
                 <h4 class="box-about-post-title">La Nostra Missione</h4>
                 <p>La nostra associazione culturale è dedicata a promuovere la cultura e l'arte attraverso eventi pubblici e manifestazioni. Organizziamo una varietà di eventi che includono presentazioni, mostre e contributi da parte di espositori di diversi settori.</p>
                 <p>Il nostro obiettivo è creare una piattaforma dove gli espositori possano condividere le loro opere e idee con il pubblico, favorendo lo scambio culturale e la crescita personale.</p>
-                <a class="button button-primary" href="registration.php">Diventa un Espositore</a>
+                <a class="button button-primary" href="registrazione_espositore.php">Diventa un Espositore</a>
               </div>
             </div>
           </div>
