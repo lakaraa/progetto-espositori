@@ -22,96 +22,10 @@ if (!$espositore) {
     die("Espositore non trovato.");
 }
 ?>
-    <style>
-        :root {
-            --primary-color: #2a4365; /* Blu scuro */
-            --secondary-color:rgb(19, 65, 102); /* Blu chiaro */
-            --accent-color: #f6ad55;
-            --light-bg: #f8f9fa;
-            --dark-bg: #1a202c;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--primary-color); /* Sfondo blu scuro */
-            color: white; /* Testo bianco */
-        }
-        
-        .breadcrumbs-custom-title {
-            color: white;
-        }
-        
-        .breadcrumbs-custom-path a {
-            color: #4299e1;
-        }
-        
-        .breadcrumbs-custom-path .active {
-            color: white;
-        }
-        
-        .profile-card {
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            margin-bottom: 2rem;
-            overflow: hidden;
-            background-color: rgba(255, 255, 255, 0.1); /* Card semi-trasparente */
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .card-header {
-            background-color: var(--secondary-color) !important; /* Header card blu chiaro */
-            color: white;
-        }
-        
-        .card-body {
-            color: white; /* Testo bianco nel corpo della card */
-        }
-        
-        .detail-item {
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .detail-label {
-            font-weight: 600;
-            color: var(--accent-color); /* Etichette in color arancione */
-        }
-        
-        .btn-outline-primary {
-            color: white;
-            border-color: white;
-        }
-        
-        .btn-outline-primary:hover {
-            background-color: white;
-            color: var(--primary-color);
-        }
-        
-        .btn-secondary {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
-        }
-
-        .contributo-item {
-            background-color: rgba(255, 255, 255, 0.05);
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border-radius: 5px;
-        }
-
-        .categoria-badge {
-            background-color: var(--accent-color);
-            color: var(--primary-color);
-            padding: 0.25rem 0.5rem;
-            border-radius: 3px;
-            margin-right: 0.5rem;
-            font-size: 0.9rem;
-        }
-    </style>
+    
 
     <!-- Breadcrumbs -->
-    <section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(images/bg-breadcrumbs-05-1920x480.jpg);">
+    <section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/sfondo.jpg);">
         <div class="container">
             <h2 class="breadcrumbs-custom-title"><?php echo htmlspecialchars($espositore['Nome'] . ' ' . htmlspecialchars($espositore['Cognome'])); ?></h2>
         </div>
@@ -213,7 +127,7 @@ if (!$espositore) {
                                     <i class="fas fa-file-alt me-2"></i>  Curriculum
                                 </h5>
                                 <div class="text-center">
-                                    <a href="../uploads/cv/<?php echo htmlspecialchars($espositore['Curriculum']); ?>" 
+                                    <a href="../cv/<?php echo htmlspecialchars($espositore['Curriculum']); ?>" 
                                         class="btn btn-download" 
                                         target="_blank">
                                         <i class="fas fa-eye me-2"></i>  Visualizza Curriculum
@@ -257,7 +171,7 @@ if (!$espositore) {
                             <?php foreach ($contributi as $contributo): ?>
                                 <div class="contributo-item">
                                     <div class="contributo-header">
-                                        <h6><?php echo htmlspecialchars($contributo['Contributo']); ?></h6>
+                                        <h6 style="color: black;"><?php echo htmlspecialchars($contributo['Contributo']); ?></h6>
                                     </div>
                                     <?php if (!empty($contributo['Categorie'])): ?>
                                         <div class="contributo-categories mt-2">
@@ -274,10 +188,13 @@ if (!$espositore) {
                 </div>
             </div>
             
-            <div class="text-center mt-4">
-                <a href="javascript:history.back()" class="btn btn-back">
-                    <i class="fas fa-arrow-left me-2"></i> Torna indietro
-                </a>
+            <div class="container text-center mt-5">
+                <div class="dashboard-card">
+                    <a href="javascript:history.back()" class="button button-primary mt-3">
+                        Torna indietro
+                        <span class="mdi mdi-arrow-left"></span>
+                    </a>
+                </div>
             </div>
         </div>
     </section>
@@ -459,6 +376,90 @@ if (!$espositore) {
         background-color: white;
         color: var(--primary-color);
         border-color: white;
+    }
+    :root {
+        --primary-color: #2a4365; /* Blu scuro */
+        --secondary-color:rgb(19, 65, 102); /* Blu chiaro */
+        --accent-color: #f6ad55;
+        --light-bg: #f8f9fa;
+        --dark-bg: #1a202c;
+    }
+    
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--primary-color); /* Sfondo blu scuro */
+        color: white; /* Testo bianco */
+    }
+    
+    .breadcrumbs-custom-title {
+        color: white;
+    }
+    
+    .breadcrumbs-custom-path a {
+        color: #4299e1;
+    }
+    
+    .breadcrumbs-custom-path .active {
+        color: white;
+    }
+    
+    .profile-card {
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        margin-bottom: 2rem;
+        overflow: hidden;
+        background-color: rgba(255, 255, 255, 0.1); /* Card semi-trasparente */
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .card-header {
+        background-color: var(--secondary-color) !important; /* Header card blu chiaro */
+        color: white;
+    }
+    
+    .card-body {
+        background: white;
+        color: black; /* Testo bianco nel corpo della card */
+    }
+    
+    .detail-item {
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .detail-label {
+        font-weight: 600;
+        color: var(--accent-color); /* Etichette in color arancione */
+    }
+    
+    .btn-outline-primary {
+        color: white;
+        border-color: white;
+    }
+    
+    .btn-outline-primary:hover {
+        background-color: white;
+        color: var(--primary-color);
+    }
+    
+    .btn-secondary {
+        background-color: var(--secondary-color);
+        border-color: var(--secondary-color);
+    }
+    .contributo-item {
+        background-color: rgba(255, 255, 255, 0.05);
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 5px;
+    }
+    .categoria-badge {
+        background-color: var(--accent-color);
+        color: var(--primary-color);
+        padding: 0.25rem 0.5rem;
+        border-radius: 3px;
+        margin-right: 0.5rem;
+        font-size: 0.9rem;
     }
 </style>
 

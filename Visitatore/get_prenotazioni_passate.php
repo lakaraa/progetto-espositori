@@ -1,6 +1,7 @@
 <?php
 include_once '../config.php';
 include_once '../queries.php';
+include_once '../session.php';
 
 $userId = $_SESSION['id_utente'];
 $prenotazioni = getPrenotazioniPassate($pdo, $userId);  // Passa il parametro $pdo per la connessione al DB

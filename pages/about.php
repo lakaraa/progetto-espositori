@@ -7,8 +7,8 @@
 ?>
 
       <!-- Breadcrumbs-->
-      <section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(resources/images/bg-breadcrumbs-02-1920x480.jpg);">
-        <div class="container">
+      <section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/sfondo.jpg);">
+         <div class="container">
           <h2 class="breadcrumbs-custom-title">About</h2>
         </div>
         <ul class="breadcrumbs-custom-path">
@@ -21,13 +21,13 @@
         <div class="container">
           <div class="row row-50 flex-md-row-reverse">
             <div class="col-md-6 text-center">
-              <div class="box-image-1"><img src="../resources/images/events-01-553x316.jpg" alt="About Us" width="468" height="276"/>
+              <div class="box-image-1"><img src="../resources/images/aboutus.jpg" alt="About Us" width="468" height="276"/>
               </div>
             </div>
             <div class="col-md-6">
               <div class="box-about">
                 <div class="box-about-title-wrap">
-                  <h2 class="box-about-mega-title">Associazione Culturale</h2>
+                  <h2 class="box-about-mega-title">Cultura Viva</h2>
                   <h2 class="box-about-title">Chi Siamo</h2>
                 </div>
                 <h4 class="box-about-post-title">La Nostra Missione</h4>

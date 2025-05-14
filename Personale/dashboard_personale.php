@@ -3,10 +3,13 @@ include_once '../config.php';
 include_once '../queries.php';
 include_once '../template_header.php'; 
 include_once '../session.php';
+
+$nomeUtente = $_SESSION['nome'];  
+
 ?>
 
 <!-- Breadcrumbs-->
-<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/bg-breadcrumbs-07-1920x480.jpg);">
+<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/sfondo.jpg);">
     <div class="container">
         <h2 class="breadcrumbs-custom-title">Dashboard</h2>
     </div>
@@ -20,10 +23,10 @@ include_once '../session.php';
 <section class="section section-lg bg-default">
     <div class="container">
         <div class="text-center">
-            <h2 class="heading-decoration"><span class="text-primary">Dashboard</span> Personale</h2>
+            <h2 class="heading-decoration"><span class="text-primary">Buongiorno</span> <?= htmlspecialchars($nomeUtente) ?></h2>
             <p class="subtitle">Gestisci tutte le funzionalità del sistema da un'unica interfaccia</p>
         </div>
-        
+
         <div class="row row-30 row-md-50 justify-content-center mt-5">
             <!-- Prenotazioni -->
             <div class="col-sm-6 col-md-4 col-lg-3">

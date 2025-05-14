@@ -7,12 +7,12 @@ include_once ("../../template_header.php");
 $messaggi = getMessaggi($pdo);
 ?>
 <!-- Breadcrumbs-->
-<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(images/bg-breadcrumbs-07-1920x480.jpg);">
+<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/sfondo.jpg);">
     <div class="container">
         <h2 class="breadcrumbs-custom-title">Visualizza Messaggi</h2>
     </div>
     <ul class="breadcrumbs-custom-path">
-        <li><a href="../../index.php">Home</a></li>
+        <li><a href="../dashboard_personale.php">Dashboard</a></li>
         <li class="active">Visualizza Messaggi</li>
     </ul>
 </section>

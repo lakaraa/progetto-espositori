@@ -4,7 +4,7 @@ include_once '../template_header.php';
 ?>
 
 <!-- Breadcrumbs-->
-<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(resources/images/bg-breadcrumbs-04-1920x480.jpg);">
+<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/sfondo.jpg);">
     <div class="container">
         <h2 class="breadcrumbs-custom-title">Login</h2>
     </div>
