@@ -5,7 +5,7 @@
                 <div class="row row-15">
                     <div class="col-sm-6">
                         
-                        <p class="rights"><span>Associazione Culturale</span><span>&nbsp;</span><span>&copy;&nbsp;</span><span class="copyright-year"><?php echo date('Y'); ?></span><span>&nbsp;</span>All Rights Reserved \ Design by Sara Petrovska</p>
+                        <p class="rights"><span>Cultura Viva</span><span>&nbsp;</span><span>&copy;&nbsp;</span><span class="copyright-year"><?php echo date('Y'); ?></span><span>&nbsp;</span>All Rights Reserved \ Design by Sara Petrovska</p>
                     </div>                  
                     <div class="col-sm-6">
                         <div class="footer-contact"><a href="contacts.php">
