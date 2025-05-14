@@ -127,7 +127,7 @@ if (!$espositore) {
                                     <i class="fas fa-file-alt me-2"></i>  Curriculum
                                 </h5>
                                 <div class="text-center">
-                                    <a href="../uploads/cv/<?php echo htmlspecialchars($espositore['Curriculum']); ?>" 
+                                    <a href="../cv/<?php echo htmlspecialchars($espositore['Curriculum']); ?>" 
                                         class="btn btn-download" 
                                         target="_blank">
                                         <i class="fas fa-eye me-2"></i>  Visualizza Curriculum
