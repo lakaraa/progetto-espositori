@@ -27,7 +27,7 @@
             <div class="col-md-6">
               <div class="box-about">
                 <div class="box-about-title-wrap">
-                  <h2 class="box-about-mega-title">Associazione Culturale</h2>
+                  <h2 class="box-about-mega-title">Cultura Viva</h2>
                   <h2 class="box-about-title">Chi Siamo</h2>
                 </div>
                 <h4 class="box-about-post-title">La Nostra Missione</h4>
