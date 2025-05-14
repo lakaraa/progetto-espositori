@@ -25,7 +25,7 @@ $nomeUtente = $_SESSION['nome'];
 
 <section class="section py-5 bg-light">
     <div class="container">
-        <h2 class="text-center mb-4">CIAO <?= htmlspecialchars($nomeUtente) ?></h2>
+        <h2 class="text-center mb-4"><span class="text-primary">Ciao</span> <?= htmlspecialchars($nomeUtente) ?></h2>
         <p class="text-center mb-5">Qui puoi visualizzare le prenotazioni effettuate, quelle in corso, quelle passate e quelle disponibili per te.</p>
         
         <!-- Prenotazioni in corso -->
