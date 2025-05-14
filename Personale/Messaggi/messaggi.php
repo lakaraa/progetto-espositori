@@ -12,7 +12,7 @@ $messaggi = getMessaggi($pdo);
         <h2 class="breadcrumbs-custom-title">Visualizza Messaggi</h2>
     </div>
     <ul class="breadcrumbs-custom-path">
-        <li><a href="../../index.php">Home</a></li>
+        <li><a href="../dashboard_personale.php">Dashboard</a></li>
         <li class="active">Visualizza Messaggi</li>
     </ul>
 </section>
