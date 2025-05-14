@@ -20,6 +20,11 @@ include_once 'session.php';
         .manifestazione-img { width: 100%; height: auto; margin-bottom: 10px; transition: transform 0.3s ease; }
         .manifestazione-img:hover { transform: scale(1.05); }
         .button { margin-top: 20px; }
+        .rd-navbar-dropdown { display: none; background-color: #4ac4cf; }
+        .rd-navbar-dropdown.open { display: block; background-color: #4ac4cf; }
+        @media (min-width: 992px) {
+            .rd-nav-item--has-dropdown:hover > .rd-navbar-dropdown { display: block; background-color: #4ac4cf; }
+        }
     </style>
 </head>
 
@@ -37,79 +42,104 @@ include_once 'session.php';
         </div>
     </div>
     <div class="page">
-        <!-- Page Header-->
-        <header class="section page-header">
-            <div class="rd-navbar-wrap" style="position: absolute">
-                <nav class="rd-navbar rd-navbar-classic" 
-                    data-layout="rd-navbar-fixed"
-                    data-sm-layout="rd-navbar-fixed"
-                    data-md-layout="rd-navbar-fixed"
-                    data-lg-layout="rd-navbar-fixed"
-                    data-xl-layout="rd-navbar-static"
-                    data-xxl-layout="rd-navbar-static"
-                    data-lg-stick-up="true"
-                    data-xl-stick-up="true"
-                    data-xxl-stick-up="true"
-                    data-lg-stick-up-offset="46px"
-                    data-xl-stick-up-offset="46px"
-                    data-xxl-stick-up-offset="46px"
-                >
-                    <div class="rd-navbar-collapse-toggle rd-navbar-fixed-element-1" data-rd-navbar-toggle=".rd-navbar-collapse"><span></span></div>
-                    <div class="rd-navbar-main-outer">
-                        <?php $current_page = basename($_SERVER['PHP_SELF']); ?>
-                        <div class="rd-navbar-main">
-                            <div class="rd-navbar-panel">
-                                <button class="rd-navbar-toggle" data-rd-navbar-toggle=".rd-navbar-nav-wrap"><span></span></button>
-                                <div class="rd-navbar-brand">
-                                    <a class="brand" href="/progetto-espositori/index.php">
-                                        <img src="/progetto-espositori/resources/images/logo-default-296x52.png" alt="" width="148" height="26"/>
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="rd-navbar-main-element">
-                                <div class="rd-navbar-nav-wrap">
-                                    <ul class="rd-navbar-nav">
-                                        <li class="rd-nav-item <?php echo $current_page == 'index.php' ? 'active' : ''; ?>">
-                                            <a class="rd-nav-link" href="/progetto-espositori/index.php">Home</a>
-                                        </li>
-                                        <li class="rd-nav-item <?php echo $current_page == 'manifestazioni.php' ? 'active' : ''; ?>">
-                                            <a class="rd-nav-link" href="/progetto-espositori/pages/manifestazioni.php">Manifestazioni</a>
-                                        </li>
-
-                                        <?php
-                                        if (!empty($_SESSION['ruolo'])) {
-                                            $ruolo = $_SESSION['ruolo'];
-                                            $ruoloLower = strtolower($ruolo);
-                                            $dashboardPage = "dashboard_" . $ruoloLower . ".php";
-                                            $dashboardPath = "/progetto-espositori/$ruolo/$dashboardPage";
-                                            $isDashboard = $current_page === $dashboardPage;
-                                            ?>
-                                            <li class="rd-nav-item <?php echo $isDashboard ? 'active' : ''; ?>">
-                                                <a class="rd-nav-link" href="<?php echo $dashboardPath; ?>">Dashboard</a>
-                                            </li>
-                                        <?php } ?>
-
-                                        <li class="rd-nav-item <?php echo $current_page == 'about.php' ? 'active' : ''; ?>">
-                                            <a class="rd-nav-link" href="/progetto-espositori/pages/about.php">About</a>
-                                        </li>
-                                        <li class="rd-nav-item <?php echo $current_page == 'contacts.php' ? 'active' : ''; ?>">
-                                            <a class="rd-nav-link" href="/progetto-espositori/pages/contacts.php">Contacts</a>
-                                        </li>
-
-                                        <?php if (isset($_SESSION['email'])): ?>
-                                            <li class="rd-nav-item">
-                                                <a class="rd-nav-link" href="/progetto-espositori/auth/logout_handler.php">Logout</a>
-                                            </li>
-                                        <?php else: ?>
-                                            <li class="rd-nav-item <?php echo $current_page == 'login.php' ? 'active' : ''; ?>">
-                                                <a class="rd-nav-link" href="/progetto-espositori/pages/login.php">Login</a>
-                                            </li>
-                                        <?php endif; ?>
-                                    </ul>
-                                </div>
-                            </div>
+<!-- Page Header-->
+<header class="section page-header">
+    <div class="rd-navbar-wrap" style="position: absolute">
+        <nav class="rd-navbar rd-navbar-classic" 
+            data-layout="rd-navbar-fixed"
+            data-sm-layout="rd-navbar-fixed"
+            data-md-layout="rd-navbar-fixed"
+            data-lg-layout="rd-navbar-fixed"
+            data-xl-layout="rd-navbar-static"
+            data-xxl-layout="rd-navbar-static"
+            data-lg-stick-up="true"
+            data-xl-stick-up="true"
+            data-xxl-stick-up="true"
+            data-lg-stick-up-offset="46px"
+            data-xl-stick-up-offset="46px"
+            data-xxl-stick-up-offset="46px"
+        >
+            <div class="rd-navbar-collapse-toggle rd-navbar-fixed-element-1" data-rd-navbar-toggle=".rd-navbar-collapse"><span></span></div>
+            <div class="rd-navbar-main-outer">
+                <?php $current_page = basename($_SERVER['PHP_SELF']); ?>
+                <div class="rd-navbar-main">
+                    <div class="rd-navbar-panel">
+                        <button class="rd-navbar-toggle" data-rd-navbar-toggle=".rd-navbar-nav-wrap"><span></span></button>
+                        <div class="rd-navbar-brand">
+                            <a class="brand" href="/progetto-espositori/index.php">
+                                <img src="/progetto-espositori/resources/images/logo-default-296x52.png" alt="" width="148" height="26"/>
+                            </a>
                         </div>
                     </div>
-                </nav>
+                    <div class="rd-navbar-main-element">
+                        <div class="rd-navbar-nav-wrap">
+                            <ul class="rd-navbar-nav">
+                                <li class="rd-nav-item <?php echo $current_page == 'index.php' ? 'active' : ''; ?>">
+                                    <a class="rd-nav-link" href="/progetto-espositori/index.php">Home</a>
+                                </li>
+                                <li class="rd-nav-item <?php echo $current_page == 'manifestazioni.php' ? 'active' : ''; ?>">
+                                    <a class="rd-nav-link" href="/progetto-espositori/pages/manifestazioni.php">Manifestazioni</a>
+                                </li>
+
+                                <?php
+                                if (!empty($_SESSION['ruolo'])) {
+                                    $ruolo = $_SESSION['ruolo'];
+                                    $ruoloLower = strtolower($ruolo);
+                                    $dashboardPage = "dashboard_" . $ruoloLower . ".php";
+                                    $dashboardPath = "/progetto-espositori/$ruolo/$dashboardPage";
+                                    $isDashboard = $current_page === $dashboardPage;
+                                    ?>
+                                    <li class="rd-nav-item <?php echo $isDashboard ? 'active' : ''; ?>">
+                                        <a class="rd-nav-link" href="<?php echo $dashboardPath; ?>">Dashboard</a>
+                                    </li>
+                                <?php } ?>
+
+                                <li class="rd-nav-item <?php echo $current_page == 'about.php' ? 'active' : ''; ?>">
+                                    <a class="rd-nav-link" href="/progetto-espositori/pages/about.php">About</a>
+                                </li>
+                                <li class="rd-nav-item <?php echo $current_page == 'contacts.php' ? 'active' : ''; ?>">
+                                    <a class="rd-nav-link" href="/progetto-espositori/pages/contacts.php">Contacts</a>
+                                </li>
+
+                                <?php if (isset($_SESSION['email'])): ?>
+                                    <li class="rd-nav-item">
+                                        <a class="rd-nav-link" href="/progetto-espositori/auth/logout_handler.php">Logout</a>
+                                    </li>
+                                <?php else: ?>
+                                    <li class="rd-nav-item <?php echo $current_page == 'login.php' ? 'active' : ''; ?>">
+                                        <a class="rd-nav-link" href="/progetto-espositori/pages/login.php">Login</a>
+                                    </li>
+                                <?php endif; ?>
+
+                                <li class="rd-nav-item rd-nav-item--has-dropdown">
+                                    <a class="rd-nav-link" href="#">Query</a>
+                                    <ul class="rd-navbar-dropdown">
+                                        <li class="rd-nav-item"><a class="rd-nav-link" href="/progetto-espositori/pages/visualizzazioni/elenco_espositori.php" style="color: white;">Elenco Espositori</a></li>
+                                        <li class="rd-nav-item"><a class="rd-nav-link" href="/progetto-espositori/pages/visualizzazioni/esposizioni_per_categoria.php" style="color: white;">Esposizioni per Categoria</a></li>
+                                        <li class="rd-nav-item"><a class="rd-nav-link" href="/progetto-espositori/pages/visualizzazioni/elenco_categorie.php" style="color: white;">Elenco Categorie</a></li>
+                                        <li class="rd-nav-item"><a class="rd-nav-link" href="/progetto-espositori/pages/visualizzazioni/andamento_partecipanti.php" style="color: white;">Andamento Partecipanti</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </header>
+        </nav>
+    </div>
+</header>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var dropdown = document.querySelector('.rd-nav-item--has-dropdown > .rd-nav-link');
+  if(dropdown) {
+    dropdown.addEventListener('click', function(e) {
+      e.preventDefault();
+      var menu = this.nextElementSibling;
+      if(menu && menu.classList.contains('rd-navbar-dropdown')) {
+        menu.classList.toggle('open');
+      }
+    });
+  }
+});
+</script>
