@@ -834,18 +834,23 @@ function getQueryEspositoriPerManifestazione() {
 }
 
 // Query prenotazioni per data
-function getQueryPrenotazioniPerData() {
-    return "
-        SELECT
-            t.data AS turno_data,
-            COUNT(*) AS numero_prenotazioni
-        FROM
-            Turno t
-        JOIN
-            Prenotazione p ON t.Id_Turno = p.Id_Turno
-        GROUP BY t.data
-        ORDER BY turno_data;
-    ";
+function getQueryPrenotazioniPerData($pdo, $anno) {
+    $sql = "
+        SELECT 
+            DATE_FORMAT(t.Data, '%d/%m/%Y') as Data,
+            COUNT(DISTINCT p.Id_Utente) as NumeroPartecipanti
+        FROM Turno t
+        JOIN Prenotazione p ON t.Id_Turno = p.Id_Turno
+        JOIN Utente u ON p.Id_Utente = u.Id_Utente
+        WHERE YEAR(t.Data) = :anno
+        AND u.Ruolo = 'Visitatore'
+        GROUP BY t.Data
+        ORDER BY t.Data ASC";
+        
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':anno', $anno, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 function getEspositoriByManifestazioneTop4($pdo, $id_manifestazione) {
@@ -1641,12 +1646,15 @@ function getEsposizioniByCategoria($pdo, $categoria_id) {
     
     $sql = "SELECT c.Id_Contributo as id, c.Titolo as titolo, c.Immagine as immagine, 
                    u.Nome as nome, u.Cognome as cognome, 
-                   a.Nome as area
+                   GROUP_CONCAT(DISTINCT CONCAT(a.Nome, ' (', m.Nome, ')') SEPARATOR ', ') as area
             FROM contributo c
             JOIN utente u ON c.Id_Utente = u.Id_Utente
-            LEFT JOIN area a ON u.Id_Area = a.Id_Area
             JOIN tipologia t ON c.Id_Contributo = t.Id_Contributo
+            LEFT JOIN esposizione e ON c.Id_Contributo = e.Id_Contributo
+            LEFT JOIN manifestazione m ON e.Id_Manifestazione = m.Id_Manifestazione
+            LEFT JOIN area a ON m.Id_Manifestazione = a.Id_Manifestazione
             WHERE t.Id_Categoria = :categoria_id
+            GROUP BY c.Id_Contributo, c.Titolo, c.Immagine, u.Nome, u.Cognome
             ORDER BY c.Titolo ASC";
             
     $stmt = $pdo->prepare($sql);
@@ -1740,5 +1748,24 @@ function getUserInfo($pdo, $idCandidatura) {
         error_log("Errore nel recupero delle informazioni utente: " . $e->getMessage());
         return false;
     }
+}
+
+function getElencoEspositoriAlfabetico($pdo) {
+    $query = "SELECT 
+        u.Cognome,
+        u.Nome,
+        GROUP_CONCAT(DISTINCT CONCAT(a.Nome, ' (', m.Nome, ')') SEPARATOR ', ') as Area
+    FROM utente u
+    LEFT JOIN contributo c ON u.Id_Utente = c.Id_Utente
+    LEFT JOIN esposizione e ON c.Id_Contributo = e.Id_Contributo
+    LEFT JOIN manifestazione m ON e.Id_Manifestazione = m.Id_Manifestazione
+    LEFT JOIN area a ON m.Id_Manifestazione = a.Id_Manifestazione
+    WHERE u.Ruolo = 'Espositore'
+    GROUP BY u.Id_Utente, u.Cognome, u.Nome
+    ORDER BY u.Cognome ASC, u.Nome ASC";
+    
+    $stmt = $pdo->prepare($query);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 ?>
