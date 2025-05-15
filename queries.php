@@ -1162,7 +1162,7 @@ function deleteContributo($pdo, $idContributo) {
 }
 
 function getCandidatureInApprovazione($pdo, $manifestazione) {
-    $sql = "SELECT c.Id_Contributo, u.Nome AS Nome_Utente, m.Nome AS Manifestazione, c.Titolo, c.Sintesi
+    $sql = "SELECT c.Id_Contributo, u.Email, u.Nome AS Nome_Utente, m.Nome AS Manifestazione, c.Titolo, c.Sintesi
             FROM Contributo c
             JOIN Utente u ON c.Id_Utente = u.Id_Utente
             JOIN Esposizione e ON c.Id_Contributo = e.Id_Contributo

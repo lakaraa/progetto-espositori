@@ -3,85 +3,89 @@ include_once("../../config.php");
 include_once("../../queries.php");
 include_once("../../session.php");
 
-// Recupera le candidature in approvazione
-$manifestazione = $_GET['manifestazione'] ?? '';
-$candidature = getCandidatureInApprovazione($pdo, $manifestazione); // Funzione per ottenere le candidature filtrate
+// Abilita la visualizzazione degli errori per il debug
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// Funzione per inviare una risposta JSON
+function sendJsonResponse($success, $message, $debug = null) {
+    header('Content-Type: application/json');
+    $response = [
+        'success' => $success,
+        'message' => $message
+    ];
+    if ($debug !== null) {
+        $response['debug'] = $debug;
+    }
+    echo json_encode($response);
+    exit;
+}
 
 // Verifica se la richiesta è POST per accettare o rifiutare una candidatura
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    ini_set('display_errors', 0);
-    ini_set('log_errors', 1);
-    ini_set('error_log', '../../error_log.txt'); // Percorso del file log
-
-    // Pulizia buffer per evitare output HTML
-    ob_start();
-    header('Content-Type: application/json');
+    // Assicuriamoci che non ci sia output prima della risposta JSON
     ob_clean();
-
-    $idContributo = $_POST['Id_Contributo'] ?? '';
-    $azione = $_POST['Azione'] ?? '';
-
-    if (empty($idContributo) || !in_array($azione, ['Accettato', 'Rifiutato'])) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Dati non validi.'
-        ]);
-        exit;
-    }
+    header('Content-Type: application/json');
 
     try {
-        $result = aggiornaStatoCandidatura($pdo, $idContributo, $azione);
-        echo json_encode([
-            'success' => $result,
-            'message' => $result ? "Candidatura $azione con successo!" : 'Errore durante l\'aggiornamento dello stato della candidatura.'
+        $idContributo = $_POST['Id_Contributo'] ?? '';
+        $azione = $_POST['Azione'] ?? '';
+
+        error_log("Ricevuta richiesta POST - Id_Contributo: $idContributo, Azione: $azione");
+
+        if (empty($idContributo) || !in_array($azione, ['Accettato', 'Rifiutato'])) {
+            throw new Exception('Dati non validi.');
+        }
+
+        // Inizia una transazione
+        $pdo->beginTransaction();
+        
+        // Aggiorna lo stato della candidatura
+        $stmt = $pdo->prepare("UPDATE contributo SET Accettazione = ? WHERE Id_Contributo = ?");
+        $result = $stmt->execute([$azione, $idContributo]);
+        
+        if (!$result) {
+            throw new PDOException("Errore nell'aggiornamento dello stato della candidatura");
+        }
+
+        error_log("Stato candidatura aggiornato con successo");
+        
+        // Commit della transazione
+        $pdo->commit();
+        error_log("Transazione completata con successo");
+        
+        $message = $azione === 'Accettato' ? 
+            "Candidatura accettata con successo!" : 
+            "Candidatura rifiutata con successo!";
+        
+        sendJsonResponse(true, $message);
+        
+    } catch (Exception $e) {
+        // Rollback in caso di errore
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log("Errore durante l'aggiornamento della candidatura: " . $e->getMessage());
+        error_log("Stack trace: " . $e->getTraceAsString());
+        
+        http_response_code(500);
+        sendJsonResponse(false, 'Errore durante l\'aggiornamento della candidatura: ' . $e->getMessage(), [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
         ]);
-        exit;
-    } catch (PDOException $e) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Errore di connessione al database: ' . $e->getMessage()
-        ]);
-        exit;
     }
+    exit;
 }
 
-// **Solo se non è una richiesta AJAX, includi il template**
+// Recupera le candidature in approvazione per la visualizzazione della pagina
+$manifestazione = $_GET['manifestazione'] ?? '';
+$candidature = getCandidatureInApprovazione($pdo, $manifestazione);
+
+// Se non è una richiesta POST, mostra la pagina normale
 include_once("../../template_header.php");
 ?>
 
-<style>
-.button-accept {
-    background-color: rgb(74, 196, 207);
-    border: none;
-    color: white;
-    padding: 10px 20px;
-    font-size: 14px;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.button-accept:hover {
-    background-color: rgb(60, 170, 180);
-    transform: scale(1.05);
-}
-
-.button-reject {
-    background-color: rgb(255, 77, 77);
-    border: none;
-    color: white;
-    padding: 10px 20px;
-    font-size: 14px;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.button-reject:hover {
-    background-color: rgb(230, 50, 50);
-    transform: scale(1.05);
-}
-</style>
 
 <!-- Breadcrumbs-->
 <section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/sfondo.jpg);">
@@ -119,7 +123,6 @@ include_once("../../template_header.php");
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Utente</th>
                         <th>Manifestazione</th>
                         <th>Titolo</th>
@@ -131,8 +134,7 @@ include_once("../../template_header.php");
                     <?php if (!empty($candidature)): ?>
                         <?php foreach ($candidature as $candidatura): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($candidatura['Id_Contributo']); ?></td>
-                                <td><?php echo htmlspecialchars($candidatura['Nome_Utente']); ?></td>
+                                <td><?php echo htmlspecialchars($candidatura['Email']); ?></td>
                                 <td><?php echo htmlspecialchars($candidatura['Manifestazione']); ?></td>
                                 <td><?php echo htmlspecialchars($candidatura['Titolo']); ?></td>
                                 <td><?php echo htmlspecialchars($candidatura['Sintesi']); ?></td>
@@ -144,7 +146,7 @@ include_once("../../template_header.php");
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6">Nessuna candidatura trovata.</td>
+                            <td colspan="5">Nessuna candidatura trovata.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -172,80 +174,69 @@ $(function () {
                     updateTable(data);
                 } catch (e) {
                     console.error("Errore nel parsing della risposta:", e);
-                    $('#form-message').html('<p style="color: rgb(74, 196, 207);">Errore nel caricamento dei dati.</p>');
+                    $('#form-message').html('<p style="color: red;">Errore nel caricamento dei dati.</p>');
                 }
             },
             error: function(xhr, status, error) {
                 console.error("Errore AJAX:", status, error);
-                $('#form-message').html('<p style="color: rgb(74, 196, 207);">Errore di comunicazione con il server.</p>');
+                $('#form-message').html('<p style="color: red;">Errore di comunicazione con il server.</p>');
             }
         });
     });
 
-    // Funzione per aggiornare la tabella
-    function updateTable(candidature) {
-        const tbody = $('#candidatureTableBody');
-        tbody.empty();
-
-        if (candidature.length === 0) {
-            tbody.html('<tr><td colspan="6">Nessuna candidatura trovata.</td></tr>');
-            return;
-        }
-
-        candidature.forEach(function(candidatura) {
-            const row = `
-                <tr>
-                    <td>${candidatura.Id_Contributo}</td>
-                    <td>${candidatura.Nome_Utente}</td>
-                    <td>${candidatura.Manifestazione}</td>
-                    <td>${candidatura.Titolo}</td>
-                    <td>${candidatura.Sintesi}</td>
-                    <td>
-                        <button class="button-accept btn-azione" data-id="${candidatura.Id_Contributo}" data-azione="Accettato">Accetta</button>
-                        <button class="button-reject btn-azione" data-id="${candidatura.Id_Contributo}" data-azione="Rifiutato">Rifiuta</button>
-                    </td>
-                </tr>
-            `;
-            tbody.append(row);
-        });
-
-        // Reattach event handlers to new buttons
-        attachActionHandlers();
-    }
-
     // Funzione per gestire le azioni (accetta/rifiuta)
     function attachActionHandlers() {
         $('.btn-azione').off('click').on('click', function () {
-            const idContributo = $(this).data('id');
-            const azione = $(this).data('azione');
+            const button = $(this);
+            const idContributo = button.data('id');
+            const azione = button.data('azione');
+            const row = button.closest('tr');
 
             if (confirm(`Sei sicuro di voler ${azione.toLowerCase()} questa candidatura?`)) {
+                // Disabilita il pulsante durante l'elaborazione
+                button.prop('disabled', true);
+                
                 $.ajax({
                     url: '',
                     method: 'POST',
                     data: { Id_Contributo: idContributo, Azione: azione },
+                    dataType: 'json',
                     success: function (response) {
-                        try {
-                            const data = typeof response === "string" ? JSON.parse(response) : response;
-                            const message = data.message || "Messaggio non disponibile.";
-                            const isSuccess = data.success === true;
-
-                            $('#form-message').html(
-                                `<p style="color: ${isSuccess ? 'green' : 'red'};">${message}</p>`
-                            );
-
-                            if (isSuccess) {
-                                // Ricarica i dati della tabella invece di ricaricare la pagina
-                                $('#searchForm').trigger('submit');
-                            }
-                        } catch (e) {
-                            console.error("Errore JSON.parse:", e, response);
-                            $('#form-message').html('<p style="color: red;">Risposta non valida dal server.</p>');
+                        if (response.success) {
+                            // Rimuovi la riga dalla tabella
+                            row.fadeOut(400, function() {
+                                $(this).remove();
+                                // Se non ci sono più righe, mostra il messaggio "Nessuna candidatura trovata"
+                                if ($('#candidatureTableBody tr').length === 0) {
+                                    $('#candidatureTableBody').html('<tr><td colspan="5">Nessuna candidatura trovata.</td></tr>');
+                                }
+                            });
+                            
+                            $('#form-message').html(`<p style="color: rgb(74, 196, 207);">${response.message}</p>`);
+                        } else {    
+                            $('#form-message').html(`<p style="color: red;">${response.message}</p>`);
+                            button.prop('disabled', false);
                         }
                     },
                     error: function (xhr, status, error) {
-                        console.error("Errore AJAX:", status, error, xhr.responseText);
-                        $('#form-message').html('<p style="color: red;">Errore di comunicazione con il server.</p>');
+                        console.error("Errore AJAX:", {
+                            status: status,
+                            error: error,
+                            response: xhr.responseText
+                        });
+                        
+                        let errorMessage = 'Errore di comunicazione con il server.';
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.message) {
+                                errorMessage = response.message;
+                            }
+                        } catch (e) {
+                            console.error("Errore nel parsing della risposta:", e);
+                        }
+                        
+                        $('#form-message').html(`<p style="color: red;">${errorMessage}</p>`);
+                        button.prop('disabled', false);
                     }
                 });
             }
@@ -257,6 +248,39 @@ $(function () {
 });
 </script>
 
+<style>
+.button-accept {
+    background-color: rgb(74, 196, 207);
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.button-accept:hover {
+    background-color: rgb(60, 170, 180);
+    transform: scale(1.05);
+}
+
+.button-reject {
+    background-color: rgb(255, 77, 77);
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.button-reject:hover {
+    background-color: rgb(230, 50, 50);
+    transform: scale(1.05);
+}
+</style>
 <?php
 include_once("../../template_footer.php");
 ?>
