@@ -83,7 +83,7 @@ $espositori = getEspositoriByManifestazioneTop4($pdo, $id);
                 </div>
 
                 <div class="text-center mt-5">
-                    <a href="javascript:history.back()" class="button button-primary mt-3">
+                    <a href="manifestazione.php?id=<?php echo $id; ?>" class="button button-primary mt-3">
                         Torna indietro
                         <span class="mdi mdi-arrow-left"></span>
                     </a>
@@ -92,7 +92,6 @@ $espositori = getEspositoriByManifestazioneTop4($pdo, $id);
                         Vedi tutti i contributi
                         <span class="mdi mdi-arrow-right"></span>
                     </a>
-                    
                 </div>
             </div>
         </div>

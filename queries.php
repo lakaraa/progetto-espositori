@@ -1768,4 +1768,17 @@ function getElencoEspositoriAlfabetico($pdo) {
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+function getEspositoriByManifestazioneTop4_2($pdo, $idManifestazione) {
+    $sql = "SELECT DISTINCT u.Id_Utente, u.Nome, u.Cognome 
+            FROM utente u 
+            INNER JOIN contributo c ON u.Id_Utente = c.Id_Utente 
+            INNER JOIN esposizione e ON c.Id_Contributo = e.Id_Contributo 
+            WHERE e.Id_Manifestazione = :idManifestazione 
+            AND c.Accettazione = 'Accettato'
+            LIMIT 4";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 ?>

@@ -190,7 +190,15 @@ if (!$espositore) {
             
             <div class="container text-center mt-5">
                 <div class="dashboard-card">
-                    <a href="javascript:history.back()" class="button button-primary mt-3">
+                    <?php
+                    // Recupera l'ID della manifestazione dal contributo
+                    $manifestazione_id = null;
+                    if (!empty($contributi)) {
+                        $manifestazione_id = $contributi[0]['Id_Manifestazione'] ?? null;
+                    }
+                    $back_url = $manifestazione_id ? "manifestazione.php?id=" . $manifestazione_id : "manifestazioni.php";
+                    ?>
+                    <a href="<?php echo htmlspecialchars($back_url); ?>" class="button button-primary mt-3">
                         Torna indietro
                         <span class="mdi mdi-arrow-left"></span>
                     </a>

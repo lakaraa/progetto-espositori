@@ -224,9 +224,9 @@ $contributi = getContributiByManifestazione($pdo, $idManifestazione);
                     <i class="fas fa-arrow-left"></i>
                 </div>
                 <h3 class="action-title">Torna Indietro</h3>
-                <p class="action-description">Ritorna alla lista delle manifestazioni</p>
-                <a href="manifestazione.php" class="action-btn outline">
-                    <i class="fas fa-arrow-left me-2"></i>Torna alle manifestazioni
+                <p class="action-description">Ritorna alla pagina della manifestazione</p>
+                <a href="manifestazione.php?id=<?php echo $idManifestazione; ?>" class="action-btn outline">
+                    <i class="fas fa-arrow-left me-2"></i>Torna alla manifestazione
                 </a>
             </div>
         </div>
