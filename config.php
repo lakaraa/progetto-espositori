@@ -1,6 +1,11 @@
 <?php
 // Define the base path for the website
-$base_path = '/progetto-espositori/';
+// Check if we're in production (Azure) or local environment
+if (strpos($_SERVER['HTTP_HOST'], 'azurewebsites.net') !== false) {
+    $base_path = '/';  // In production, use root path
+} else {
+    $base_path = '/progetto-espositori/';  // In local environment
+}
 
 $_db_host = '134.149.24.61';
 $db_dbname = 'MySQLDB';
