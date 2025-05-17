@@ -784,12 +784,12 @@ function getVisitatoreById($pdo, $id) {
 function getQueryPartecipantiPerMese() {
     return "
         SELECT
-            MONTH(Turno.data) AS mese,
-            COUNT(DISTINCT Prenotazione.Id_Utente) AS numero_partecipanti
+            MONTH(turno.data) AS mese,
+            COUNT(DISTINCT prenotazione.Id_Utente) AS numero_partecipanti
         FROM
-            Prenotazione
+            prenotazione
         JOIN
-            Turno ON Prenotazione.Id_Turno = Turno.Id_Turno
+            turno ON prenotazione.Id_Turno = turno.Id_Turno
         GROUP BY mese
         ORDER BY mese;
     ";
@@ -802,11 +802,11 @@ function getQueryContributiPerManifestazione() {
             m.Nome AS nome_manifestazione,
             COUNT(c.Id_Contributo) AS numero_contributi
         FROM
-            Manifestazione m
+            manifestazione m
         JOIN
-            Esposizione e ON m.Id_Manifestazione = e.Id_Manifestazione
+            esposizione e ON m.Id_Manifestazione = e.Id_Manifestazione
         JOIN
-            Contributo c ON e.Id_Contributo = c.Id_Contributo
+            contributo c ON e.Id_Contributo = c.Id_Contributo
         GROUP BY m.Id_Manifestazione
         ORDER BY m.Nome;
     ";
@@ -819,15 +819,15 @@ function getQueryEspositoriPerManifestazione() {
             m.Nome AS nome_manifestazione,
             COUNT(DISTINCT CASE WHEN u.Ruolo = 'Espositore' THEN u.Id_Utente ELSE NULL END) AS numero_espositori
         FROM
-            Manifestazione m
+            manifestazione m
         LEFT JOIN
-            Area a ON m.Id_Manifestazione = a.Id_Manifestazione
+            area a ON m.Id_Manifestazione = a.Id_Manifestazione
         LEFT JOIN
-            Turno t ON a.Id_Area = t.Id_Area
+            turno t ON a.Id_Area = t.Id_Area
         LEFT JOIN
-            Prenotazione p ON t.Id_Turno = p.Id_Turno
+            prenotazione p ON t.Id_Turno = p.Id_Turno
         LEFT JOIN
-            Utente u ON p.Id_Utente = u.Id_Utente
+            utente u ON p.Id_Utente = u.Id_Utente
         GROUP BY m.Id_Manifestazione
         ORDER BY m.Nome;
     ";
@@ -1178,7 +1178,7 @@ function getCandidatureInApprovazione($pdo, $manifestazione) {
 }
 
 function aggiornaStatoCandidatura($pdo, $idContributo, $stato) {
-    $sql = "UPDATE Contributo SET Accettazione = :stato WHERE Id_Contributo = :idContributo";
+    $sql = "UPDATE contributo SET Accettazione = :stato WHERE Id_Contributo = :idContributo";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':stato', $stato, PDO::PARAM_STR);
     $stmt->bindParam(':idContributo', $idContributo, PDO::PARAM_INT);
@@ -1211,12 +1211,12 @@ function getCandidatureByUser($pdo, $userId) {
 function getManifestazioniDisponibili($pdo, $userId) {
     try {
         $query = "SELECT m.*, 
-                  (SELECT COUNT(*) FROM Esposizione e WHERE e.Id_Manifestazione = m.Id_Manifestazione) as ContributiAttuali,
-                  (SELECT COUNT(*) FROM Contributo c 
-                   JOIN Esposizione e ON c.Id_Contributo = e.Id_Contributo 
+                  (SELECT COUNT(*) FROM esposizione e WHERE e.Id_Manifestazione = m.Id_Manifestazione) as ContributiAttuali,
+                  (SELECT COUNT(*) FROM contributo c 
+                   JOIN esposizione e ON c.Id_Contributo = e.Id_Contributo 
                    WHERE e.Id_Manifestazione = m.Id_Manifestazione 
                    AND c.Id_Utente = :userId) as HaContributo
-                  FROM Manifestazione m 
+                  FROM manifestazione m 
                   WHERE m.Data >= CURDATE()
                   ORDER BY m.Data ASC";
         
@@ -1289,12 +1289,12 @@ function getCandidatureRifiutateCount($pdo, $userId) {
 // Query per ottenere le manifestazioni disponibili
 function getManifestazioniDisponibili_dashboard_espositore($pdo, $userId) {
     $sql = "SELECT m.*, 
-        (SELECT COUNT(*) FROM Esposizione e WHERE e.Id_Manifestazione = m.Id_Manifestazione) as ContributiAttuali,
-        (SELECT COUNT(*) FROM Contributo c 
-         JOIN Esposizione e ON c.Id_Contributo = e.Id_Contributo 
+        (SELECT COUNT(*) FROM esposizione e WHERE e.Id_Manifestazione = m.Id_Manifestazione) as ContributiAttuali,
+        (SELECT COUNT(*) FROM contributo c 
+         JOIN esposizione e ON c.Id_Contributo = e.Id_Contributo 
          WHERE e.Id_Manifestazione = m.Id_Manifestazione 
          AND c.Id_Utente = :userId) as HaContributo
-    FROM Manifestazione m 
+    FROM manifestazione m 
     WHERE m.Data >= CURDATE()
     ORDER BY m.Data ASC";
     
@@ -1374,8 +1374,8 @@ function updateEspositoreDettagli($pdo, $idEspositore, $nome, $cognome, $email, 
 
 function getCandidaturaById($pdo, $idCandidatura) {
     $sql = "SELECT c.*, u.Email 
-            FROM Contributo c
-            JOIN Utente u ON c.Id_Utente = u.Id_Utente
+            FROM contributo c
+            JOIN utente u ON c.Id_Utente = u.Id_Utente
             WHERE c.Id_Contributo = :idCandidatura";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idCandidatura', $idCandidatura, PDO::PARAM_INT);
@@ -1386,7 +1386,7 @@ function getCandidaturaById($pdo, $idCandidatura) {
 function updateCandidaturaDettagli($pdo, $idCandidatura, $titolo, $sintesi, $url, $accettazione, $immagine = null) {
     try {
         // Costruisci la query base
-        $sql = "UPDATE Contributo 
+        $sql = "UPDATE contributo 
                 SET Titolo = :titolo, 
                     Sintesi = :sintesi, 
                     URL = :url, 
@@ -1420,7 +1420,7 @@ function updateCandidaturaDettagli($pdo, $idCandidatura, $titolo, $sintesi, $url
 }
 
 function getManifestazioneNome($pdo, $idManifestazione) {
-    $sql = "SELECT Nome FROM Manifestazione WHERE Id_Manifestazione = :idManifestazione";
+    $sql = "SELECT Nome FROM manifestazione WHERE Id_Manifestazione = :idManifestazione";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
     $stmt->execute();
@@ -1460,11 +1460,11 @@ function addCandidaturaCompleta($pdo, $idUtente, $immagine, $titolo, $sintesi, $
 function getCandidaturaCompleta($pdo, $idCandidatura) {
     $sql = "SELECT c.*, u.Email, m.Id_Manifestazione, m.Nome as Nome_Manifestazione, 
             GROUP_CONCAT(t.Id_Categoria) as Categorie, c.Immagine
-            FROM Contributo c
-            JOIN Utente u ON c.Id_Utente = u.Id_Utente
-            JOIN Esposizione e ON c.Id_Contributo = e.Id_Contributo
-            JOIN Manifestazione m ON e.Id_Manifestazione = m.Id_Manifestazione
-            LEFT JOIN Tipologia t ON c.Id_Contributo = t.Id_Contributo
+            FROM contributo c
+            JOIN utente u ON c.Id_Utente = u.Id_Utente
+            JOIN esposizione e ON c.Id_Contributo = e.Id_Contributo
+            JOIN manifestazione m ON e.Id_Manifestazione = m.Id_Manifestazione
+            LEFT JOIN tipologia t ON c.Id_Contributo = t.Id_Contributo
             WHERE c.Id_Contributo = :idCandidatura
             GROUP BY c.Id_Contributo, c.Immagine, c.Titolo, c.Sintesi, c.URL, c.Accettazione, m.Id_Manifestazione, u.Email, m.Nome, t.Id_Categoria";
     $stmt = $pdo->prepare($sql);
@@ -1490,7 +1490,7 @@ function updateCandidaturaCompleta($pdo, $idCandidatura, $titolo, $sintesi, $url
         }
 
         // Aggiorna la manifestazione
-        $sqlManifestazione = "UPDATE Esposizione 
+        $sqlManifestazione = "UPDATE esposizione 
                              SET Id_Manifestazione = :idManifestazione 
                              WHERE Id_Contributo = :idCandidatura";
         $stmtManifestazione = $pdo->prepare($sqlManifestazione);
@@ -1505,7 +1505,7 @@ function updateCandidaturaCompleta($pdo, $idCandidatura, $titolo, $sintesi, $url
 
         // Aggiorna le categorie
         // Prima elimina tutte le categorie esistenti
-        $sqlDeleteCategorie = "DELETE FROM Tipologia WHERE Id_Contributo = :idCandidatura";
+        $sqlDeleteCategorie = "DELETE FROM tipologia WHERE Id_Contributo = :idCandidatura";
         $stmtDeleteCategorie = $pdo->prepare($sqlDeleteCategorie);
         $stmtDeleteCategorie->execute(['idCandidatura' => $idCandidatura]);
 
@@ -1529,8 +1529,8 @@ function updateCandidaturaCompleta($pdo, $idCandidatura, $titolo, $sintesi, $url
 
 function getCandidaturaCategorie($pdo, $idCandidatura) {
     $sql = "SELECT c.Id_Categoria, c.Nome, c.Descrizione
-            FROM Categoria c
-            JOIN Tipologia t ON c.Id_Categoria = t.Id_Categoria
+            FROM categoria c
+            JOIN tipologia t ON c.Id_Categoria = t.Id_Categoria
             WHERE t.Id_Contributo = :idCandidatura";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idCandidatura', $idCandidatura, PDO::PARAM_INT);
@@ -1736,8 +1736,8 @@ function getUserInfo($pdo, $idCandidatura) {
     try {
         $stmt = $pdo->prepare("
             SELECT u.Nome, u.Cognome 
-            FROM Utente u 
-            INNER JOIN Contributo c ON u.Id_Utente = c.Id_Utente 
+            FROM utente u 
+            INNER JOIN contributo c ON u.Id_Utente = c.Id_Utente 
             WHERE c.Id_Contributo = :idCandidatura
         ");
         $stmt->execute(['idCandidatura' => $idCandidatura]);
