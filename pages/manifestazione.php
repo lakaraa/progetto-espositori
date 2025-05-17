@@ -80,11 +80,15 @@ $espositori = getEspositoriByManifestazioneTop4($pdo, $id);
                 <div class="detail-section">
                     <h5 class="detail-title text-center">Espositori partecipanti</h5>
                     <div class="expositors-tags">
-                        <?php foreach ($espositori as $e): ?>
-                            <a href="espositore.php?id=<?php echo urlencode($e['Id_Utente']); ?>" class="tag-link" style="color: black;">
+                        <?php if (empty($espositori)): ?>
+                            <p style="color: rgb(34, 45, 79);">Nessun espositore partecipante</p>
+                        <?php else: ?>
+                            <?php foreach ($espositori as $e): ?>
+                                <a href="espositore.php?id=<?php echo urlencode($e['Id_Utente']); ?>" class="tag-link" style="color: black;">
                                 <?php echo htmlspecialchars($e['Nome'] . ' ' . $e['Cognome']); ?>
-                            </a>
-                        <?php endforeach; ?>
+                                </a>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                 </div>
 
