@@ -1,4 +1,19 @@
 <?php
+// Enable error reporting
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// Debug: Check if files exist
+$configFile = '../config.php';
+$queriesFile = '../queries.php';
+$templateFile = '../template_header.php';
+
+echo "Checking files:<br>";
+echo "config.php exists: " . (file_exists($configFile) ? 'Yes' : 'No') . "<br>";
+echo "queries.php exists: " . (file_exists($queriesFile) ? 'Yes' : 'No') . "<br>";
+echo "template_header.php exists: " . (file_exists($templateFile) ? 'Yes' : 'No') . "<br>";
+
 include_once('../config.php'); 
 include_once('../queries.php'); 
 include_once('../template_header.php');
