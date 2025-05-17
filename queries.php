@@ -65,8 +65,8 @@ function getContributiByManifestazione($pdo, $idManifestazione)
 {
     try {
         // Prima verifica solo i contributi base
-        $sql = "SELECT c.* FROM Contributo c 
-                INNER JOIN Esposizione e ON c.Id_Contributo = e.Id_Contributo
+        $sql = "SELECT c.* FROM contributo c 
+                INNER JOIN esposizione e ON c.Id_Contributo = e.Id_Contributo
                 WHERE e.Id_Manifestazione = :idManifestazione";
                 
         $stmt = $pdo->prepare($sql);
@@ -78,7 +78,7 @@ function getContributiByManifestazione($pdo, $idManifestazione)
         // Poi per ogni contributo, recupera i dettagli aggiuntivi
         foreach ($contributi as &$contributo) {
             // Info espositore
-            $sql_utente = "SELECT Nome, Cognome FROM Utente WHERE Id_Utente = ?";
+            $sql_utente = "SELECT Nome, Cognome FROM utente WHERE Id_Utente = ?";
             $stmt = $pdo->prepare($sql_utente);
             $stmt->execute([$contributo['Id_Utente']]);
             $utente = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -87,8 +87,8 @@ function getContributiByManifestazione($pdo, $idManifestazione)
             $contributo['CognomeEspositore'] = $utente['Cognome'] ?? '';
             
             // Categorie
-            $sql_categorie = "SELECT cat.Nome FROM Categoria cat
-                             INNER JOIN Tipologia t ON cat.Id_Categoria = t.Id_Categoria
+            $sql_categorie = "SELECT cat.Nome FROM categoria cat
+                             INNER JOIN tipologia t ON cat.Id_Categoria = t.Id_Categoria
                              WHERE t.Id_Contributo = ?";
             $stmt = $pdo->prepare($sql_categorie);
             $stmt->execute([$contributo['Id_Contributo']]);
@@ -526,24 +526,24 @@ function updatePersonale($pdo, $idUtente, $username, $password, $nome, $cognome,
     }
 }
 //Gestione Prenoatazione
-function addPrenotazione($pdo, $idUtente, $idTurno) 
-{
-    try {
-        // Verifica se c'è ancora spazio disponibile
-        if (!checkAreaCapacity($pdo, $idTurno)) {
-            return false;
-        }
-
-        $sql = "INSERT INTO prenotazione (Id_Utente, Id_Turno) 
-                VALUES (:idUtente, :idTurno)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
-        $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
-        return $stmt->execute();
-    } catch (PDOException $e) {
-        return false;
-    }
-}
+//function addPrenotazione($pdo, $idUtente, $idTurno) 
+//{
+//    try {
+//        // Verifica se c'è ancora spazio disponibile
+//        if (!checkAreaCapacity($pdo, $idTurno)) {
+//            return false;
+//        }
+//
+//        $sql = "INSERT INTO prenotazione (Id_Utente, Id_Turno) 
+//                VALUES (:idUtente, :idTurno)";
+//        $stmt = $pdo->prepare($sql);
+//        $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+//        $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
+//        return $stmt->execute();
+//    } catch (PDOException $e) {
+//        return false;
+//    }
+//}
 function deletePrenotazione($pdo, $idUtente, $idTurno) {
     $sql = "DELETE FROM prenotazione 
             WHERE Id_Utente = :idUtente AND Id_Turno = :idTurno";
@@ -839,9 +839,9 @@ function getQueryPrenotazioniPerData($pdo, $anno) {
         SELECT 
             DATE_FORMAT(t.Data, '%d/%m/%Y') as Data,
             COUNT(DISTINCT p.Id_Utente) as NumeroPartecipanti
-        FROM Turno t
-        JOIN Prenotazione p ON t.Id_Turno = p.Id_Turno
-        JOIN Utente u ON p.Id_Utente = u.Id_Utente
+        FROM turno t
+        JOIN prenotazione p ON t.Id_Turno = p.Id_Turno
+        JOIN utente u ON p.Id_Utente = u.Id_Utente
         WHERE YEAR(t.Data) = :anno
         AND u.Ruolo = 'Visitatore'
         GROUP BY t.Data
@@ -1010,14 +1010,14 @@ function checkAreaCapacity($pdo, $idTurno) {
 }
 
 function getUtenti($pdo) {
-    $sql = "SELECT Id_Utente, Email FROM Utente WHERE Ruolo = 'Espositore'";
+    $sql = "SELECT Id_Utente, Email FROM utente WHERE Ruolo = 'Espositore'";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 function getUsernameById($pdo, $idUtente) {
-    $sql = "SELECT Username, Nome, Cognome FROM Utente WHERE Id_Utente = :idUtente";
+    $sql = "SELECT Username, Nome, Cognome FROM utente WHERE Id_Utente = :idUtente";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
     $stmt->execute();
@@ -1039,7 +1039,7 @@ function addContributo($pdo, $idUtente, $immagine, $titolo, $sintesi, $accettazi
         }
 
         // Inserisci il contributo
-        $query = "INSERT INTO Contributo (Id_Utente, Immagine, Titolo, Sintesi, Accettazione, URL) 
+        $query = "INSERT INTO contributo (Id_Utente, Immagine, Titolo, Sintesi, Accettazione, URL) 
                  VALUES (:idUtente, :immagine, :titolo, :sintesi, :accettazione, :url)";
         
         $stmt = $pdo->prepare($query);
@@ -1063,15 +1063,15 @@ function addContributo($pdo, $idUtente, $immagine, $titolo, $sintesi, $accettazi
         }
 
         // Verifica che la manifestazione esista
-        $queryManifestazione = "SELECT Id_Manifestazione FROM Manifestazione WHERE Id_Manifestazione = :idManifestazione";
+        $queryManifestazione = "SELECT Id_Manifestazione FROM manifestazione WHERE Id_Manifestazione = :idManifestazione";
         $stmtManifestazione = $pdo->prepare($queryManifestazione);
         $stmtManifestazione->execute(['idManifestazione' => $idManifestazione]);
         if (!$stmtManifestazione->fetch()) {
             throw new PDOException('Manifestazione non trovata');
         }
 
-        // Inserisci l'associazione nella tabella Esposizione
-        $queryEsposizione = "INSERT INTO Esposizione (Id_Manifestazione, Id_Contributo) 
+        // Inserisci l'associazione nella tabella esposizione
+        $queryEsposizione = "INSERT INTO esposizione (Id_Manifestazione, Id_Contributo) 
                            VALUES (:idManifestazione, :idContributo)";
         
         $stmtEsposizione = $pdo->prepare($queryEsposizione);
@@ -1095,12 +1095,12 @@ function getCandidature($pdo) {
     $sql = "SELECT c.Id_Contributo, u.Email, c.Titolo, c.Sintesi, c.Accettazione, c.Immagine, c.URL,
                    m.Nome as Manifestazione,
                    GROUP_CONCAT(cat.Nome SEPARATOR ', ') as Categorie
-            FROM Contributo c
-            JOIN Utente u ON c.Id_Utente = u.Id_Utente
-            LEFT JOIN Esposizione e ON c.Id_Contributo = e.Id_Contributo
-            LEFT JOIN Manifestazione m ON e.Id_Manifestazione = m.Id_Manifestazione
-            LEFT JOIN Tipologia t ON c.Id_Contributo = t.Id_Contributo
-            LEFT JOIN Categoria cat ON t.Id_Categoria = cat.Id_Categoria
+            FROM contributo c
+            JOIN utente u ON c.Id_Utente = u.Id_Utente
+            LEFT JOIN esposizione e ON c.Id_Contributo = e.Id_Contributo
+            LEFT JOIN manifestazione m ON e.Id_Manifestazione = m.Id_Manifestazione
+            LEFT JOIN tipologia t ON c.Id_Contributo = t.Id_Contributo
+            LEFT JOIN categoria cat ON t.Id_Categoria = cat.Id_Categoria
             GROUP BY c.Id_Contributo, u.Email, c.Titolo, c.Sintesi, c.Accettazione, c.Immagine, c.URL, m.Nome";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
@@ -1110,23 +1110,23 @@ function getCandidature($pdo) {
 function deleteContributo($pdo, $idContributo) {
     try {
         // Prima recupera il nome dell'immagine
-        $stmt = $pdo->prepare("SELECT Immagine FROM Contributo WHERE Id_Contributo = ?");
+        $stmt = $pdo->prepare("SELECT Immagine FROM contributo WHERE Id_Contributo = ?");
         $stmt->execute([$idContributo]);
         $contributo = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Inizia la transazione
         $pdo->beginTransaction();
 
-        // Elimina le relazioni con le categorie dalla tabella Tipologia
-        $stmt = $pdo->prepare("DELETE FROM Tipologia WHERE Id_Contributo = ?");
+        // Elimina le relazioni con le categorie dalla tabella tipologia
+        $stmt = $pdo->prepare("DELETE FROM tipologia WHERE Id_Contributo = ?");
         $stmt->execute([$idContributo]);
 
         // Elimina le relazioni con le manifestazioni
-        $stmt = $pdo->prepare("DELETE FROM Esposizione WHERE Id_Contributo = ?");
+        $stmt = $pdo->prepare("DELETE FROM esposizione WHERE Id_Contributo = ?");
         $stmt->execute([$idContributo]);
 
         // Elimina il contributo
-        $stmt = $pdo->prepare("DELETE FROM Contributo WHERE Id_Contributo = ?");
+        $stmt = $pdo->prepare("DELETE FROM contributo WHERE Id_Contributo = ?");
         $stmt->execute([$idContributo]);
 
         // Commit della transazione
@@ -1134,7 +1134,6 @@ function deleteContributo($pdo, $idContributo) {
 
         // Se c'era un'immagine associata, eliminala
         if ($contributo && !empty($contributo['Immagine'])) {
-            // Usa un percorso relativo alla root del progetto
             $imagePath = 'uploads/img/' . $contributo['Immagine'];
             
             error_log("Tentativo di eliminazione immagine. Percorso: " . $imagePath);
@@ -1152,7 +1151,6 @@ function deleteContributo($pdo, $idContributo) {
 
         return true;
     } catch (PDOException $e) {
-        // Rollback in caso di errore
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
         }
@@ -1163,10 +1161,10 @@ function deleteContributo($pdo, $idContributo) {
 
 function getCandidatureInApprovazione($pdo, $manifestazione) {
     $sql = "SELECT c.Id_Contributo, u.Email, u.Nome AS Nome_Utente, m.Nome AS Manifestazione, c.Titolo, c.Sintesi
-            FROM Contributo c
-            JOIN Utente u ON c.Id_Utente = u.Id_Utente
-            JOIN Esposizione e ON c.Id_Contributo = e.Id_Contributo
-            JOIN Manifestazione m ON e.Id_Manifestazione = m.Id_Manifestazione
+            FROM contributo c
+            JOIN utente u ON c.Id_Utente = u.Id_Utente
+            JOIN esposizione e ON c.Id_Contributo = e.Id_Contributo
+            JOIN manifestazione m ON e.Id_Manifestazione = m.Id_Manifestazione
             WHERE c.Accettazione = 'In Approvazione'";
     if (!empty($manifestazione)) {
         $sql .= " AND m.Nome LIKE :manifestazione";
@@ -1780,5 +1778,127 @@ function getEspositoriByManifestazioneTop4_2($pdo, $idManifestazione) {
     $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function getPrenotazioniPerData($pdo, $data) {
+    $sql = "SELECT t.Id_Turno, t.Ora_Inizio, t.Ora_Fine, t.Numero_Max_Utenti,
+            COUNT(p.Id_Prenotazione) as Prenotazioni_Attuali,
+            GROUP_CONCAT(u.Nome SEPARATOR ', ') as Nomi_Utenti
+            FROM turno t
+            LEFT JOIN prenotazione p ON t.Id_Turno = p.Id_Turno
+            LEFT JOIN utente u ON p.Id_Utente = u.Id_Utente
+            WHERE DATE(t.Data) = :data
+            GROUP BY t.Id_Turno, t.Ora_Inizio, t.Ora_Fine, t.Numero_Max_Utenti
+            ORDER BY t.Ora_Inizio";
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':data', $data, PDO::PARAM_STR);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function getPrenotazioniUtente($pdo, $idUtente) {
+    $sql = "SELECT p.Id_Prenotazione, t.Data, t.Ora_Inizio, t.Ora_Fine, m.Nome as Nome_Manifestazione
+            FROM prenotazione p
+            JOIN turno t ON p.Id_Turno = t.Id_Turno
+            JOIN manifestazione m ON t.Id_Manifestazione = m.Id_Manifestazione
+            WHERE p.Id_Utente = :idUtente
+            ORDER BY t.Data, t.Ora_Inizio";
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function addPrenotazione($pdo, $idUtente, $idTurno) {
+    try {
+        // Verifica se il turno esiste e ha posti disponibili
+        $sql = "SELECT t.Numero_Max_Utenti, COUNT(p.Id_Prenotazione) as Prenotazioni_Attuali
+                FROM turno t
+                LEFT JOIN prenotazione p ON t.Id_Turno = p.Id_Turno
+                WHERE t.Id_Turno = :idTurno
+                GROUP BY t.Id_Turno, t.Numero_Max_Utenti";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
+        $stmt->execute();
+        $turno = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$turno) {
+            throw new PDOException('Turno non trovato');
+        }
+
+        if ($turno['Prenotazioni_Attuali'] >= $turno['Numero_Max_Utenti']) {
+            throw new PDOException('Turno completo');
+        }
+
+        // Verifica se l'utente ha già una prenotazione per questo turno
+        $sql = "SELECT COUNT(*) FROM prenotazione 
+                WHERE Id_Utente = :idUtente AND Id_Turno = :idTurno";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+        $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
+        $stmt->execute();
+        
+        if ($stmt->fetchColumn() > 0) {
+            throw new PDOException('Hai già una prenotazione per questo turno');
+        }
+
+        // Inserisci la prenotazione
+        $sql = "INSERT INTO prenotazione (Id_Utente, Id_Turno) VALUES (:idUtente, :idTurno)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindParam(':idUtente', $idUtente, PDO::PARAM_INT);
+        $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
+        
+        return $stmt->execute();
+
+    } catch (PDOException $e) {
+        throw $e;
+    }
+}
+
+
+function getTurniManifestazione($pdo, $idManifestazione) {
+    $sql = "SELECT t.*, COUNT(p.Id_Prenotazione) as Prenotazioni_Attuali
+            FROM turno t
+            LEFT JOIN prenotazione p ON t.Id_Turno = p.Id_Turno
+            WHERE t.Id_Manifestazione = :idManifestazione
+            GROUP BY t.Id_Turno
+            ORDER BY t.Data, t.Ora_Inizio";
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function addTurno($pdo, $idManifestazione, $data, $oraInizio, $oraFine, $numeroMaxUtenti) {
+    $sql = "INSERT INTO turno (Id_Manifestazione, Data, Ora_Inizio, Ora_Fine, Numero_Max_Utenti)
+            VALUES (:idManifestazione, :data, :oraInizio, :oraFine, :numeroMaxUtenti)";
+    
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idManifestazione', $idManifestazione, PDO::PARAM_INT);
+    $stmt->bindParam(':data', $data, PDO::PARAM_STR);
+    $stmt->bindParam(':oraInizio', $oraInizio, PDO::PARAM_STR);
+    $stmt->bindParam(':oraFine', $oraFine, PDO::PARAM_STR);
+    $stmt->bindParam(':numeroMaxUtenti', $numeroMaxUtenti, PDO::PARAM_INT);
+    
+    return $stmt->execute();
+}
+
+function deleteTurno($pdo, $idTurno) {
+    // Prima elimina le prenotazioni associate
+    $sql = "DELETE FROM prenotazione WHERE Id_Turno = :idTurno";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
+    $stmt->execute();
+
+    // Poi elimina il turno
+    $sql = "DELETE FROM turno WHERE Id_Turno = :idTurno";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':idTurno', $idTurno, PDO::PARAM_INT);
+    return $stmt->execute();
 }
 ?>
