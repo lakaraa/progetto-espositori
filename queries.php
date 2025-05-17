@@ -856,9 +856,9 @@ function getQueryPrenotazioniPerData($pdo, $anno) {
 function getEspositoriByManifestazioneTop4($pdo, $id_manifestazione) {
     $sql = "
         SELECT DISTINCT u.Id_Utente, u.Nome, u.Cognome, u.Email
-        FROM Utente u
-        INNER JOIN Contributo c ON u.Id_Utente = c.Id_Utente
-        INNER JOIN Esposizione e ON c.Id_Contributo = e.Id_Contributo
+        FROM utente u
+        INNER JOIN contributo c ON u.Id_Utente = c.Id_Utente
+        INNER JOIN esposizione e ON c.Id_Contributo = e.Id_Contributo
         WHERE e.Id_Manifestazione = :Id_Manifestazione
         AND u.Ruolo = 'Espositore'
         LIMIT 4
