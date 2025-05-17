@@ -24,8 +24,9 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 // Recupera dati della manifestazione
 $manifestazione = getManifestazioneById($pdo, $id);
 
-// Recupera gli espositori legati alla manifestazione
-$espositori = getEspositoriByManifestazioneTop4($pdo, $id);
+// Temporaneamente commentiamo questa riga per vedere se il resto della pagina funziona
+// $espositori = getEspositoriByManifestazioneTop4($pdo, $id);
+$espositori = []; // Array vuoto per ora
 ?>
 
 <?php if ($manifestazione): ?>
