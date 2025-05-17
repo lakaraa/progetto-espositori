@@ -1,14 +1,21 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+// Disable error display in production
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
 error_reporting(E_ALL);
+
+// Start output buffering
+ob_start();
 
 include_once '../config.php';
 include_once '../session.php';
 include_once '../queries.php';
 
-header('Content-Type: application/json');
+// Clear any previous output
 ob_clean();
+
+// Set JSON header
+header('Content-Type: application/json');
 
 try {
     // Verifica che la richiesta sia POST
@@ -127,3 +134,6 @@ try {
         'message' => $e->getMessage()
     ]);
 }
+
+// End output buffering and flush
+ob_end_flush();
