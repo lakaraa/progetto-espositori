@@ -28,6 +28,7 @@ try {
         $partecipanti[$mese - 1] = (int)$row['numero_partecipanti'];
         $hasPartecipanti = true;
     }
+    error_log("Partecipanti: " . ($hasPartecipanti ? "Dati trovati" : "Nessun dato"));
 
     // Contributi
     $stmt = $pdo->query($sqlContributi);
@@ -39,6 +40,7 @@ try {
         $contributi[] = (int)$row['numero_contributi'];
         $hasContributi = true;
     }
+    error_log("Contributi: " . ($hasContributi ? "Dati trovati" : "Nessun dato"));
 
     // Espositori
     $stmt = $pdo->query($sqlEspositori);
@@ -50,6 +52,7 @@ try {
         $espositori[] = (int)$row['numero_espositori'];
         $hasEspositori = true;
     }
+    error_log("Espositori: " . ($hasEspositori ? "Dati trovati" : "Nessun dato"));
 
     // Prenotazioni per data
     $stmt = $pdo->query($sqlPrenotazioni);
@@ -61,13 +64,16 @@ try {
         $prenotazioniCount[] = (int)$row['numero_prenotazioni'];
         $hasPrenotazioni = true;
     }
+    error_log("Prenotazioni: " . ($hasPrenotazioni ? "Dati trovati" : "Nessun dato"));
 
     // Verifica se ci sono dati
     if (!$hasPartecipanti && !$hasContributi && !$hasEspositori && !$hasPrenotazioni) {
+        error_log("Nessun dato disponibile per nessuna categoria");
         echo '<div class="alert alert-info text-center">Nessun dato disponibile.</div>';
         exit;
     }
 } catch (PDOException $e) {
+    error_log("Errore PDO: " . $e->getMessage());
     echo json_encode([
         'success' => false,
         'message' => 'Errore nel recupero dei dati: ' . $e->getMessage()
