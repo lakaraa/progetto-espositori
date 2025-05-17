@@ -1,6 +1,15 @@
 <?php
 include_once ("../../config.php");
 include_once ("../../queries.php");
+include_once ("../../session.php");
+
+// Verifica che l'utente sia loggato e sia personale
+if (!isset($_SESSION['id_utente']) || $_SESSION['ruolo'] !== 'Personale') {
+    // Se non è loggato o non è personale, reindirizza alla pagina di login
+    header('Location: ../../pages/login.php');
+    exit;
+}
+
 include_once ("../../template_header.php");
 
 $espositori = getEspositori($pdo);
@@ -48,7 +57,7 @@ $espositori = getEspositori($pdo);
                                 <td><?php echo htmlspecialchars($espositore['qualifica']); ?></td>
                                 <td>
                                     <a class="button button-primary button-sm" 
-                                        href="modifica_espositore_dettagli.php?id=<?php echo urlencode($espositore['id']); ?>" >
+                                        href="modifica_espositore_dettagli.php?id=<?php echo $espositore['id']; ?>" >
                                         Modifica
                                     </a>
                                 </td>

@@ -1,6 +1,14 @@
 <?php
 include_once '../../config.php';
 include_once '../../queries.php';
+include_once '../../session.php';
+
+// Verifica che l'utente sia loggato e sia personale
+if (!isset($_SESSION['id_utente']) || $_SESSION['ruolo'] !== 'Personale') {
+    // Se non è loggato o non è personale, reindirizza alla pagina di login
+    header('Location: ../../pages/login.php');
+    exit;
+}
 
 error_log("Inizio modifica_espositore_dettagli.php");
 
@@ -14,16 +22,28 @@ error_log("ID Espositore ricevuto: " . $idEspositore);
 
 if ($idEspositore <= 0) {
     error_log("ID espositore non valido: " . $idEspositore);
-    die("ID espositore non valido.");
+    header('Location: modifica_espositore.php');
+    exit;
 }
 
-// Recupera i dettagli dell'espositore
-$espositore = getEspositoreById($pdo, $idEspositore);
-error_log("Dettagli espositore recuperati: " . print_r($espositore, true));
+// Debug: Stampa la query SQL
+error_log("Query SQL per getEspositoreById: " . getQueryEspositoreById());
 
-if (!$espositore) {
-    error_log("Espositore non trovato per ID: " . $idEspositore);
-    die("Espositore non trovato.");
+// Recupera i dettagli dell'espositore
+try {
+    $espositore = getEspositoreById($pdo, $idEspositore);
+    error_log("Dettagli espositore recuperati: " . print_r($espositore, true));
+    
+    if (!$espositore) {
+        error_log("Espositore non trovato per ID: " . $idEspositore);
+        header('Location: modifica_espositore.php');
+        exit;
+    }
+} catch (PDOException $e) {
+    error_log("Errore database: " . $e->getMessage());
+    $errorMessage = "Errore nel recupero dei dati dell'espositore";
+    header('Location: modifica_espositore.php');
+    exit;
 }
 
 // Gestisci l'invio del modulo
