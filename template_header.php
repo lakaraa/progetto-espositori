@@ -8,11 +8,11 @@ include_once 'session.php';
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link rel="icon" href="/progetto-espositori/resources/images/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="resources/images/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato:400,700%7COpen+Sans:400,600,700%7CSource+Code+Pro:300,400,500,600,700,900%7CNothing+You+Could+Do%7CPoppins:400,500">
-    <link rel="stylesheet" href="/progetto-espositori/resources/css/bootstrap.css">
-    <link rel="stylesheet" href="/progetto-espositori/resources/css/fonts.css">
-    <link rel="stylesheet" href="/progetto-espositori/resources/css/style.css">
+    <link rel="stylesheet" href="resources/css/bootstrap.css">
+    <link rel="stylesheet" href="resources/css/fonts.css">
+    <link rel="stylesheet" href="resources/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css">
     <style>
         .ie-panel{display: none;background: #212121;padding: 10px 0;box-shadow: 3px 3px 5px 0 rgba(0,0,0,.3);clear: both;text-align:center;position: relative;z-index: 1;} 
@@ -29,11 +29,11 @@ include_once 'session.php';
 </head>
 
 <!-- JS -->
-<script src="/progetto-espositori/resources/js/core.min.js"></script>
-<script src="/progetto-espositori/resources/js/script.js"></script>
+<script src="resources/js/core.min.js"></script>
+<script src="resources/js/script.js"></script>
 
 <body>
-    <div class="ie-panel"><a href="http://windows.microsoft.com/en-US/internet-explorer/"><img src="/progetto-espositori/resources/images/ie8-panel/warning_bar_0000_us.jpg" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today."></a></div>
+    <div class="ie-panel"><a href="http://windows.microsoft.com/en-US/internet-explorer/"><img src="resources/images/ie8-panel/warning_bar_0000_us.jpg" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today."></a></div>
     <div class="preloader">
         <div class="preloader-body">
             <div class="cssload-container">
@@ -66,8 +66,8 @@ include_once 'session.php';
                     <div class="rd-navbar-panel">
                         <button class="rd-navbar-toggle" data-rd-navbar-toggle=".rd-navbar-nav-wrap"><span></span></button>
                         <div class="rd-navbar-brand">
-                            <a class="brand" href="/progetto-espositori/index.php">
-                                <img src="/progetto-espositori/resources/images/logo-default-296x52.png" alt="" width="148" height="26"/>
+                            <a class="brand" href="index.php">
+                                <img src="resources/images/logo-default-296x52.png" alt="" width="148" height="26"/>
                             </a>
                         </div>
                     </div>
@@ -75,10 +75,10 @@ include_once 'session.php';
                         <div class="rd-navbar-nav-wrap">
                             <ul class="rd-navbar-nav">
                                 <li class="rd-nav-item <?php echo $current_page == 'index.php' ? 'active' : ''; ?>">
-                                    <a class="rd-nav-link" href="/progetto-espositori/index.php">Home</a>
+                                    <a class="rd-nav-link" href="index.php">Home</a>
                                 </li>
                                 <li class="rd-nav-item <?php echo $current_page == 'manifestazioni.php' ? 'active' : ''; ?>">
-                                    <a class="rd-nav-link" href="/progetto-espositori/pages/manifestazioni.php">Manifestazioni</a>
+                                    <a class="rd-nav-link" href="pages/manifestazioni.php">Manifestazioni</a>
                                 </li>
 
                                 <?php
@@ -86,7 +86,7 @@ include_once 'session.php';
                                     $ruolo = $_SESSION['ruolo'];
                                     $ruoloLower = strtolower($ruolo);
                                     $dashboardPage = "dashboard_" . $ruoloLower . ".php";
-                                    $dashboardPath = "/progetto-espositori/$ruolo/$dashboardPage";
+                                    $dashboardPath = "$ruolo/$dashboardPage";
                                     $isDashboard = $current_page === $dashboardPage;
                                     ?>
                                     <li class="rd-nav-item <?php echo $isDashboard ? 'active' : ''; ?>">
@@ -95,29 +95,29 @@ include_once 'session.php';
                                 <?php } ?>
 
                                 <li class="rd-nav-item <?php echo $current_page == 'about.php' ? 'active' : ''; ?>">
-                                    <a class="rd-nav-link" href="/progetto-espositori/pages/about.php">About</a>
+                                    <a class="rd-nav-link" href="pages/about.php">About</a>
                                 </li>
                                 <li class="rd-nav-item <?php echo $current_page == 'contacts.php' ? 'active' : ''; ?>">
-                                    <a class="rd-nav-link" href="/progetto-espositori/pages/contacts.php">Contacts</a>
+                                    <a class="rd-nav-link" href="pages/contacts.php">Contacts</a>
                                 </li>
 
                                 <?php if (isset($_SESSION['email'])): ?>
                                     <li class="rd-nav-item">
-                                        <a class="rd-nav-link" href="/progetto-espositori/auth/logout_handler.php">Logout</a>
+                                        <a class="rd-nav-link" href="auth/logout_handler.php">Logout</a>
                                     </li>
                                 <?php else: ?>
                                     <li class="rd-nav-item <?php echo $current_page == 'login.php' ? 'active' : ''; ?>">
-                                        <a class="rd-nav-link" href="/progetto-espositori/pages/login.php">Login</a>
+                                        <a class="rd-nav-link" href="pages/login.php">Login</a>
                                     </li>
                                 <?php endif; ?>
 
                                 <li class="rd-nav-item rd-nav-item--has-dropdown">
                                     <a class="rd-nav-link" href="#">Query</a>
                                     <ul class="rd-navbar-dropdown">
-                                        <li class="rd-nav-item"><a class="rd-nav-link" href="/progetto-espositori/pages/visualizzazioni/elenco_espositori.php" style="color: white;">Elenco Espositori</a></li>
-                                        <li class="rd-nav-item"><a class="rd-nav-link" href="/progetto-espositori/pages/visualizzazioni/esposizioni_per_categoria.php" style="color: white;">Esposizioni per Categoria</a></li>
-                                        <li class="rd-nav-item"><a class="rd-nav-link" href="/progetto-espositori/pages/visualizzazioni/elenco_categorie.php" style="color: white;">Elenco Categorie</a></li>
-                                        <li class="rd-nav-item"><a class="rd-nav-link" href="/progetto-espositori/pages/visualizzazioni/andamento_partecipanti.php" style="color: white;">Andamento Partecipanti</a></li>
+                                        <li class="rd-nav-item"><a class="rd-nav-link" href="pages/visualizzazioni/elenco_espositori.php" style="color: white;">Elenco Espositori</a></li>
+                                        <li class="rd-nav-item"><a class="rd-nav-link" href="pages/visualizzazioni/esposizioni_per_categoria.php" style="color: white;">Esposizioni per Categoria</a></li>
+                                        <li class="rd-nav-item"><a class="rd-nav-link" href="pages/visualizzazioni/elenco_categorie.php" style="color: white;">Elenco Categorie</a></li>
+                                        <li class="rd-nav-item"><a class="rd-nav-link" href="pages/visualizzazioni/andamento_partecipanti.php" style="color: white;">Andamento Partecipanti</a></li>
                                     </ul>
                                 </li>
                             </ul>

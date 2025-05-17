@@ -1,7 +1,7 @@
 <!-- template_footer.php -->
 <footer class="section footer-classic bg-default">
             <div class="container">
-            <img src="/progetto-espositori/resources/images/motto.png" alt="About Us" width="20%"/>
+            <img src="resources/images/motto.png" alt="About Us" width="20%"/>
                 <div class="row row-15">
                     <div class="col-sm-6">
                         
@@ -17,7 +17,7 @@
         </footer>
     </div>
     <div class="snackbars" id="form-output-global"></div>
-    <script src="/progetto-espositori/resources/js/core.min.js"></script>
-    <script src="/progetto-espositori/resources/js/script.js"></script>
+    <script src="resources/js/core.min.js"></script>
+    <script src="resources/js/script.js"></script>
 </body>
 </html>

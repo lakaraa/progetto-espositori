@@ -1135,7 +1135,7 @@ function deleteContributo($pdo, $idContributo) {
         // Se c'era un'immagine associata, eliminala
         if ($contributo && !empty($contributo['Immagine'])) {
             // Usa un percorso relativo alla root del progetto
-            $imagePath = $_SERVER['DOCUMENT_ROOT'] . '/progetto-espositori/uploads/img/' . $contributo['Immagine'];
+            $imagePath = 'uploads/img/' . $contributo['Immagine'];
             
             error_log("Tentativo di eliminazione immagine. Percorso: " . $imagePath);
             

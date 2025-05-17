@@ -7,7 +7,7 @@ $manifestazioni = getManifestazioni($pdo);
 ?>
 
 <!-- Breadcrumbs-->
-<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/sfondo.jpg);">
+<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(../resources/images/sfondo.jpg);">
        <div class="container">
         <h2 class="breadcrumbs-custom-title">Manifestazioni</h2>
     </div>
@@ -29,7 +29,7 @@ $manifestazioni = getManifestazioni($pdo);
                     <article class="card-modern">
                         <div class="card-modern-body">
                             <h4 class="card-modern-title">
-                                <a href="/progetto-espositori/pages/manifestazione.php?id=<?php echo $row['Id_Manifestazione']; ?>">
+                                <a href="manifestazione.php?id=<?php echo $row['Id_Manifestazione']; ?>">
                                     <?php echo htmlspecialchars($row['Nome']); ?>
                                 </a>
                             </h4>
@@ -40,7 +40,7 @@ $manifestazioni = getManifestazioni($pdo);
                                     <span><?php echo htmlspecialchars($row['Luogo'] ?? 'Luogo non specificato'); ?></span>
                                 </div>
                             </div>
-                            <a class="button button-primary button-sm" href="/progetto-espositori/pages/manifestazione.php?id=<?php echo $row['Id_Manifestazione']; ?>">Scopri di più</a>
+                            <a class="button button-primary button-sm" href="manifestazione.php?id=<?php echo $row['Id_Manifestazione']; ?>">Scopri di più</a>
                         </div>
                     </article>
                 </div>
