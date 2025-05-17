@@ -377,7 +377,7 @@ function usernameExists($pdo, $username) {
 function getEspositori($pdo) 
 {
     $sql = "
-        SELECT u.Id_Utente AS id, 
+        SELECT u.Id_Utente, 
             u.Username AS username, 
             u.Password AS password, 
             u.Nome AS nome, 

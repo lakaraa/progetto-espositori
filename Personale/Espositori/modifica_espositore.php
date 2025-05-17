@@ -52,7 +52,7 @@ $espositori = getEspositori($pdo);
                                 <td>
                                     <a class="button button-primary button-sm" 
                                         href="modifica_espositore_dettagli.php?id=<?php echo urlencode($espositore['Id_Utente']); ?>" >
-                                         Modifica
+                                        Modifica
                                     </a>
                                 </td>
                                 <td>

@@ -5,23 +5,16 @@ include_once '../../session.php';
 
 
 error_log("Inizio modifica_espositore_dettagli.php");
-
-$successMessage = '';
-$errorMessage = '';
-
-// Recupera l'ID dell'espositore dalla query string
-$idEspositore = isset($_GET['id']) ? intval($_GET['id']) : 0;
-
+error_log("GET params: " . print_r($_GET, true));
+$idEspositore = intval($_GET['id']);
 error_log("ID Espositore ricevuto: " . $idEspositore);
+error_log("Query SQL per getEspositoreById: " . getQueryEspositoreById());
 
 if ($idEspositore <= 0) {
     error_log("ID espositore non valido: " . $idEspositore);
     header('Location: modifica_espositore.php');
     exit;
 }
-
-// Debug: Stampa la query SQL
-error_log("Query SQL per getEspositoreById: " . getQueryEspositoreById());
 
 // Recupera i dettagli dell'espositore
 try {
