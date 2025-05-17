@@ -1,4 +1,7 @@
 <?php
+// Define the base path for the website
+$base_path = '/progetto-espositori/';
+
 $_db_host = '134.149.24.61';
 $db_dbname = 'MySQLDB';
 $db_username = 'azureuser';
