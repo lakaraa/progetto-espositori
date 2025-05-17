@@ -170,7 +170,13 @@ $contributi = getContributiByManifestazione($pdo, $idManifestazione);
         </div>
         <h3>Nessun contributo presente</h3>
         <p>Non sono ancora stati pubblicati contributi per questa manifestazione.</p>
-        <a href="login.php" class="btn btn-primary">
+        <?php
+            $link = 'login.php';
+            if (isset($_SESSION['user_id']) && isset($_SESSION['ruolo']) && $_SESSION['ruolo'] === 'Espositore') {
+                $link = '../Espositore/form_candidatura.php?id=' . $idManifestazione;
+            }
+        ?>
+        <a href="<?php echo $link; ?>" class="btn btn-primary">
             <i class="fas fa-plus me-2"></i>Diventa il primo contributore
         </a>
     </div>
