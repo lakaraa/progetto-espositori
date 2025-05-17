@@ -1,11 +1,12 @@
 <?php
-$_db_host = '127.0.0.1';
-$db_dbnam = 'espositori';
-$db_username = 'espositori';
-$db_password = 'espositori.123';
+$_db_host = '134.149.24.61';
+$db_dbname = 'MySQLDB';
+$db_username = 'azureuser';
+$db_password = 'Espositori.123';
 
-$pdo = new PDO(dsn: "mysql:host=$_db_host;dbname=$db_dbnam", username: $db_username, password: $db_password);
-$pdo->setAttribute(attribute: PDO::ATTR_ERRMODE, value: PDO::ERRMODE_EXCEPTION);
-$pdo->setAttribute(attribute: PDO::ATTR_DEFAULT_FETCH_MODE, value: PDO::FETCH_ASSOC);
+$pdo = new PDO("mysql:host=$_db_host;dbname=$db_dbname", $db_username, $db_password);
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
+echo "Connessione riuscita!";
 ?>
