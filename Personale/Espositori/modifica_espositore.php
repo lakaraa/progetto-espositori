@@ -51,8 +51,8 @@ $espositori = getEspositori($pdo);
                                 <td><?php echo htmlspecialchars($espositore['qualifica']); ?></td>
                                 <td>
                                     <a class="button button-primary button-sm" 
-                                        href="modifica_espositore_dettagli.php?id=<?php echo $espositore['id']; ?>" >
-                                        Modifica
+                                        href="modifica_espositore_dettagli.php?id=<?php echo urlencode($espositore['Id_Utente']); ?>" >
+                                         Modifica
                                     </a>
                                 </td>
                                 <td>
