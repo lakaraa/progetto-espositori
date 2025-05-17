@@ -1,8 +1,8 @@
 <?php
 // Connessione al database
-include_once("../../config.php");
-include_once("../../queries.php");
-include_once("../../session.php");
+include_once '../../config.php';
+include_once '../../queries.php';
+include_once '../../session.php';
 
 // Query partecipanti per mese
 $sqlPartecipanti = getQueryPartecipantiPerMese();
@@ -60,16 +60,16 @@ try {
     ]);
     exit;
 }
-include_once("../../template_header.php");
+include_once '../../template_header.php';
 ?>
 
 <!-- Breadcrumbs -->
-<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(<?php echo $base_path; ?>resources/images/sfondo.jpg);">
+<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(../../resources/images/sfondo.jpg);">
     <div class="container">
         <h2 class="breadcrumbs-custom-title">Statistiche Partecipanti</h2>
     </div>
     <ul class="breadcrumbs-custom-path">
-        <li><a href="<?php echo $base_path; ?>Personale/dashboard_personale.php">Dashboard</a></li>
+        <li><a href="../dashboard_personale.php">Dashboard</a></li>
         <li class="active">Statistiche Partecipanti</li>
     </ul>
 </section>
@@ -195,4 +195,4 @@ include_once("../../template_header.php");
     });
 </script>
 
-<?php include_once("../../template_footer.php"); ?>
+<?php include_once '../../template_footer.php'; ?>
