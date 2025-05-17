@@ -33,14 +33,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <!-- Breadcrumbs-->
-<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/sfondo.jpg);">
+<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(../../resources/images/sfondo.jpg);">
   <div class="container">
       <h2 class="breadcrumbs-custom-title">Modifica Dettagli Categoria</h2>
   </div>
   <ul class="breadcrumbs-custom-path">
     <li><a href="../dashboard_personale.php">Dashboard</a></li>
-    <li><a href="/progetto-espositori/Personale/Categorie/gestisci_categorie.php">Gestione Categorie</a></li>
-    <li><a href="/progetto-espositori/Personale/Categorie/modifica_categoria.php">Modifica Categorie</a></li>
+    <li><a href="gestisci_categorie.php">Gestione Categorie</a></li>
+    <li><a href="modifica_categoria.php">Modifica Categorie</a></li>
     <li class="active">Modifica Dettagli Categoria</li>
   </ul>
 </section>

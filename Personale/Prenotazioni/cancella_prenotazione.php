@@ -27,7 +27,7 @@ include_once '../../template_header.php';
 $prenotazioni = getPrenotazioni($pdo);
 ?>
 <!-- Breadcrumbs-->
-<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/sfondo.jpg);">
+<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(../../resources/images/sfondo.jpg);">
     <div class="container">
         <h2 class="breadcrumbs-custom-title">Elimina Prenotazione</h2>
     </div>

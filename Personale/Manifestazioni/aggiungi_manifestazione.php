@@ -82,7 +82,7 @@ input[type="date"]::-webkit-datetime-edit-day-field {
 </style>
 
 <!-- Breadcrumbs-->
-<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/sfondo.jpg);">
+<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(../../resources/images/sfondo.jpg);">
     <div class="container">
         <h2 class="breadcrumbs-custom-title">Aggiungi Manifestazione</h2>
     </div>

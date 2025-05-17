@@ -1,9 +1,10 @@
 <?php
 include_once '../../config.php';
+include_once '../../queries.php';
 include_once '../../template_header.php';
 ?>
 <!-- Breadcrumbs-->
-<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/sfondo.jpg);">
+<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(../../resources/images/sfondo.jpg);">
     <div class="container">
         <h2 class="breadcrumbs-custom-title">Dashboard</h2>
     </div>
@@ -24,7 +25,7 @@ include_once '../../template_header.php';
             <!-- Effettua Prenotazione -->
             <div class="col-sm-6 col-md-4 col-lg-3">
                 <div class="dashboard-card">
-                    <a class="dashboard-card-link" href="../Prenotazioni/effettua_prenotazione.php">
+                    <a class="dashboard-card-link" href="effettua_prenotazione.php">
                         <div class="dashboard-card-icon">
                             <span class="icon-lg mdi mdi-calendar-plus"></span>
                         </div>
@@ -50,7 +51,7 @@ include_once '../../template_header.php';
             <!-- Cancella Prenotazione -->
             <div class="col-sm-6 col-md-4 col-lg-3">
                 <div class="dashboard-card">
-                    <a class="dashboard-card-link" href="../Prenotazioni/cancella_prenotazione.php">
+                    <a class="dashboard-card-link" href="cancella_prenotazione.php">
                         <div class="dashboard-card-icon">
                             <span class="icon-lg mdi mdi-calendar-remove"></span>
                         </div>

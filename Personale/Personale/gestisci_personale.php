@@ -1,7 +1,7 @@
 <?php
-include '../../config.php';
-include '../../queries.php';
-include '../../template_header.php';
+include_once '../../config.php';
+include_once '../../queries.php';
+include_once '../../template_header.php';
 ?>
 <!-- Breadcrumbs-->
 <section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(../../resources/images/sfondo.jpg);">
