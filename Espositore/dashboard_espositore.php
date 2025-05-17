@@ -43,7 +43,7 @@ try {
     <div class="container">
         <!-- Welcome Banner -->
         <div class="container">
-        <h2 class="text-center mb-4">CIAO <?= htmlspecialchars($nomeUtente) ?></h2>
+        <h2 class="text-center mb-4"><span class="text-primary">CIAO</span> <?= htmlspecialchars($nomeUtente) ?></h2>
         <p class="text-center mb-5">Qui puoi visualizzare le tue candidature e i contributi accettati.</p>
         
         <h3>Statistiche Candidature</h3>
