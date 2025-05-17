@@ -1,8 +1,16 @@
 <?php
 include_once '../config.php';
 include_once '../queries.php';
-include_once '../template_header.php'; 
 include_once '../session.php';
+
+// Verifica che l'utente sia loggato e sia personale
+if (!isset($_SESSION['id_utente']) || $_SESSION['ruolo'] !== 'Personale') {
+    // Se non è loggato o non è personale, reindirizza alla pagina di login
+    header('Location: ../pages/login.php');
+    exit;
+}
+
+include_once '../template_header.php';
 
 $nomeUtente = $_SESSION['nome'];  
 
@@ -122,7 +130,7 @@ $nomeUtente = $_SESSION['nome'];
             <!-- Statistiche -->
             <div class="col-sm-6 col-md-4 col-lg-3">
                 <div class="dashboard-card">
-                    <a class="dashboard-card-link" href="Personale/Statistiche/statistiche.php">
+                    <a class="dashboard-card-link" href="Statistiche/statistiche.php">
                         <div class="dashboard-card-icon">
                             <span class="icon-lg mdi mdi-chart-bar"></span>
                         </div>
