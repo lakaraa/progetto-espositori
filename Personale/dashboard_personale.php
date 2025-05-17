@@ -122,7 +122,7 @@ $nomeUtente = $_SESSION['nome'];
             <!-- Statistiche -->
             <div class="col-sm-6 col-md-4 col-lg-3">
                 <div class="dashboard-card">
-                    <a class="dashboard-card-link" href="Statistiche/statistiche.php">
+                    <a class="dashboard-card-link" href="<?php echo $base_path; ?>Personale/Statistiche/statistiche.php">
                         <div class="dashboard-card-icon">
                             <span class="icon-lg mdi mdi-chart-bar"></span>
                         </div>
