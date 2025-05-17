@@ -40,13 +40,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json');
     
     try {
-        $nome = $_POST['nome'] ?? '';
-        $cognome = $_POST['cognome'] ?? '';
-        $email = $_POST['email'] ?? '';
-        $telefono = $_POST['telefono'] ?? '';
-        $username = $_POST['username'] ?? '';
+        // Recupera i dati dal form, usa i valori esistenti se i campi sono vuoti
+        $nome = !empty($_POST['nome']) ? $_POST['nome'] : $espositore['nome'];
+        $cognome = !empty($_POST['cognome']) ? $_POST['cognome'] : $espositore['cognome'];
+        $email = !empty($_POST['email']) ? $_POST['email'] : $espositore['email'];
+        $telefono = !empty($_POST['telefono']) ? $_POST['telefono'] : $espositore['telefono'];
+        $username = !empty($_POST['username']) ? $_POST['username'] : $espositore['username'];
         $password = $_POST['password'] ?? '';
-        $qualifica = $_POST['qualifica'] ?? '';
+        $qualifica = !empty($_POST['qualifica']) ? $_POST['qualifica'] : $espositore['qualifica'];
         $cvData = null;
 
         error_log("Dati ricevuti: " . print_r($_POST, true));
