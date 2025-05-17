@@ -198,7 +198,7 @@ if (!$espositore) {
                     }
                     $back_url = $manifestazione_id ? "manifestazione.php?id=" . $manifestazione_id : "manifestazioni.php";
                     ?>
-                    <a href="<?php echo htmlspecialchars($back_url); ?>" class="button button-primary mt-3">
+                    <a href="manifestazioni.php" class="button button-primary mt-3">
                         Torna indietro
                         <span class="mdi mdi-arrow-left"></span>
                     </a>
