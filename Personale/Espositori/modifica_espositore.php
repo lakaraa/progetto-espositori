@@ -1,10 +1,7 @@
 <?php
-include_once ("../../config.php");
-include_once ("../../queries.php");
-include_once ("../../session.php");
-
-
-include_once ("../../template_header.php");
+include_once "../../config.php";
+include_once "../../queries.php";
+include_once "../../template_header.php";
 
 $espositori = getEspositori($pdo);
 ?>
