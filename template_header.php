@@ -34,7 +34,7 @@ include_once 'config.php';
 <script src="<?php echo $base_path; ?>resources/js/script.js"></script>
 
 <body>
-    <div class="ie-panel"><a href="http://windows.microsoft.com/en-US/internet-explorer/"><img src="resources/images/ie8-panel/warning_bar_0000_us.jpg" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today."></a></div>
+    <div class="ie-panel"><a href="http://windows.microsoft.com/en-US/internet-explorer/"><img src="<?php echo $base_path; ?>resources/images/ie8-panel/warning_bar_0000_us.jpg" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today."></a></div>
     <div class="preloader">
         <div class="preloader-body">
             <div class="cssload-container">
@@ -87,7 +87,7 @@ include_once 'config.php';
                                     $ruolo = $_SESSION['ruolo'];
                                     $ruoloLower = strtolower($ruolo);
                                     $dashboardPage = "dashboard_" . $ruoloLower . ".php";
-                                    $dashboardPath = "$ruolo/$dashboardPage";
+                                    $dashboardPath = $base_path . "$ruolo/$dashboardPage";
                                     $isDashboard = $current_page === $dashboardPage;
                                     ?>
                                     <li class="rd-nav-item <?php echo $isDashboard ? 'active' : ''; ?>">
@@ -104,7 +104,7 @@ include_once 'config.php';
 
                                 <?php if (isset($_SESSION['email'])): ?>
                                     <li class="rd-nav-item">
-                                        <a class="rd-nav-link" href="auth/logout_handler.php">Logout</a>
+                                        <a class="rd-nav-link" href="<?php echo $base_path; ?>auth/logout_handler.php">Logout</a>
                                     </li>
                                 <?php else: ?>
                                     <li class="rd-nav-item <?php echo $current_page == 'login.php' ? 'active' : ''; ?>">
