@@ -1,12 +1,21 @@
 <?php
 include_once '../config.php';
 include_once '../session.php';
+
+// Verifica che l'utente sia loggato e sia espositore
+if (!isset($_SESSION['id_utente']) || $_SESSION['ruolo'] !== 'Espositore') {
+    // Se non è loggato o non è espositore, reindirizza alla pagina di login
+    header('Location: ../pages/login.php');
+    exit;
+}
+
 include_once '../queries.php';
 include_once '../template_header.php';
 
 // Abilita la visualizzazione degli errori
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
+
 
 try {
     $userId = $_SESSION['id_utente']; 

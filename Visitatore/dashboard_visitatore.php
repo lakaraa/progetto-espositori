@@ -1,6 +1,14 @@
 <?php
 include_once '../config.php';
 include_once '../session.php';
+
+// Verifica che l'utente sia loggato e sia visitatore
+if (!isset($_SESSION['id_utente']) || $_SESSION['ruolo'] !== 'Visitatore') {
+    // Se non è loggato o non è visitatore, reindirizza alla pagina di login
+    header('Location: ../pages/login.php');
+    exit;
+}
+
 //include_once '../queries.php';
 include_once '../template_header.php';
 
