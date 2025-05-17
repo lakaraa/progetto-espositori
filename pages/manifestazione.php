@@ -26,7 +26,7 @@ $espositori = getEspositoriByManifestazioneTop4($pdo, $id);
             <h2 class="breadcrumbs-custom-title"><?php echo htmlspecialchars($manifestazione['Nome']); ?></h2>
         </div>
         <ul class="breadcrumbs-custom-path">
-            <li><a href="index.php">Home</a></li>
+            <li><a href="../index.php">Home</a></li>
             <li><a href="manifestazioni.php">Manifestazioni</a></li>
             <li class="active"><?php echo htmlspecialchars($manifestazione['Nome']); ?></li>
         </ul>
