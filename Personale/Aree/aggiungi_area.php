@@ -46,6 +46,7 @@ $manifestazioni = getManifestazioni($pdo);
 
 <!-- Breadcrumbs -->
 <section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(../../resources/images/sfondo.jpg);">
+    <div class="container">
         <h2 class="breadcrumbs-custom-title">Crea Aree</h2>
     </div>
     <ul class="breadcrumbs-custom-path">
