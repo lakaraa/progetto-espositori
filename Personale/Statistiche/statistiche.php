@@ -22,36 +22,50 @@ try {
     // Partecipanti
     $stmt = $pdo->query($sqlPartecipanti);
     $partecipanti = array_fill(0, 12, 0);
+    $hasPartecipanti = false;
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $mese = (int)$row['mese'];
         $partecipanti[$mese - 1] = (int)$row['numero_partecipanti'];
+        $hasPartecipanti = true;
     }
 
     // Contributi
     $stmt = $pdo->query($sqlContributi);
     $contributi = [];
     $manifestazioniContributi = [];
+    $hasContributi = false;
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $manifestazioniContributi[] = $row['nome_manifestazione'];
         $contributi[] = (int)$row['numero_contributi'];
+        $hasContributi = true;
     }
 
     // Espositori
     $stmt = $pdo->query($sqlEspositori);
     $espositori = [];
     $manifestazioniEspositori = [];
+    $hasEspositori = false;
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $manifestazioniEspositori[] = $row['nome_manifestazione'];
         $espositori[] = (int)$row['numero_espositori'];
+        $hasEspositori = true;
     }
 
     // Prenotazioni per data
     $stmt = $pdo->query($sqlPrenotazioni);
     $prenotazioniDate = [];
     $prenotazioniCount = [];
+    $hasPrenotazioni = false;
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $prenotazioniDate[] = $row['turno_data'];
         $prenotazioniCount[] = (int)$row['numero_prenotazioni'];
+        $hasPrenotazioni = true;
+    }
+
+    // Verifica se ci sono dati
+    if (!$hasPartecipanti && !$hasContributi && !$hasEspositori && !$hasPrenotazioni) {
+        echo '<div class="alert alert-info text-center">Nessun dato disponibile.</div>';
+        exit;
     }
 } catch (PDOException $e) {
     echo json_encode([
