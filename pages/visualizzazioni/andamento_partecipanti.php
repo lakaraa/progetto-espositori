@@ -9,11 +9,11 @@ $partecipanti = getQueryPrenotazioniPerData($pdo, $anno);
 ?>
 
 <!-- Breadcrumbs-->
-<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/sfondo.jpg);">
+<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/resources/images/sfondo.jpg);">
     <div class="container">
         <h2 class="breadcrumbs-custom-title">Andamento Partecipanti</h2>
         <ul class="breadcrumbs-custom-path">
-            <li><a href="/progetto-espositori/index.php">Home</a></li>
+            <li><a href="/index.php">Home</a></li>
             <li class="active">Andamento Partecipanti</li>
         </ul>
     </div>
