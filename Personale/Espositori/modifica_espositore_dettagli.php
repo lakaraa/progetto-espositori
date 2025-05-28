@@ -44,13 +44,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     try {
         // Recupera i dati dal form, usa i valori esistenti se i campi sono vuoti
-        $nome = !empty($_POST['nome']) ? $_POST['nome'] : $espositore['nome'];
-        $cognome = !empty($_POST['cognome']) ? $_POST['cognome'] : $espositore['cognome'];
-        $email = !empty($_POST['email']) ? $_POST['email'] : $espositore['email'];
-        $telefono = !empty($_POST['telefono']) ? $_POST['telefono'] : $espositore['telefono'];
-        $username = !empty($_POST['username']) ? $_POST['username'] : $espositore['username'];
+        $nome = !empty($_POST['nome']) ? $_POST['nome'] : $espositore['Nome'];
+        $cognome = !empty($_POST['cognome']) ? $_POST['cognome'] : $espositore['Cognome'];
+        $email = !empty($_POST['email']) ? $_POST['email'] : $espositore['Email'];
+        $telefono = !empty($_POST['telefono']) ? $_POST['telefono'] : $espositore['Telefono'];
+        $username = !empty($_POST['username']) ? $_POST['username'] : $espositore['Username'];
         $password = $_POST['password'] ?? '';
-        $qualifica = !empty($_POST['qualifica']) ? $_POST['qualifica'] : $espositore['qualifica'];
+        $qualifica = !empty($_POST['qualifica']) ? $_POST['qualifica'] : $espositore['Qualifica'];
         $cvData = null;
 
         error_log("Dati ricevuti: " . print_r($_POST, true));
@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $cvTmpPath = $_FILES['CV']['tmp_name'];
             $cvName = "cv_" . $username . ".pdf";
             $cvUploadPath = "../../uploads/cv/" . $cvName;
-
+        
             // Verifica che il file sia un PDF
             if ($_FILES['CV']['type'] !== 'application/pdf') {
                 throw new Exception("Il curriculum deve essere un file PDF.");
@@ -122,13 +122,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Controlla se almeno un campo è stato modificato
-        $modificheEffettuate = $nome !== $espositore['nome'] || 
-                              $cognome !== $espositore['cognome'] || 
-                              $email !== $espositore['email'] ||
-                              $telefono !== $espositore['telefono'] || 
-                              $username !== $espositore['username'] || 
-                              $qualifica !== $espositore['qualifica'] || 
-                              !empty($password) || 
+        $modificheEffettuate = $nome !== $espositore['Nome'] ||
+                              $cognome !== $espositore['Cognome'] ||
+                              $email !== $espositore['Email'] ||
+                              $telefono !== $espositore['Telefono'] ||
+                              $username !== $espositore['Username'] ||
+                              $qualifica !== $espositore['Qualifica'] ||
+                              !empty($password) ||
                               !empty($cvData);
 
         if (!$modificheEffettuate) {
@@ -190,31 +190,31 @@ include_once '../../template_header.php';
                 <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="espositore-nome">Nome</label>
-                        <input class="form-input" id="espositore-nome" type="text" name="nome" value="<?php echo htmlspecialchars($espositore['nome'] ?? ''); ?>">
+                        <input class="form-input" id="espositore-nome" type="text" name="nome" value="<?php echo htmlspecialchars($espositore['Nome'] ?? ''); ?>">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="espositore-cognome">Cognome</label>
-                        <input class="form-input" id="espositore-cognome" type="text" name="cognome" value="<?php echo htmlspecialchars($espositore['cognome'] ?? ''); ?>">
+                        <input class="form-input" id="espositore-cognome" type="text" name="cognome" value="<?php echo htmlspecialchars($espositore['Cognome'] ?? ''); ?>">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="espositore-email">Email</label>
-                        <input class="form-input" id="espositore-email" type="email" name="email" value="<?php echo htmlspecialchars($espositore['email'] ?? ''); ?>">
+                        <input class="form-input" id="espositore-email" type="email" name="email" value="<?php echo htmlspecialchars($espositore['Email'] ?? ''); ?>">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="espositore-telefono">Telefono</label>
-                        <input class="form-input" id="espositore-telefono" type="text" name="telefono" value="<?php echo htmlspecialchars($espositore['telefono'] ?? ''); ?>">
+                        <input class="form-input" id="espositore-telefono" type="text" name="telefono" value="<?php echo htmlspecialchars($espositore['Telefono'] ?? ''); ?>">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="espositore-username">Username</label>
-                        <input class="form-input" id="espositore-username" type="text" name="username" value="<?php echo htmlspecialchars($espositore['username'] ?? ''); ?>">
+                        <input class="form-input" id="espositore-username" type="text" name="username" value="<?php echo htmlspecialchars($espositore['Username'] ?? ''); ?>">
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -226,7 +226,7 @@ include_once '../../template_header.php';
                 <div class="col-md-12">
                     <div class="form-wrap">
                         <label class="form-label" for="espositore-qualifica">Qualifica</label>
-                        <input class="form-input" id="espositore-qualifica" type="text" name="qualifica" value="<?php echo htmlspecialchars($espositore['qualifica'] ?? ''); ?>">
+                        <input class="form-input" id="espositore-qualifica" type="text" name="qualifica" value="<?php echo htmlspecialchars($espositore['Qualifica'] ?? ''); ?>">
                     </div>
                 </div>
                 <div class="col-md-12">
