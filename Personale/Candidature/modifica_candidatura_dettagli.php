@@ -209,7 +209,7 @@ $candidaturaCategorie = getCandidaturaCategorie($pdo, $idCandidatura);
 $categorieAttuali = array_column($candidaturaCategorie, 'Id_Categoria');
 ?>
 
-<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/sfondo.jpg);">
+<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(../../resources/images/sfondo.jpg);">
     <div class="container">
         <h2 class="breadcrumbs-custom-title">Modifica Dettagli Candidatura</h2>
     </div>

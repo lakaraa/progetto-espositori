@@ -11,12 +11,12 @@ $categorie = getClassificaCategorie($pdo);
 ?>
 
 <!-- Breadcrumbs-->
-<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(/progetto-espositori/resources/images/sfondo.jpg);">
+<section class="breadcrumbs-custom bg-image context-dark" style="background-image: url(../../resources/images/sfondo.jpg);">
     <div class="container">
         <h2 class="breadcrumbs-custom-title">Elenco Categorie</h2>
     </div>
     <ul class="breadcrumbs-custom-path">
-        <li><a href="/progetto-espositori/index.php">Home</a></li>
+        <li><a href="../../index.php">Home</a></li>
         <li class="active">Elenco Categorie</li>
     </ul>
 </section>
