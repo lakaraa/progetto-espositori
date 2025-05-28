@@ -11,7 +11,7 @@ include_once '../template_header.php';
         <h2 class="breadcrumbs-custom-title">Registrazione</h2>
     </div>
         <ul class="breadcrumbs-custom-path">
-            <li><a href="index.php">Home</a></li>
+            <li><a href="../index.php">Home</a></li>
             <li class="active">Registration</li>
         </ul>
 </section>

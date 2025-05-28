@@ -33,7 +33,7 @@ if (!$espositore) {
             <h2 class="breadcrumbs-custom-title"><?php echo htmlspecialchars($espositore['Nome'] . ' ' . htmlspecialchars($espositore['Cognome'])); ?></h2>
         </div>
         <ul class="breadcrumbs-custom-path">
-            <li><a href="manifestazione.php">Manifestazione</a></li>
+            <li><a href="manifestazioni.php">Manifestazione</a></li>
             <li class="active">Espositore</li>
         </ul>
     </section>

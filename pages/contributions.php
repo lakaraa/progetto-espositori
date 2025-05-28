@@ -35,7 +35,7 @@ $contributi = getContributiByManifestazione($pdo, $idManifestazione);
     <h2 class="breadcrumbs-custom-title"><?php echo htmlspecialchars($manifestazione['Nome']); ?></h2>
   </div>
   <ul class="breadcrumbs-custom-path">
-    <li><a href="manifestazione.php">Manifestazioni</a></li>
+    <li><a href="manifestazioni.php">Manifestazioni</a></li>
     <li class="active">Contributi</li>
   </ul>
 </section>

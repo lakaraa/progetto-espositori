@@ -15,7 +15,7 @@ $manifestazioni = getManifestazioni($pdo);
         <h2 class="breadcrumbs-custom-title">Manifestazioni</h2>
     </div>
     <ul class="breadcrumbs-custom-path">
-        <li><a href="index.php">Home</a></li>
+        <li><a href="../index.php">Home</a></li>
         <li class="active">Manifestazioni</li>
     </ul>
 </section>
