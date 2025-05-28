@@ -272,6 +272,10 @@ function deleteEspositore($pdo, $idUtente)
     $result = $stmt->execute();
     return $result;
 }
+function getQueryEspositoreById($idUtente) {
+    return "SELECT Id_Utente, Username, Nome, Cognome, Email, Telefono, Qualifica, Curriculum 
+            FROM utente WHERE Id_Utente = :idUtente AND Ruolo = 'Espositore'";
+}
 function updateEspositore($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono, $qualifica, $curriculum = null) {
     // Verifica che l'ID utente sia valido
     if ($idUtente <= 0) {
