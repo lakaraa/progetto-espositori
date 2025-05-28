@@ -273,12 +273,6 @@ function deleteEspositore($pdo, $idUtente)
     return $result;
 }
 
-function getEspositoreById($pdo, $id) {
-    $sql = "SELECT * FROM utente WHERE Id_Utente = ? AND Ruolo = 'Espositore'";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$id]);
-    return $stmt->fetch(PDO::FETCH_ASSOC);
-}
 function updateEspositore($pdo, $idUtente, $username, $password, $nome, $cognome, $email, $telefono, $qualifica, $curriculum = null) {
     // Verifica che l'ID utente sia valido
     if ($idUtente <= 0) {
