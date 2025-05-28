@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL); // Report all errors and warnings
+ini_set('display_errors', 1); // Display errors on the screen
+
 ob_start(); // Inizia il buffer di output
 
 include_once("../../config.php");

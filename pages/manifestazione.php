@@ -1,4 +1,7 @@
 <?php
+error_reporting(E_ALL); // Report all errors and warnings
+ini_set('display_errors', 1); // Display errors on the screen
+
 require_once('../session.php');
 // Enable error reporting
 ini_set('display_errors', 1);
