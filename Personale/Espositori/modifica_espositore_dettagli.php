@@ -11,7 +11,7 @@ error_log("Inizio modifica_espositore_dettagli.php");
 error_log("GET params: " . print_r($_GET, true));
 $idEspositore = intval($_GET['id']);
 error_log("ID Espositore ricevuto: " . $idEspositore);
-error_log("Query SQL per getEspositoreById: " . getQueryEspositoreById());
+error_log("Query SQL per getEspositoreById: " . getQueryEspositoreById($idEspositore));
 
 if ($idEspositore <= 0) {
     error_log("ID espositore non valido: " . $idEspositore);
