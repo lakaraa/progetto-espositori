@@ -248,22 +248,22 @@ include_once '../../template_header.php';
                                         <h4>CV Attuale</h4>
                                     </div>
                                     <div class="cv-card-body">
-                                        <?php if (!empty($espositore['curriculum'])): ?>
+                                        <?php if (!empty($espositore['Curriculum'])): ?>
                                             <div class="cv-action-buttons">
                                                 <a href="#" 
-                                                   onclick="previewNewCV('../../uploads/cv/cv_<?php echo htmlspecialchars($espositore['username']); ?>.pdf'); return false;"
+                                                   onclick="previewNewCV('../../uploads/cv/cv_<?php echo htmlspecialchars($espositore['Username']); ?>.pdf'); return false;"
                                                    class="btn btn-view">
                                                     <i class="fas fa-eye"></i> Visualizza
                                                 </a>
                                                 <a href="#" 
-                                                   onclick="downloadCV('<?php echo htmlspecialchars($espositore['username']); ?>'); return false;"
+                                                   onclick="downloadCV('<?php echo htmlspecialchars($espositore['Username']); ?>'); return false;"
                                                    class="btn btn-download">
                                                     <i class="fas fa-download"></i> Scarica
                                                 </a>
                                             </div>
                                             <div class="cv-info">
-                                                <p><i class="fas fa-file-pdf"></i> <?php echo "cv_".htmlspecialchars($espositore['username']).".pdf"; ?></p>
-                                                <p class="text-muted">Ultimo aggiornamento: <?php echo date("d/m/Y H:i", filemtime("../../uploads/cv/cv_".htmlspecialchars($espositore['username']).".pdf")); ?></p>
+                                                <p><i class="fas fa-file-pdf"></i> <?php echo "cv_".htmlspecialchars($espositore['Username']).".pdf"; ?></p>
+                                                <p class="text-muted">Ultimo aggiornamento: <?php echo date("d/m/Y H:i", filemtime("../../uploads/cv/cv_".htmlspecialchars($espositore['Username']).".pdf")); ?></p>
                                             </div>
                                         <?php else: ?>
                                             <div class="no-cv">
