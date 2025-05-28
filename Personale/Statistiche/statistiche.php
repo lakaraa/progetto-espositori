@@ -18,7 +18,7 @@ $sqlEspositori = getQueryEspositoriPerManifestazione();
 
 $anno = 2020;
 // Query prenotazioni per data
-$sqlPrenotazioni = getQueryPrenotazioniPerData($pdo, $anno);
+//$sqlPrenotazioni = getQueryPrenotazioniPerData($pdo, $anno);
 
 
 // Recupero dati
@@ -59,17 +59,16 @@ try {
     error_log("Espositori: " . ($hasEspositori ? "Dati trovati" : "Nessun dato"));
 
     // Prenotazioni per data
-    $stmt = $pdo->query($sqlPrenotazioni);
+    $prenotazioniData = getQueryPrenotazioniPerData($pdo, $anno);
     $prenotazioniDate = [];
     $prenotazioniCount = [];
     $hasPrenotazioni = false;
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $prenotazioniDate[] = $row['turno_data'];
-        $prenotazioniCount[] = (int)$row['numero_prenotazioni'];
+    foreach ($prenotazioniData as $row) {
+        $prenotazioniDate[] = $row['Data'];
+        $prenotazioniCount[] = (int)$row['NumeroPartecipanti'];
         $hasPrenotazioni = true;
     }
     error_log("Prenotazioni: " . ($hasPrenotazioni ? "Dati trovati" : "Nessun dato"));
-
     // Verifica se ci sono dati
     if (!$hasPartecipanti && !$hasContributi && !$hasEspositori && !$hasPrenotazioni) {
         error_log("Nessun dato disponibile per nessuna categoria");
