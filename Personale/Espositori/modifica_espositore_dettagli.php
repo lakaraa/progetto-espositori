@@ -190,31 +190,31 @@ include_once '../../template_header.php';
                 <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="espositore-nome">Nome</label>
-                        <input class="form-input" id="espositore-nome" type="text" name="nome" value="<?php echo htmlspecialchars($espositore['nome']); ?>">
+                        <input class="form-input" id="espositore-nome" type="text" name="nome" value="<?php echo htmlspecialchars($espositore['nome'] ?? ''); ?>">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="espositore-cognome">Cognome</label>
-                        <input class="form-input" id="espositore-cognome" type="text" name="cognome" value="<?php echo htmlspecialchars($espositore['cognome']); ?>">
+                        <input class="form-input" id="espositore-cognome" type="text" name="cognome" value="<?php echo htmlspecialchars($espositore['cognome'] ?? ''); ?>">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="espositore-email">Email</label>
-                        <input class="form-input" id="espositore-email" type="email" name="email" value="<?php echo htmlspecialchars($espositore['email']); ?>">
+                        <input class="form-input" id="espositore-email" type="email" name="email" value="<?php echo htmlspecialchars($espositore['email'] ?? ''); ?>">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="espositore-telefono">Telefono</label>
-                        <input class="form-input" id="espositore-telefono" type="text" name="telefono" value="<?php echo htmlspecialchars($espositore['telefono']); ?>">
+                        <input class="form-input" id="espositore-telefono" type="text" name="telefono" value="<?php echo htmlspecialchars($espositore['telefono'] ?? ''); ?>">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-wrap">
                         <label class="form-label" for="espositore-username">Username</label>
-                        <input class="form-input" id="espositore-username" type="text" name="username" value="<?php echo htmlspecialchars($espositore['username']); ?>">
+                        <input class="form-input" id="espositore-username" type="text" name="username" value="<?php echo htmlspecialchars($espositore['username'] ?? ''); ?>">
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -226,7 +226,7 @@ include_once '../../template_header.php';
                 <div class="col-md-12">
                     <div class="form-wrap">
                         <label class="form-label" for="espositore-qualifica">Qualifica</label>
-                        <input class="form-input" id="espositore-qualifica" type="text" name="qualifica" value="<?php echo htmlspecialchars($espositore['qualifica']); ?>">
+                        <input class="form-input" id="espositore-qualifica" type="text" name="qualifica" value="<?php echo htmlspecialchars($espositore['qualifica'] ?? ''); ?>">
                     </div>
                 </div>
                 <div class="col-md-12">
