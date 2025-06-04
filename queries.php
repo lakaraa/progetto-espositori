@@ -1387,9 +1387,10 @@ function updateEspositoreDettagli2($pdo, $id, $nome, $cognome, $email, $telefono
         $sql .= ", Password = :password";
         $params[':password'] = password_hash($password, PASSWORD_DEFAULT);
     }
+    $bindCv = false;
     if ($cvData !== null) {
         $sql .= ", Curriculum = :cvData";
-        // NON aggiungere a $params, ma fai bindParam manuale sotto!
+        $bindCv = true;
     }
     $sql .= " WHERE Id_Utente = :id";
     $stmt = $pdo->prepare($sql);
@@ -1399,7 +1400,7 @@ function updateEspositoreDettagli2($pdo, $id, $nome, $cognome, $email, $telefono
         $stmt->bindValue($key, $value);
     }
     // Bind del CV come LOB se presente
-    if ($cvData !== null) {
+    if ($bindCv) {
         $stmt->bindValue(':cvData', $cvData, PDO::PARAM_LOB);
     }
 

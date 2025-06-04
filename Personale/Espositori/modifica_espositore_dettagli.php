@@ -122,14 +122,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Controlla se almeno un campo è stato modificato
-        $modificheEffettuate = $nome !== $espositore['Nome'] ||
-                              $cognome !== $espositore['Cognome'] ||
-                              $email !== $espositore['Email'] ||
-                              $telefono !== $espositore['Telefono'] ||
-                              $username !== $espositore['Username'] ||
-                              $qualifica !== $espositore['Qualifica'] ||
-                              !empty($password) ||
-                              !empty($cvData);
+        $modificheEffettuate =  $nome !== $espositore['Nome'] ||
+                                $cognome !== $espositore['Cognome'] ||
+                                $email !== $espositore['Email'] ||
+                                $telefono !== $espositore['Telefono'] ||
+                                $username !== $espositore['Username'] ||
+                                $qualifica !== $espositore['Qualifica'] ||
+                                !empty($password) ||
+                                !empty($cvData);
 
         if (!$modificheEffettuate) {
             throw new Exception("Nessuna modifica rilevata.");
