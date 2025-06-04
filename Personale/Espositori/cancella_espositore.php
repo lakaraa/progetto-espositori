@@ -94,7 +94,7 @@ $espositori = getEspositori($pdo);
                             <td><?php echo htmlspecialchars($espositore['qualifica']); ?></td>
                             <td>
                                 <form method="POST" action="cancella_espositore.php" onsubmit="return confirm('Sei sicuro di voler eliminare questo Espositore?');">
-                                    <input type="hidden" name="id" value="<?php echo htmlspecialchars($espositore['id']); ?>">
+                                    <input type="hidden" name="id" value="<?php echo htmlspecialchars($espositore['Id_Utente']); ?>">
                                     <button type="submit" class="button button-primary button-sm">Elimina</button>
                                 </form>
                             </td>
