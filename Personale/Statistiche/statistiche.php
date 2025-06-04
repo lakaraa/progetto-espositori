@@ -16,9 +16,9 @@ $sqlContributi = getQueryContributiPerManifestazione();
 // Query espositori per manifestazione
 $sqlEspositori = getQueryEspositoriPerManifestazione();
 
-$anno = 2020;
+$anno = 2025;
 // Query prenotazioni per data
-//$sqlPrenotazioni = getQueryPrenotazioniPerData($pdo, $anno);
+$sqlPrenotazioni = getQueryPrenotazioniPerData($pdo, $anno);
 
 
 // Recupero dati
