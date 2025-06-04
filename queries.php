@@ -1389,11 +1389,21 @@ function updateEspositoreDettagli2($pdo, $id, $nome, $cognome, $email, $telefono
     }
     if ($cvData !== null) {
         $sql .= ", Curriculum = :cvData";
-        $params[':cvData'] = $cvData;
+        // NON aggiungere a $params, ma fai bindParam manuale sotto!
     }
     $sql .= " WHERE Id_Utente = :id";
     $stmt = $pdo->prepare($sql);
-    return $stmt->execute($params);
+
+    // Bind parametri normali
+    foreach ($params as $key => $value) {
+        $stmt->bindValue($key, $value);
+    }
+    // Bind del CV come LOB se presente
+    if ($cvData !== null) {
+        $stmt->bindValue(':cvData', $cvData, PDO::PARAM_LOB);
+    }
+
+    return $stmt->execute();
 }
 
 function getCandidaturaById($pdo, $idCandidatura) {
