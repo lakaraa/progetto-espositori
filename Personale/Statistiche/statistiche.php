@@ -107,12 +107,12 @@ include_once '../../template_header.php';
 </section>
 
 <!-- Sezione Espositori -->
-<section class="section section-lg bg-default text-center">
+<!--<section class="section section-lg bg-default text-center">
     <div class="container">
         <h2>Numero di Espositori per Manifestazione</h2>
         <canvas id="espositoriChart" width="400" height="200"></canvas>
     </div>
-</section>
+</section>-->
 
 <!-- Sezione Contributi -->
 <section class="section section-lg bg-default text-center">
