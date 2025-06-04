@@ -250,7 +250,8 @@ include_once '../../template_header.php';
                                     <div class="cv-card-body">
                                         <?php if (!empty($espositore['Curriculum'])): ?>
                                             <div class="cv-action-buttons">
-                                                <a href="#" 
+                                                <a id="current-cv-link"
+                                                   href="#"
                                                    onclick="previewNewCV('../../uploads/cv/cv_<?php echo htmlspecialchars($espositore['Username']); ?>.pdf'); return false;"
                                                    class="btn btn-view">
                                                     <i class="fas fa-eye"></i> Visualizza
@@ -333,8 +334,8 @@ $(document).ready(function() {
                     
                     // Aggiorna il link del CV attuale
                     var username = formData.get('username');
-                    var currentCvLink = $('.current-cv a');
-                    currentCvLink.attr('href', '../../uploads/cv/cv_' + username + '.pdf');
+                    var currentCvLink = $('#current-cv-link');
+                    currentCvLink.attr('onclick', "previewNewCV('../../uploads/cv/cv_" + username + ".pdf'); return false;");
                     currentCvLink.attr('target', '_blank');
                     currentCvLink.attr('rel', 'noopener noreferrer');
                     
