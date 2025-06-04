@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // Se esiste un CV precedente, eliminarlo
-            $oldCvPath = "../../uploads/cv/cv_" . $espositore['username'] . ".pdf";
+            $oldCvPath = "../../uploads/cv/cv_" . $espositore['Username'] . ".pdf";
             if (file_exists($oldCvPath)) {
                 error_log("Eliminazione CV precedente: " . $oldCvPath);
                 if (!unlink($oldCvPath)) {
