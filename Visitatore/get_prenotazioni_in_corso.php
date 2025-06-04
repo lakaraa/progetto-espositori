@@ -6,7 +6,6 @@ include_once '../config.php';
 include_once '../queries.php';  
 include_once '../session.php';  
 
-session_start(); 
 
 $userId = $_SESSION['id_utente'];  
 
