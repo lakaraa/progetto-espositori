@@ -57,11 +57,17 @@ $espositori = getEspositori($pdo);
 
         <!-- Messaggi di successo o errore -->
         <?php if (!empty($successMessage)): ?>
-            <p style="<?php echo $successStyle; ?>"><?php echo htmlspecialchars($successMessage); ?></p>
+            <p style="<?php echo htmlspecialchars($successStyle); ?>">
+                <?php echo htmlspecialchars($successMessage); ?>
+            </p>
         <?php endif; ?>
+
         <?php if (!empty($errorMessage)): ?>
-            <p style="<?php echo $errorStyle; ?>"><?php echo htmlspecialchars($errorMessage); ?></p>
+            <p style="<?php echo isset($errorStyle) ? htmlspecialchars($errorStyle) : 'color:red;'; ?>">
+                <?php echo htmlspecialchars($errorMessage); ?>
+            </p>
         <?php endif; ?>
+
 
         <div class="table-responsive">
             <table class="table table-striped">
