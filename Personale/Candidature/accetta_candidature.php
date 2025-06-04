@@ -27,8 +27,7 @@ function sendJsonResponse($success, $message, $debug = null) {
 
 // Verifica se la richiesta è POST per accettare o rifiutare una candidatura
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Assicuriamoci che non ci sia output prima della risposta JSON
-    ob_clean();
+    if (ob_get_level()) ob_clean();
     header('Content-Type: application/json');
 
     try {
