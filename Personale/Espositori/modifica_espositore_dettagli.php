@@ -136,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // Aggiorna i dati dell'espositore
-        if (!updateEspositoreDettagli($pdo, $idEspositore, $nome, $cognome, $email, $telefono, $username, $qualifica, $password, $cvData)) {
+        if (!updateEspositoreDettagli2($pdo, $idEspositore, $nome, $cognome, $email, $telefono, $username, $qualifica, $password, $cvData)) {
             throw new Exception("Errore nell'aggiornamento dei dati.");
         }
 

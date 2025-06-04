@@ -1372,6 +1372,29 @@ function updateEspositoreDettagli($pdo, $idEspositore, $nome, $cognome, $email, 
         throw $e;
     }
 }
+function updateEspositoreDettagli2($pdo, $id, $nome, $cognome, $email, $telefono, $username, $qualifica, $password, $cvData) {
+    $sql = "UPDATE utente SET Nome = :nome, Cognome = :cognome, Email = :email, Telefono = :telefono, Username = :username, Qualifica = :qualifica";
+    $params = [
+        ':nome' => $nome,
+        ':cognome' => $cognome,
+        ':email' => $email,
+        ':telefono' => $telefono,
+        ':username' => $username,
+        ':qualifica' => $qualifica,
+        ':id' => $id
+    ];
+    if (!empty($password)) {
+        $sql .= ", Password = :password";
+        $params[':password'] = password_hash($password, PASSWORD_DEFAULT);
+    }
+    if ($cvData !== null) {
+        $sql .= ", Curriculum = :cvData";
+        $params[':cvData'] = $cvData;
+    }
+    $sql .= " WHERE Id_Utente = :id";
+    $stmt = $pdo->prepare($sql);
+    return $stmt->execute($params);
+}
 
 function getCandidaturaById($pdo, $idCandidatura) {
     $sql = "SELECT c.*, u.Email 
